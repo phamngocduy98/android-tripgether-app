@@ -1,0 +1,60 @@
+package cf.bautroixa.maptest.data;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
+import cf.bautroixa.maptest.database.User;
+
+public class AppDB implements DBConstant{
+    SQLiteHelper appSQLiteOpenHelper;
+
+    private AppDB(Context context) {
+        appSQLiteOpenHelper = new SQLiteHelper(context);
+    }
+
+    static AppDB instance;
+
+    public static AppDB getInstance(Context context) {
+        if (instance == null) {
+            synchronized (AppDB.class) {
+                if (instance == null) {
+                    instance = new AppDB(context);
+                }
+            }
+        }
+        return instance;
+    }
+
+    public long insertNewUser(User user) {
+        SQLiteDatabase db = instance.appSQLiteOpenHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_USERID, user.getUserId());
+        values.put(COL_FULLNAME, user.getFullName());
+        values.put(COL_AVATAR, user.getAvatar());
+        return db.insert(TABLE_USER, null, values);
+    }
+
+    public User getUser(String userId) {
+        SQLiteDatabase db = instance.appSQLiteOpenHelper.getReadableDatabase();
+        String[] cols = {COL_FULLNAME, COL_AVATAR};
+        String selection = COL_USERID+" = ?";
+        String[] selectionArgs = {userId};
+        Cursor cursor = db.query(TABLE_USER, cols, selection, selectionArgs,null, null, null);
+        try {
+            if (!cursor.moveToNext()){
+                cursor.close();
+                return null;
+            }
+            String fullName = cursor.getString(cursor.getColumnIndexOrThrow(COL_FULLNAME));
+            String avatar = cursor.getString(cursor.getColumnIndexOrThrow(COL_AVATAR));
+            cursor.close();
+            return new User(userId, fullName, avatar);
+        } catch (Exception e){
+            cursor.close();
+            return null;
+        }
+    }
+
+}

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_radius_top_white_with_border"
+    android:orientation="vertical"
+    tools:context=".TripOverviewFragment">
+
+
+    <TextView
+        android:id="@+id/tv_name_item_checkpoint_frag_trip_overview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Really long Locatio"
+        android:textSize="22sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextView
+        android:id="@+id/tv_time_item_checkpoint_frag_trip_overview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="00:00"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_name_item_checkpoint_frag_trip_overview" />
+
+    <TextView
+        android:id="@+id/tv_location_item_checkpoint_frag_trip_overview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="132 Ngõ 32 Trần Quốc Hoàn, Dịch vọng Hậu, Cầu giấy, Hà Nội"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/tv_name_item_checkpoint_frag_trip_overview"
+        app:layout_constraintTop_toBottomOf="@+id/tv_name_item_checkpoint_frag_trip_overview" />
+
+    <HorizontalScrollView
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:layout_width="0dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:scrollbars="none"
+        app:layout_constraintStart_toStartOf="@+id/tv_name_item_checkpoint_frag_trip_overview"
+        app:layout_constraintTop_toBottomOf="@+id/tv_location_item_checkpoint_frag_trip_overview">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/btn_roll_up_item_checkpoint_frag_trip_overview"
+                style="@style/Button.RaisedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_assistant_photo_white_24dp"
+                android:text="Điểm danh" />
+
+            <Button
+                android:id="@+id/btn_draw_route_item_checkpoint_frag_trip_overview"
+                style="@style/Button.RaisedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_directions_white_24dp"
+                android:text="Chỉ đường" />
+
+            <Button
+                android:id="@+id/btn_start_direction_item_checkpoint_frag_trip_overview"
+                style="@style/Button.FlatIconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_navigation_black_24dp"
+                android:text="Bắt đầu" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

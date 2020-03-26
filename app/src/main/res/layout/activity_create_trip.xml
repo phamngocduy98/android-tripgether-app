@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".CreateTripActivity">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_name_trip_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên chuyến đi" />
+
+            <EditText
+                android:id="@+id/edit_name_trip_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:text="Một vòng phố đi bộ"
+                android:inputType="textPersonName" />
+
+            <TextView
+                android:id="@+id/tv_location_trip_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chuyến đi tới" />
+
+            <EditText
+                android:id="@+id/edit_location_trip_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Hà Nội, Việt Nam" />
+
+            <TextView
+                android:id="@+id/tv_checkpoint_trip_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Một chuyến đi sẽ bao gồm vài điểm đến:" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_checkpoint_trip_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_cancel_trip_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Hủy" />
+
+                <Button
+                    android:id="@+id/btn_ok_trip_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tạo" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+</LinearLayout>

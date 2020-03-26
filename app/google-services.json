@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "703604566706",
+    "firebase_url": "https://tripgether-b135a.firebaseio.com",
+    "project_id": "tripgether-b135a",
+    "storage_bucket": "tripgether-b135a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:703604566706:android:11a64808ab3f7471aa77ab",
+        "android_client_info": {
+          "package_name": "cf.bautroixa.maptest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-MmhK9ciM3mfHl2AvFpj6oYlvYni-9KA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

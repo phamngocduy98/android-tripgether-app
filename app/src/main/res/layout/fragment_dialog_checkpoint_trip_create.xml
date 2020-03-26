@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0">
+
+        <fragment
+            android:id="@+id/map_checkpoint_select"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="fill_parent"
+            android:layout_height="0.0dip"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="50.0dip"
+            android:layout_height="50.0dip"
+            android:layout_marginBottom="50.0dip"
+            app:layout_constraintBottom_toBottomOf="@id/map_checkpoint_select"
+            app:layout_constraintEnd_toEndOf="@id/map_checkpoint_select"
+            app:layout_constraintStart_toStartOf="@id/map_checkpoint_select"
+            app:layout_constraintTop_toTopOf="@id/map_checkpoint_select"
+            app:srcCompat="@drawable/marker" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16.0dip"
+        android:layout_marginTop="16.0dip"
+        android:layout_marginRight="16.0dip"
+        android:layout_marginBottom="16.0dip"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Vị trí checkpoint" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/edit_location_checkpoint"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Tìm kiếm..."
+                android:inputType="textPersonName" />
+
+            <ImageButton
+                android:id="@+id/btn_location_checkpoint_search"
+                style="@style/Button.FlatIconButton"
+                android:layout_width="50.0dip"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-50.0dip"
+                app:srcCompat="@drawable/ic_search_black_24dp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Tên địa điểm" />
+
+        <EditText
+            android:id="@+id/edit_name_dialog_checkpoint_trip_create"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Thời gian" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/edit_time_checkpoint"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:focusable="false"
+                android:hint="00:00"
+                android:inputType="textPersonName" />
+
+            <ImageButton
+                style="@style/Button.FlatIconButton"
+                android:layout_width="50.0dip"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-50.0dip"
+                app:srcCompat="@drawable/ic_edit_black_24dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_cancel_checkpoint"
+                style="@style/Button.FlatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:text="Hủy" />
+
+            <Button
+                android:id="@+id/btn_add_checkpoint"
+                style="@style/Button.FlatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:text="Thêm" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

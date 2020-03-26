@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_location_tab"
+        android:icon="@drawable/marker"
+        android:title="Vị trí" />
+    <item
+        android:id="@+id/nav_trip_tab"
+        android:icon="@drawable/ic_directions_black_24dp"
+        android:title="Chuyến đi" />
+    <item
+        android:id="@+id/nav_bar_setting"
+        android:title="Setting" />
+</menu>

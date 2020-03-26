@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_marker" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_name_item_checkpoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cầu Thê Húc"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_location_item_checkpoint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hà Nội" />
+
+        <TextView
+            android:id="@+id/tv_time_item_checkpoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="12:30" />
+
+    </LinearLayout>
+
+</LinearLayout>

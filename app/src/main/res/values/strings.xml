@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">MapTest</string>
+
+
+    <string name="config_gg_map_api_key">AIzaSyB0L5w8Q390UmPQBlZwAi1kcMF8KvwvsLE</string>
+    <string name="config_mapbox_map_api_key">pk.eyJ1IjoicGhhbW5nb2NkdXk5OCIsImEiOiJjazZhN2N2bWQwMmxrM29wOXFjamRrZnB1In0.XB_MxPGB-795mTHp94pvgw</string>
+    <string name="btn_got_it">Got it</string>
+    <string name="config_server_ip">http://192.168.1.108:8181</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="dialog_title">Dialog title</string>
+    <string name="dialog_messsage">Dialog message</string>
+    <string name="dialog_title_sos">Send SOS</string>
+
+    <string name="shared_preference_name">tripgether</string>
+    <string name="socket_token">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhbmRyb2lkIiwiaWF0IjoxNTg0Mjg4NTA1LCJleHAiOjE2MTU4NDYxMDV9.cezgSOYqispv6Qq_aUZBlp--O72YeGYMKhH3oriez68</string>
+
+    <string-array name="alert_levers_array">
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+    </string-array>
+</resources>

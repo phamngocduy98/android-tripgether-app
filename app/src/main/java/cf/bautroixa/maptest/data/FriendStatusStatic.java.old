@@ -1,0 +1,139 @@
+package cf.bautroixa.maptest.data;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+
+import cf.bautroixa.maptest.database.User;
+import cf.bautroixa.maptest.utils.LatLngDistance;
+
+class FriendStatusStatic {
+    private static final String TAG = "FriendStatusStatic";
+    String userId;
+    User user;
+    LatLng latLng;
+    Marker marker;
+    String place; // Gần ngõ 16 Phan Văn Trường
+    long speed; // m/s
+    int battery; // percent
+    double bearing; // goc quay
+    private long lastUpdate; // lan cuoi cap nhat
+
+    public static class Builder {
+        FriendStatusStatic friendStatus;
+
+        public Builder() {
+            this.friendStatus = new FriendStatusStatic();
+        }
+
+        public Builder userId(String userId) {
+            this.friendStatus.setUserId(userId);
+            return this;
+        }
+
+        public Builder user(User user) {
+            this.friendStatus.setUser(user);
+            return this;
+        }
+
+        public Builder latLng(LatLng latLng) {
+            this.friendStatus.setLatLng(latLng);
+            return this;
+        }
+
+        public Builder speed(int speed) {
+            this.friendStatus.setSpeed(speed);
+            return this;
+        }
+
+        public Builder battery(int battery) {
+            this.friendStatus.setBattery(battery);
+            return this;
+        }
+
+        public Builder place(String location) {
+            this.friendStatus.setPlace(location);
+            return this;
+        }
+
+        public Builder marker(Marker marker) {
+            this.friendStatus.setMarker(marker);
+            return this;
+        }
+
+        public FriendStatusStatic build() {
+            return this.friendStatus;
+        }
+    }
+
+    public FriendStatusStatic() {
+        lastUpdate = System.currentTimeMillis();
+    }
+
+    public FriendStatusStatic(String userId, LatLng latLng, int speed, int battery) {
+        this.userId = userId;
+        this.latLng = latLng;
+        this.speed = speed;
+        this.battery = battery;
+        lastUpdate = System.currentTimeMillis();
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void setLatLng(LatLng latLng) {
+        if (this.latLng != null) {
+            speed = Math.round(LatLngDistance.measureDistance(this.latLng, latLng) * 1000 / (System.currentTimeMillis() - lastUpdate));
+        }
+        lastUpdate = System.currentTimeMillis();
+        this.latLng = latLng;
+    }
+
+    public void setSpeed(long speed) {
+        this.speed = speed;
+    }
+
+    public void setBattery(int battery) {
+        this.battery = battery;
+    }
+
+    public Marker getMarker() {
+        return marker;
+    }
+
+    public void setMarker(Marker marker) {
+        this.marker = marker;
+    }
+
+    public LatLng getLatLng() {
+        return latLng;
+    }
+
+    public long getSpeed() {
+        return speed;
+    }
+
+    public String getBattery() {
+        return "" + battery + "%";
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getPlace() {
+        return place;
+    }
+
+    public void setPlace(String place) {
+        this.place = place;
+    }
+}

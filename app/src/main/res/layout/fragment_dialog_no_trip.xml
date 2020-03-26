@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_radius_top_white_with_border"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32.0dip"
+        android:layout_marginBottom="8.0dip"
+        android:gravity="center"
+        android:text="Chuyến đi mới"
+        android:textSize="24.0sp" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Bạn chưa tham gia một chuyến đi nào" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="46.0dip"
+        android:layout_marginBottom="32.0dip"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_create_trip_dialog_no_trip"
+            style="@style/Button.FlatButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8.0dip"
+            android:layout_marginRight="8.0dip"
+            android:layout_weight="1.0"
+            android:drawableTop="@drawable/ic_add_black_24dp"
+            android:text="Tạo chuyến đi" />
+
+        <Button
+            android:id="@+id/btn_join_trip_dialog_no_trip"
+            style="@style/Button.FlatButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8.0dip"
+            android:layout_marginRight="8.0dip"
+            android:layout_weight="1.0"
+            android:drawableTop="@drawable/ic_navigation_black_24dp"
+            android:text="Tham gia" />
+    </LinearLayout>
+</LinearLayout>
