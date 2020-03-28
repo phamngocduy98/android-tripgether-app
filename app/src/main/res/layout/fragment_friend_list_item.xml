@@ -10,13 +10,13 @@
 
     <cf.bautroixa.maptest.theme.RoundedImageView
         android:id="@+id/img_avatar_status_item_friend"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/user"
         android:padding="8dp"
+        android:src="@drawable/user"
         app:borderRadius="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

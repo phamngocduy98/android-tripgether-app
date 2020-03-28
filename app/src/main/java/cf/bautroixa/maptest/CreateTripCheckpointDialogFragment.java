@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.view.InflateException;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TimePicker;
@@ -30,6 +32,7 @@ import cf.bautroixa.maptest.network_io.AppRequest;
 import cf.bautroixa.maptest.network_io.HttpRequest;
 import cf.bautroixa.maptest.theme.FullScreenDialogFragment;
 import cf.bautroixa.maptest.types.APILocation;
+import cf.bautroixa.maptest.utils.DateFormatter;
 
 public class CreateTripCheckpointDialogFragment extends FullScreenDialogFragment implements OnMapReadyCallback {
 
@@ -100,22 +103,29 @@ public class CreateTripCheckpointDialogFragment extends FullScreenDialogFragment
                 });
             }
         });
+        final int hour = selectedTime.get(Calendar.HOUR_OF_DAY);
+        final int minute = selectedTime.get(Calendar.MINUTE);
+        final int year = selectedTime.get(Calendar.YEAR);
+        final int month = selectedTime.get(Calendar.MONTH);
+        final int dayOfMonth = selectedTime.get(Calendar.DAY_OF_MONTH);
 
+        editTime.setText(DateFormatter.format(selectedTime));
         editTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
-                TimePickerDialog mTimePicker = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
+                new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        editTime.setText(""+hourOfDay+":"+minute);
-                        selectedTime.set(0, 0, 0, hourOfDay, minute);
+                    public void onDateSet(DatePicker view, final int year, final int month, final int dayOfMonth) {
+                        TimePickerDialog mTimePicker = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                selectedTime.set(year, month, dayOfMonth, hourOfDay, minute);
+                                editTime.setText(DateFormatter.format(selectedTime));
+                            }
+                        }, hour, minute, true);
+                        mTimePicker.show();
                     }
-                },hour,minute,true);
-//                mTimePicker.setTitle("Select Time");
-                mTimePicker.show();
+                }, year, month, dayOfMonth).show();
             }
         });
 
@@ -129,8 +139,8 @@ public class CreateTripCheckpointDialogFragment extends FullScreenDialogFragment
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (onCheckpointSetListener != null){
-                    onCheckpointSetListener.onCheckpointSet(new Checkpoint(editName.getText().toString(), new GeoPoint(selectedLatLng.latitude, selectedLatLng.longitude),editLocation.getHint().toString(), new Timestamp(selectedTime.getTime())));
+                if (onCheckpointSetListener != null) {
+                    onCheckpointSetListener.onCheckpointSet(new Checkpoint(editName.getText().toString(), new GeoPoint(selectedLatLng.latitude, selectedLatLng.longitude), editLocation.getHint().toString(), new Timestamp(selectedTime.getTime())));
                 }
                 dismiss();
             }

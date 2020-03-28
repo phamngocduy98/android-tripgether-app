@@ -79,7 +79,7 @@
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
     <include
-        android:id="@+id/toolbar_activity_main"
+        android:id="@+id/toolbar_activity_main_layout"
         layout="@layout/toolbar_activity_main"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

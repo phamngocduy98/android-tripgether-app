@@ -1,14 +1,20 @@
 package cf.bautroixa.maptest;
 
+import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import cf.bautroixa.maptest.services.UpdateLocationService;
 
 public class LoginActivity extends AppCompatActivity {
     EditText editText;
@@ -41,6 +47,12 @@ public class LoginActivity extends AppCompatActivity {
     public void onLoginSuccess(){
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
+
+        Intent serviceIntent = new Intent(getApplicationContext(), UpdateLocationService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 12345, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager am = (AlarmManager)getSystemService(Activity.ALARM_SERVICE);
+        am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, pendingIntent);
+
         finish();
     }
 }

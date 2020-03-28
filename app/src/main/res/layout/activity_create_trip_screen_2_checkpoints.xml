@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Các điểm đến trong chuyến đi của bạn"
+        android:textColor="@android:color/black"
+        android:textSize="28dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_checkpoint_trip_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="32dp"
+        android:nestedScrollingEnabled="false">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/btn_continue_screen2_activity_create_trip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Button.RaisedButton"
+        android:text="Tiếp tục" />
+
+</LinearLayout>

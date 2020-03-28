@@ -1,6 +1,9 @@
 package cf.bautroixa.maptest;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,36 +23,45 @@ import androidx.recyclerview.widget.SnapHelper;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import cf.bautroixa.maptest.data.CurrentUserStatus;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
+import cf.bautroixa.maptest.firestore.Trip;
+import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.utils.DateFormatter;
+import cf.bautroixa.maptest.utils.UrlParser;
 
 public class TripOverviewFragment extends Fragment {
     private static final String TAG = "TripOverviewFragment";
 
     private FirebaseFirestore db;
-    OnDrawRouteButtonClickedListener onDrawRouteButtonClickedListener = null;
-    OnCheckpointChanged onCheckpointChanged = null;
+    private SharedPreferences sharedPref;
+    private OnDrawRouteButtonClickedListener onDrawRouteButtonClickedListener = null;
+    private OnCheckpointChanged onCheckpointChanged = null;
+
+    private HashMap<String, Checkpoint> checkpoints;
+    private DocumentReference currentUserRef, currentTripRef;
+    private int activePosition = 0;
+
+    private Button btnCreateTrip, btnJoinTrip;
+    private View noTripLayout;
 
     TextView tvLocation, tvTime;
     Button btnRoute;
-
     RecyclerView rv;
+    Adapter adapter;
     SnapHelper snapHelper;
-
-    HashMap<String, Checkpoint> checkpoints;
-
-    CurrentUserStatus currentUserStatus;
-
-    int activePosition = 0;
 
     public TripOverviewFragment() {
         // Required empty public constructor
@@ -67,35 +79,60 @@ public class TripOverviewFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
-        if (currentUserStatus == null) currentUserStatus = CurrentUserStatus.getInstance(getContext());
+        sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         db = FirebaseFirestore.getInstance();
-        db.collection(Collections.CHECKPOINTS).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        currentUserRef = db.collection(Collections.USERS).document(sharedPref.getString("userName", "notLoggedIn"));
+        currentUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Checkpoint checkpoint = document.toObject(Checkpoint.class);
-                        checkpoints.put(document.getId(), checkpoint);
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    User user = documentSnapshot.toObject(User.class);
+                    currentTripRef = user.getActiveTrip();
+                    if (currentTripRef == null) {
+                        noTripLayout.setVisibility(View.VISIBLE);
+                    } else {
+                        noTripLayout.setVisibility(View.INVISIBLE);
+                        currentTripRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    Trip trip = task.getResult().toObject(Trip.class);
+                                }
+                            }
+                        });
+
+                        db.collection(Collections.checkpoints(currentTripRef.getId())).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Checkpoint checkpoint = document.toObject(Checkpoint.class);
+                                        checkpoints.put(document.getId(), checkpoint);
+                                    }
+                                    adapter.changeDataSet(checkpoints);
+                                } else {
+                                    Log.w(TAG, "Error getting documents.", task.getException());
+                                }
+                            }
+                        });
+                        // listen checkpoint added/changed
+                        db.collection(Collections.checkpoints(currentTripRef.getId())).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                                if (e != null) {
+                                    Log.w(TAG, "Listen failed.", e);
+                                    return;
+                                }
+                                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                    Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
+                                    String id = documentSnapshot.getId();
+                                    checkpoints.put(id, checkpoint);
+                                }
+                                adapter.changeDataSet(checkpoints);
+                            }
+                        });
                     }
-                } else {
-                    Log.w(TAG, "Error getting documents.", task.getException());
-                }
-            }
-        });
-        // listen checkpoint added/changed
-        db.collection(Collections.CHECKPOINTS).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
-                    return;
-                }
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                    Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
-                    String id = documentSnapshot.getId();
-                    checkpoints.put(id, checkpoint);
                 }
             }
         });
@@ -106,8 +143,40 @@ public class TripOverviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_trip_overview, container, false);
+
+        // no trip
+        noTripLayout = v.findViewById(R.id.fragment_trip_overview_no_trip);
+        btnCreateTrip = v.findViewById(R.id.btn_create_trip_dialog_no_trip);
+        btnCreateTrip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), CreateTripActivity.class);
+                startActivity(intent);
+            }
+        });
+        btnJoinTrip = v.findViewById(R.id.btn_join_trip_dialog_no_trip);
+        btnJoinTrip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                QRScanDialogFragment qrDialog = new QRScanDialogFragment(new QRScanDialogFragment.OnQrResultListener() {
+                    @Override
+                    public void onResult(String result) {
+                        if (getContext() != null) {
+                            String tripCode = UrlParser.parseTripCode(getContext(), result);
+                            currentTripRef = db.collection(Collections.TRIPS).document(tripCode);
+                            currentUserRef.update(User.ACTIVE_TRIP, currentTripRef);
+                            currentTripRef.update(Trip.MEMBERS, FieldValue.arrayUnion(currentUserRef));
+                        }
+                    }
+                });
+                qrDialog.show(getChildFragmentManager(), "qr scanner");
+            }
+        });
+
+        // joined
         rv = v.findViewById(R.id.rv_checkpoints_frag_trip_overview);
-        rv.setAdapter(new Adapter());
+        adapter = new Adapter(checkpoints);
+        rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rv);
@@ -122,8 +191,8 @@ public class TripOverviewFragment extends Fragment {
         return layoutManager.getPosition(snapView);
     }
 
-    void selectCheckpoint(int position){
-        if (position >= 0 && position < checkpoints.size()){
+    void selectCheckpoint(int position) {
+        if (position >= 0 && position < checkpoints.size()) {
             rv.smoothScrollToPosition(position);
         }
     }
@@ -142,6 +211,7 @@ public class TripOverviewFragment extends Fragment {
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvLocation, tvTime;
         Button btnRoute, btnStart, btnRollUp;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_name_item_checkpoint_frag_trip_overview);
@@ -151,11 +221,23 @@ public class TripOverviewFragment extends Fragment {
             btnRollUp = itemView.findViewById(R.id.btn_roll_up_item_checkpoint_frag_trip_overview);
             btnStart = itemView.findViewById(R.id.btn_start_direction_item_checkpoint_frag_trip_overview);
         }
-        void bind(final Checkpoint checkpoint){
-//            tvName.setText("");
+
+        void bind(final Checkpoint checkpoint) {
+            tvName.setText(checkpoint.getName());
             tvLocation.setText(checkpoint.getLocation());
-            tvTime.setText(checkpoint.getTime().toString());
-            if (false){
+            tvTime.setText(DateFormatter.format(checkpoint.getTime()));
+            btnStart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri gmmIntentUri = Uri.parse("google.navigation:q=" + checkpoint.getLatLng().latitude + "," + checkpoint.getLatLng().longitude);
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                    mapIntent.setPackage("com.google.android.apps.maps");
+                    if (mapIntent.resolveActivity(getContext().getPackageManager()) != null) {
+                        startActivity(mapIntent);
+                    }
+                }
+            });
+            if (false) {
 //            if (LatLngDistance.measureDistance(currentUserStatus.status.getLatLng(), checkpoint.getLatLng()) < 50){
                 btnRoute.setVisibility(View.GONE);
                 btnRollUp.setVisibility(View.VISIBLE);
@@ -179,12 +261,22 @@ public class TripOverviewFragment extends Fragment {
     }
 
     class Adapter extends RecyclerView.Adapter<ViewHolder> {
+        ArrayList<Checkpoint> checkpoints;
+
+        public Adapter(HashMap<String, Checkpoint> checkpointHashMap) {
+            this.checkpoints = new ArrayList<>(checkpointHashMap.values());
+        }
 
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_checkpoint_frag_trip_overview, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_trip_overview_item_checkpoint, parent, false);
             return new ViewHolder(view);
+        }
+
+        void changeDataSet(HashMap<String, Checkpoint> checkpointHashMap) {
+            checkpoints = new ArrayList<>(checkpointHashMap.values());
+            notifyDataSetChanged();
         }
 
         @Override

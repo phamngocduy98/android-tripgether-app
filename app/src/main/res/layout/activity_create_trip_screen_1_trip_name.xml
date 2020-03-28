@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:text="Hãy bắt đầu bằng cách đặt tên cho chuyến đi của bạn"
+        android:textColor="@android:color/black"
+        android:textSize="28dp" />
+
+    <EditText
+        android:id="@+id/edit_name_trip_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="18dp"
+        android:background="@android:color/transparent"
+        android:ems="10"
+        android:hint="Tên chuyến đi"
+        android:text=""
+        android:inputType="textMultiLine"
+        android:maxLines="2"
+        android:textColor="@color/colorPrimary"
+        android:textSize="38dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/holo_red_dark"
+        android:text="(!) Vui lòng nhập tên chuyến đi" />
+
+    <Button
+        android:id="@+id/btn_continue_screen1_activity_create_trip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="18dp"
+        style="@style/Button.RaisedButton"
+        android:text="Tiếp tục" />
+
+</LinearLayout>

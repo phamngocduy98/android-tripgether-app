@@ -1,8 +1,11 @@
 package cf.bautroixa.maptest;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
@@ -12,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -24,23 +28,30 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 
 import cf.bautroixa.maptest.firestore.Collections;
+import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.RoundedImageView;
+import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.BatteryHelper;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
+import cf.bautroixa.maptest.utils.UrlParser;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, MapFragment.OnMapClicked {
     private static final String TAG = "MainActivity";
     private FirebaseFirestore db;
+    private SharedPreferences sharedPref;
     private HashMap<String, User> friends;
 
     private static final int STATE_HIDE = -1;
@@ -50,6 +61,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private static final int STATE_CHECKPOINT = 20;
 
     int state, lastState = 0;
+    String userName = "notLoggedIn";
+    User currentUser;
+    Trip currentTrip;
+    DocumentReference currentUserRef, currentTripRef;
+
     User selectedUser = null;
 
     // fragment for tab
@@ -67,7 +83,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     // toolbar / status bar
     View statusBar;
     Toolbar toolbar;
-    TextView tvTripName;
+    ActionBar actionBar;
+    TextView tvTripName, tvTitle;
     Button btnSos, btnQR;
     RoundedImageView imgAvatar;
     LinearLayout containerToolbar;
@@ -85,33 +102,29 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         db = FirebaseFirestore.getInstance();
+        sharedPref = getSharedPreferences(getString(R.string.shared_preference_name), MODE_PRIVATE);
+        userName = sharedPref.getString("userName", userName);
         // get
-        db.collection(Collections.USERS).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        currentUserRef = db.collection(Collections.USERS).document(userName);
+        currentUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        User user = document.toObject(User.class);
-                        user.setUserName(document.getId());
-                        friends.put(document.getId(), user);
-                    }
-                } else {
-                    Log.w(TAG, "Error getting documents.", task.getException());
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    User user = documentSnapshot.toObject(User.class);
+                    onUpdateCurrentUser(user);
                 }
             }
         });
         // listen changed
-        db.collection(Collections.USERS).addSnapshotListener(new EventListener<QuerySnapshot>() {
+        currentUserRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
-                    return;
-                }
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                    Log.w(TAG, "error listen changed" + e.getMessage());
+                } else {
                     User user = documentSnapshot.toObject(User.class);
-                    user.setUserName(documentSnapshot.getId());
-                    friends.put(documentSnapshot.getId(), user);
+                    onUpdateCurrentUser(user);
                 }
             }
         });
@@ -222,57 +235,76 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         }
     }
 
-    private void handleState(int newState){
+    private void onUpdateCurrentUser(User user) {
+        currentUser = user;
+        if (!currentUser.getAvatar().equals(user.getAvatar())) {
+            Picasso.get().load(currentUser.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
+        }
+        currentTripRef = user.getActiveTrip();
+        if (currentTripRef != null) {
+            currentTripRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        currentTrip = task.getResult().toObject(Trip.class);
+                        tvTripName.setText(currentTrip.getName());
+                        tvTitle.setText(currentTrip.getName());
+                    }
+                }
+            });
+        } else {
+            Log.d(TAG, "null trip");
+        }
+    }
+
+    private void handleState(int newState) {
         state = newState;
-        switch (state){
-            case STATE_FRIEND_LIST: case STATE_FRIEND_LIST_EXPANDED:
+        switch (state) {
+            case STATE_FRIEND_LIST:
+            case STATE_FRIEND_LIST_EXPANDED:
                 if (state == STATE_FRIEND_LIST) {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 } else {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
                 toggleToolbar(false);
-                toggleHideShow(containerToolbar, true, true);
-                toggleHideShow(bottomSheet, true, true);
-                toggleHideShow(bottomSpace, false, false);
+                ViewAnim.toggleHideShow(containerToolbar, true, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(tvTitle, false, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(bottomSheet, true, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(bottomSpace, false, ViewAnim.DIRECTION_DOWN);
                 break;
             case STATE_FRIEND_STATUS:
-                toggleToolbar(true);
-                toggleHideShow(containerToolbar, false, true);
-                toggleHideShow(bottomSheet, false, false);
-                toggleHideShow(bottomSpace, true, false);
+                toggleToolbar(currentTripRef != null);
+                ViewAnim.toggleHideShow(tvTitle, currentTripRef != null, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
                 replaceBottomSpace(FriendFragment.newInstance(selectedUser.getUserName()));
                 if (mapFragment != null) mapFragment.cameraTarget(null, selectedUser.getLatLng());
                 break;
             case STATE_CHECKPOINT:
-                toggleToolbar(true);
-                toggleHideShow(containerToolbar, false, true);
-                toggleHideShow(bottomSheet, false, true);
-                toggleHideShow(bottomSpace, true, false);
+                toggleToolbar(currentTripRef != null);
+                ViewAnim.toggleHideShow(tvTitle, currentTripRef != null, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
                 replaceBottomSpace(new TripOverviewFragment());
                 break;
         }
-        Log.d(TAG, "new state= "+state);
+        Log.d(TAG, "new state= " + state);
     }
 
-    private void replaceBottomSpace(Fragment fragment){
+    private void replaceBottomSpace(Fragment fragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.bottom_space, fragment);
         ft.commit();
     }
 
-    void toggleToolbar(boolean show){
-        toggleHideShow(toolbar, show, true);
-        toggleHideShow(statusBar, show, true);
+    void toggleToolbar(boolean show) {
+        ViewAnim.toggleHideShow(toolbar, show, ViewAnim.DIRECTION_UP);
+        ViewAnim.toggleHideShow(statusBar, show, ViewAnim.DIRECTION_UP);
     }
 
-    void toggleHideShow(View view, boolean show, boolean up){
-        if (show){
-            view.animate().translationY(0).alpha(1);
-        } else {
-            view.animate().translationY(view.getHeight()*(up?-1:1)).alpha(0);
-        }
-    }
 
     void bottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from((View) (bottomSheet));
@@ -292,23 +324,23 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     @Override
     public void onMapClicked(LatLng latLng) {
-        Log.d(TAG, "last state= "+lastState);
-        if (state != STATE_HIDE){
+        Log.d(TAG, "last state= " + lastState);
+        if (state != STATE_HIDE) {
             toggleToolbar(false);
-            toggleHideShow(containerToolbar, false, true);
-            toggleHideShow(bottomNavigationView, false, false);
-            toggleHideShow(bottomSheet, false, false);
-            toggleHideShow(bottomSpace, false, false);
+            ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
+            ViewAnim.toggleHideShow(bottomNavigationView, false, ViewAnim.DIRECTION_DOWN);
+            ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
+            ViewAnim.toggleHideShow(bottomSpace, false, ViewAnim.DIRECTION_DOWN);
             lastState = state;
             state = STATE_HIDE;
         } else {
-            toggleHideShow(bottomNavigationView, true, false);
+            ViewAnim.toggleHideShow(bottomNavigationView, true, ViewAnim.DIRECTION_DOWN);
             handleState(lastState);
         }
-        Log.d(TAG, "click new state= "+state);
+        Log.d(TAG, "click new state= " + state);
     }
 
-    private void initStatusBarToolbar(){
+    private void initStatusBarToolbar() {
         // status bar
         statusBar = findViewById(R.id.view_status_bar_activity_main);
         statusBar.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
@@ -320,7 +352,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         });
         // toolbar
         containerToolbar = findViewById(R.id.container_toolbar_activity_main);
-        toolbar = findViewById(R.id.toolbar_main_activity);
+        tvTitle = findViewById(R.id.tv_title_toolbar_activity_main);
+        toolbar = findViewById(R.id.toolbar_activity_main);
+        setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
+        actionBar.setTitle("");
         tvTripName = findViewById(R.id.tv_trip_name_activity_main);
         btnQR = findViewById(R.id.btn_qr_code_activity_main);
         btnSos = findViewById(R.id.btn_sos_activity_main);
@@ -331,7 +367,10 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 QRScanDialogFragment qrScanDialogFragment = new QRScanDialogFragment(new QRScanDialogFragment.OnQrResultListener() {
                     @Override
                     public void onResult(String result) {
-
+                        String tripCode = UrlParser.parseTripCode(MainActivity.this, result);
+                        currentTripRef = db.collection(Collections.TRIPS).document(tripCode);
+                        currentUserRef.update(User.ACTIVE_TRIP, currentTripRef);
+                        currentTripRef.update(Trip.MEMBERS, FieldValue.arrayUnion(currentUserRef));
                     }
                 });
                 qrScanDialogFragment.show(getSupportFragmentManager(), "QR scanner");
@@ -356,22 +395,78 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.nav_location_tab:
                 handleState(STATE_FRIEND_LIST);
                 break;
             case R.id.nav_trip_tab:
-                if (false) {
-                    handleState(STATE_CHECKPOINT);
-                } else {
-                    NoTripDialogFragment noTripDialogFragment = new NoTripDialogFragment();
-                    noTripDialogFragment.show(getSupportFragmentManager(), "no tripp");
-                    return false;
-                }
+                handleState(STATE_CHECKPOINT);
                 break;
             case R.id.nav_bar_setting:
                 break;
         }
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share_activity_main:
+                Intent intent = new Intent(MainActivity.this, TripInvitationActivity.class);
+                intent.putExtra(Trip.ID, currentTripRef.getId());
+                startActivity(intent);
+                return true;
+            case R.id.menu_leave_trip_activity_main:
+                LeaveTripConfirmDialog dialog = new LeaveTripConfirmDialog();
+                dialog.setPositiveBtnClick(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.setNegativeBtnClick(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        currentUserRef.update(User.ACTIVE_TRIP, null);
+                    }
+                });
+                dialog.show(getSupportFragmentManager(), "leave trip");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public static class LeaveTripConfirmDialog extends OneDialog {
+        @Override
+        public int getTitleRes() {
+            return super.getTitleRes();
+        }
+
+        @Override
+        public int getMessageRes() {
+            return R.string.dialog_message_leave_trip;
+        }
+
+        @Override
+        public int getPositiveButtonTextRes() {
+            return R.string.btn_cancel;
+        }
+
+        @Override
+        public int getNegativeButtonTextRes() {
+            return R.string.btn_leave_trip;
+        }
+
+        @Override
+        public boolean isEnableNegativeButton() {
+            return true;
+        }
     }
 }

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Binder;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +16,10 @@ import androidx.annotation.LayoutRes;
 
 import cf.bautroixa.maptest.R;
 
-interface ILayoutEditor {
-    void edit(View view);
-}
-
 public class CreateMarker {
+    public interface ILayoutEditor {
+        void edit(View view);
+    }
     public static Bitmap createBitmapFromLayout(Context context, @LayoutRes int layoutResId, ILayoutEditor editor){
         View view = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(layoutResId, null);
         editor.edit(view);

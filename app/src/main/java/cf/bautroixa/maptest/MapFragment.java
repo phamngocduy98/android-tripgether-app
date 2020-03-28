@@ -7,15 +7,22 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,6 +43,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 
@@ -47,7 +55,8 @@ import cf.bautroixa.maptest.network_io.HttpRequest;
 import cf.bautroixa.maptest.types.MapBoxDirection;
 import cf.bautroixa.maptest.utils.CompassHelper;
 import cf.bautroixa.maptest.utils.CreateMarker;
-import cf.bautroixa.maptest.utils.GPSHelper;
+
+import static cf.bautroixa.maptest.utils.CreateMarker.createMarker;
 
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
@@ -55,13 +64,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "MapFragment";
 
     private FirebaseFirestore db;
+    private FusedLocationProviderClient fusedLocationClient;
     OnMapClicked onMapClicked;
     SharedPreferences sharedPref;
     String userName;
 
     // utils service
     private CompassHelper compass;
-    private GPSHelper gps;
 
     // GG map component
     private GoogleMap mMap;
@@ -99,6 +108,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         friends = new HashMap<>();
         checkpoints = new HashMap<>();
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
         sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         userName = sharedPref.getString("userName", "duy");
         db = FirebaseFirestore.getInstance();
@@ -185,7 +195,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         compass = new CompassHelper(getContext());
-        gps = GPSHelper.getInstance(getContext());
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         // GG map fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_main);
@@ -196,19 +205,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     void initLocationAndCompass() {
-        currentLocation = gps.getLastKnownLocation();
-        gps.setListener(new GPSHelper.GPSLocationListener() {
+        currentLocation = new LatLng(0,0);
+        fusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
             @Override
-            public void onNewLocation(Location location) {
-                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            public void onComplete(@NonNull Task<Location> task) {
+                if (task.isSuccessful() && task.getResult() != null){
+                    Location res = task.getResult();
+                    currentLocation = new LatLng(res.getLatitude(), res.getLongitude());
+                }
+            }
+        });
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        fusedLocationClient.requestLocationUpdates(locationRequest,new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                Location lastLocation = locationResult.getLastLocation();
+                currentLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                 myLocationMarker.setPosition(currentLocation);
                 if (focusMyLocation) {
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation));
                 }
                 myLocationRotationMarker.setPosition(currentLocation);
-                sendUpdateCoord(location);
+                super.onLocationResult(locationResult);
             }
-        });
+        }, Looper.getMainLooper());
         compass.setListener(new CompassHelper.CompassListener() {
             @Override
             public void onNewAzimuth(float azimuth) {
@@ -299,7 +322,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_direction)));
         myLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation)
                 .anchor(0.5f, 0.5f)
-                .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createMarker(getContext(), R.drawable.marker_my_location, 120, 120))));
+                .icon(BitmapDescriptorFactory.fromBitmap(createMarker(getContext(), R.drawable.marker_my_location, 120, 120))));
     }
 
     void initFriendMarkers() {
@@ -310,11 +333,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         isMarkerLoaded = true;
     }
 
-    public Marker createFriendMarker(User user) {
+    public Marker createFriendMarker(final User user) {
         if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
         return mMap.addMarker(new MarkerOptions().position(user.getLatLng())
                 .title(user.getName())
-                .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createMarker(getContext(), R.layout.map_marker, R.drawable.user))));
+                .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker, new CreateMarker.ILayoutEditor() {
+                    @Override
+                    public void edit(View view) {
+                        ImageView markerImage = (ImageView) view.findViewById(R.id.img_marker_avatar);
+                        Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(markerImage);
+                    }
+                }))));
     }
 
     void initCheckpointMarker() {
@@ -396,7 +425,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 return;
             }
         }
-        gps.start();
         compass.start();
     }
 
@@ -410,7 +438,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onPause() {
         super.onPause();
         compass.stop();
-        gps.stop();
     }
 
     @Override

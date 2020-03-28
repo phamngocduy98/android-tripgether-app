@@ -2,10 +2,12 @@ package cf.bautroixa.maptest.firestore;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
 
 public class User {
+    @Exclude public static final String NO_USER = "notLoggedIn";
     @Exclude String userName;
     @Exclude public static final String NAME = "name";
     String name;
@@ -21,6 +23,8 @@ public class User {
     Long speed;
     @Exclude public static final String BATTERY = "battery";
     int battery;
+    @Exclude public static final String ACTIVE_TRIP = "activeTrip";
+    DocumentReference activeTrip;
     @Exclude LatLng latLng;
     @Exclude Marker marker;
 
@@ -89,6 +93,14 @@ public class User {
 
     public void setBattery(int battery) {
         this.battery = battery;
+    }
+
+    public DocumentReference getActiveTrip() {
+        return activeTrip;
+    }
+
+    public void setActiveTrip(DocumentReference activeTrip) {
+        this.activeTrip = activeTrip;
     }
 
     @Exclude

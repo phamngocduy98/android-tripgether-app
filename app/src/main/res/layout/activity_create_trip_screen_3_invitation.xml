@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mời bạn bè tham gia chuyến đi của bạn"
+        android:textColor="@android:color/black"
+        android:textSize="28dp" />
+
+
+
+    <ImageView
+        android:id="@+id/img_qr_code_activity_create_trip"
+        android:layout_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="24dp" />
+    <TextView
+        android:id="@+id/tv_code_activity_create_trip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="1234.5678"
+        android:textSize="30sp" />
+    <Button
+        android:id="@+id/btn_share_activity_create_trip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        style="@style/Button.FlatButton"
+        android:text="Chia sẻ" />
+    <Button
+        android:id="@+id/btn_finish_activity_create_trip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        style="@style/Button.RaisedButton"
+        android:text="Hoàn thành" />
+
+</LinearLayout>

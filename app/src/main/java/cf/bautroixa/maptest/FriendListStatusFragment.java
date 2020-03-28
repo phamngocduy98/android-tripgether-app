@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,7 +110,7 @@ public class FriendListStatusFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_friend_list_status, container, false);
+        View v = inflater.inflate(R.layout.fragment_friend_list, container, false);
         Context context = v.getContext();
 
         dragMark = v.findViewById(R.id.drag_mark_frag_friend_list_status);
@@ -170,6 +171,7 @@ public class FriendListStatusFragment extends Fragment {
         TextView tvName, tvLocation, tvCount, tvBattery;
         RoundedImageView imgAvatar;
         View view;
+        User currentUser;
 
         public FriendStatusViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -187,12 +189,18 @@ public class FriendListStatusFragment extends Fragment {
 
         public void update(User user) {
 //            tvCount.setText("1");
+            currentUser = user;
             tvBattery.setText(user.getBattery() + "%");
             tvLocation.setText(user.getCurrentLocation());
+            if (!user.getAvatar().equals(currentUser.getAvatar())) {
+                Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
+            }
         }
 
         public void bind(User user) {
+            currentUser = user;
             tvName.setText(user.getName());
+            Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
             this.update(user);
         }
     }
@@ -224,7 +232,7 @@ public class FriendListStatusFragment extends Fragment {
         @NonNull
         @Override
         public FriendStatusViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_friend_status, parent, false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_friend_list_item, parent, false);
             return new FriendStatusViewHolder(v);
         }
 
@@ -276,9 +284,7 @@ public class FriendListStatusFragment extends Fragment {
 
         @Override
         public void bind(User user) {
-            if (user != null) {
-//                imgAvatar.setImageDrawable(context.getDrawable(R.drawable.avatar_item_room));
-            }
+            Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
 //            tvCount.setText("1");
         }
 
@@ -295,7 +301,7 @@ public class FriendListStatusFragment extends Fragment {
         @NonNull
         @Override
         public FriendStatusLiteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_friend_status_lite, parent, false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_friend_list_item_lite, parent, false);
             return new FriendStatusLiteViewHolder(v);
         }
     }

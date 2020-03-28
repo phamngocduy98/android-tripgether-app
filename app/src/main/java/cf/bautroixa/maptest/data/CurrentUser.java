@@ -5,12 +5,12 @@ import android.content.Context;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.utils.BatteryHelper;
 
-public class CurrentUserStatus {
-    private static CurrentUserStatus instance = null;
+public class CurrentUser {
+    private static CurrentUser instance = null;
     public User user;
     private Context context;
 
-    private CurrentUserStatus(Context context) {
+    private CurrentUser(Context context) {
 //        SharedPreferences sharedPref = context.getSharedPreferences(
 //                context.getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
 //        String userId = sharedPref.getString("userId");
@@ -18,11 +18,11 @@ public class CurrentUserStatus {
         this.context = context;
     }
 
-    public static CurrentUserStatus getInstance(Context context) {
+    public static CurrentUser getInstance(Context context) {
         if (instance == null) {
-            synchronized (CurrentUserStatus.class) {
+            synchronized (CurrentUser.class) {
                 if (instance == null) {
-                    instance = new CurrentUserStatus(context);
+                    instance = new CurrentUser(context);
                 }
             }
         }

@@ -22,4 +22,8 @@
         <item>Medium</item>
         <item>Low</item>
     </string-array>
+    <string name="tv_step_activity_create_trip">Tạo chuyến đi (Bước %d của %d)</string>
+    <string name="btn_leave_trip">Leave trip</string>
+    <string name="dialog_message_leave_trip">Bạn có chắc chắn muốn rời chuyến đi này không?</string>
+    <string name="server_host">www.example.com</string>
 </resources>

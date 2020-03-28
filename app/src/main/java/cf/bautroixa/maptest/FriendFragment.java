@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.squareup.picasso.Picasso;
 
 import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.User;
@@ -36,6 +38,7 @@ public class FriendFragment extends Fragment {
 
     TextView tvName, tvLocation, tvBattery, tvSpeed;
     Button btnCall, btnDirection, btnMessage;
+    ImageView imgAvatar;
 
     int pos;
 
@@ -93,6 +96,7 @@ public class FriendFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_friend, container, false);
+        imgAvatar = v.findViewById(R.id.img_avatar_frag_friend);
         tvName = v.findViewById(R.id.tv_name_frag_friend);
         tvLocation = v.findViewById(R.id.tv_location_frag_friend);
         tvBattery = v.findViewById(R.id.tv_battery_frag_friend);
@@ -128,7 +132,8 @@ public class FriendFragment extends Fragment {
 
     void updateView() {
         if (getContext() == null && isDetached()) return; // getContext() may return null if fragment detached or not attached
-        if (this.activeUser != null) {
+        if (activeUser != null) {
+            Picasso.get().load(activeUser.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
             tvName.setText(this.activeUser.getName());
             tvLocation.setText(this.activeUser.getCurrentLocation());
             tvBattery.setText(this.activeUser.getBattery() + "%");

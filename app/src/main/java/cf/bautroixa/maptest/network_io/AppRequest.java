@@ -1,6 +1,7 @@
 package cf.bautroixa.maptest.network_io;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -45,6 +46,10 @@ public class AppRequest {
                 }
             }
         });
+    }
+
+    public static void getGeocodingAddress(Context context, Location location, final HttpRequest.Callback<String> callback) {
+        getGeocodingAddress(context, new LatLng(location.getLatitude(), location.getLongitude()), callback);
     }
 
     public static void getGeocodingAddress(Context context, LatLng latLng, final HttpRequest.Callback<String> callback) {
