@@ -17,10 +17,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".RegisterActivity"></activity>
+
         <service
             android:name=".services.UpdateLocationService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity android:name=".LoginActivity">
             <intent-filter>
@@ -59,7 +61,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/NoActionBar.NoStatusBar"></activity>
+            android:theme="@style/NoActionBar.NoStatusBar" />
     </application>
 
 </manifest>
