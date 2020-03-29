@@ -49,6 +49,7 @@ import java.util.HashMap;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
+import cf.bautroixa.maptest.firestore.FireStoreManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.network_io.AppRequest;
 import cf.bautroixa.maptest.network_io.HttpRequest;
@@ -64,6 +65,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "MapFragment";
 
     private FirebaseFirestore db;
+    private FireStoreManager manager;
     private FusedLocationProviderClient fusedLocationClient;
     OnMapClicked onMapClicked;
     SharedPreferences sharedPref;
@@ -112,6 +114,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         userName = sharedPref.getString("userName", "duy");
         db = FirebaseFirestore.getInstance();
+        manager = FireStoreManager.getInstance(userName);
         // get user
         db.collection(Collections.USERS).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -151,44 +154,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         });
-
-        db.collection(Collections.CHECKPOINTS).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Checkpoint checkpoint = document.toObject(Checkpoint.class);
-                        checkpoints.put(document.getId(), checkpoint);
-                    }
-                    if (isMapLoaded && !isCheckpointLoaded) initCheckpointMarker();
-                } else {
-                    Log.w(TAG, "Error getting documents.", task.getException());
-                }
-            }
-        });
+        for (Checkpoint checkpoint: manager.getCheckpoints().values()){
+            checkpoints.put(checkpoint.getId(), checkpoint);
+        }
+        if (isMapLoaded && !isCheckpointLoaded) initCheckpointMarker();
         // listen checkpoint added/changed
-        db.collection(Collections.CHECKPOINTS).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
-                    return;
-                }
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                    Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
-                    String id = documentSnapshot.getId();
-                    Marker marker = null;
-                    if (checkpoints.get(id) == null) { // newly added
-                        marker = createCheckpointMarker(checkpoint);
-                    } else { // update position
-                        marker = checkpoints.get(id).getMarker();
-                        marker.setPosition(checkpoint.getLatLng());
+        if (manager.getCurrentTripRef() != null) {
+            db.collection(Collections.checkpoints(manager.getCurrentTripRef().getId())).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
                     }
-                    checkpoint.setMarker(marker);
-                    checkpoints.put(id, checkpoint);
+                    for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                        Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
+                        String id = documentSnapshot.getId();
+                        Marker marker = null;
+                        if (checkpoints.get(id) == null) { // newly added
+                            marker = createCheckpointMarker(checkpoint);
+                        } else { // update position
+                            marker = checkpoints.get(id).getMarker();
+                            marker.setPosition(checkpoint.getLatLng());
+                        }
+                        checkpoint.setMarker(marker);
+                        checkpoints.put(id, checkpoint);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override

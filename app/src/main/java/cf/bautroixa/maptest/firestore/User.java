@@ -8,6 +8,7 @@ import com.google.firebase.firestore.GeoPoint;
 
 public class User {
     @Exclude public static final String NO_USER = "notLoggedIn";
+    @Exclude public static final String USER_NAME = "userName";
     @Exclude String userName;
     @Exclude public static final String NAME = "name";
     String name;
@@ -19,6 +20,8 @@ public class User {
     GeoPoint currentCoord;
     @Exclude public static final String LOCATION = "currentLocation";
     String currentLocation;
+    @Exclude public static final String EMAIL = "email";
+    String email;
     @Exclude public static final String SPEED = "speed";
     Long speed;
     @Exclude public static final String BATTERY = "battery";
@@ -101,6 +104,14 @@ public class User {
 
     public void setActiveTrip(DocumentReference activeTrip) {
         this.activeTrip = activeTrip;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Exclude

@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,6 +43,7 @@ import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.theme.OneDialog;
+import cf.bautroixa.maptest.theme.OnePromptDialog;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.BatteryHelper;
@@ -247,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
                         currentTrip = task.getResult().toObject(Trip.class);
-                        tvTripName.setText(currentTrip.getName());
+                        tvTripName.setText(currentUser.getName());
                         tvTitle.setText(currentTrip.getName());
                     }
                 }
@@ -417,56 +419,57 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_gather_activity_main:
+                OneDialog selectGatherTypeDialog = new OneDialog.Builder().title(R.string.dialog_title_gather).message(R.string.dialog_message_choose_gather_position)
+                        .enableNegativeButton(true)
+                        .posBtnText(R.string.btn_pos_res_choose_checkpoint)
+                        .negBtnText(R.string.btn_neg_current_position)
+                        .buttonClickListener(new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == DialogInterface.BUTTON_POSITIVE){
+                                    // chọn checkpoint
+                                    SelectCheckpointDialog selectCheckpointDialog = new SelectCheckpointDialog();
+                                    selectCheckpointDialog.setTitleRes(R.string.dialog_title_select_checkpoint);
+                                    selectCheckpointDialog.show(getSupportFragmentManager(), "select cp dialog");
+                                } else {
+                                    // vị trí hiện tại
+                                    OneDialog enterCheckpointNameDialog = new OnePromptDialog.Builder().title(R.string.dialog_title_enter_checkpoint_name)
+                                            .onResult(new OnePromptDialog.OnDialogResult() {
+                                                @Override
+                                                public void onDialogResult(Dialog dialog1, boolean isCanceled, String value) {
+                                                    Log.d(TAG, value);
+                                                    dialog1.dismiss();
+                                                }
+                                            }).build();
+                                    enterCheckpointNameDialog.show(getSupportFragmentManager(), "enter cp name");
+                                }
+                            }
+                        }).build();
+                selectGatherTypeDialog.show(getSupportFragmentManager(), "select gather position");
+                return true;
             case R.id.menu_share_activity_main:
                 Intent intent = new Intent(MainActivity.this, TripInvitationActivity.class);
                 intent.putExtra(Trip.ID, currentTripRef.getId());
                 startActivity(intent);
                 return true;
             case R.id.menu_leave_trip_activity_main:
-                LeaveTripConfirmDialog dialog = new LeaveTripConfirmDialog();
-                dialog.setPositiveBtnClick(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.setNegativeBtnClick(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        currentUserRef.update(User.ACTIVE_TRIP, null);
-                    }
-                });
-                dialog.show(getSupportFragmentManager(), "leave trip");
+                OneDialog leaveTripConfirmDialog = new OneDialog.Builder().message(R.string.dialog_message_leave_trip)
+                        .enableNegativeButton(true).buttonClickListener(new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == DialogInterface.BUTTON_POSITIVE){
+                                    currentUserRef.update(User.ACTIVE_TRIP, null);
+                                    dialog.dismiss();
+                                } else {
+                                    dialog.dismiss();
+                                }
+                            }
+                        }).build();
+                leaveTripConfirmDialog.show(getSupportFragmentManager(), "leave trip");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    public static class LeaveTripConfirmDialog extends OneDialog {
-        @Override
-        public int getTitleRes() {
-            return super.getTitleRes();
-        }
-
-        @Override
-        public int getMessageRes() {
-            return R.string.dialog_message_leave_trip;
-        }
-
-        @Override
-        public int getPositiveButtonTextRes() {
-            return R.string.btn_cancel;
-        }
-
-        @Override
-        public int getNegativeButtonTextRes() {
-            return R.string.btn_leave_trip;
-        }
-
-        @Override
-        public boolean isEnableNegativeButton() {
-            return true;
         }
     }
 }

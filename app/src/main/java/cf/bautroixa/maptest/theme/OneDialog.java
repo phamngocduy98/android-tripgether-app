@@ -1,18 +1,19 @@
 package cf.bautroixa.maptest.theme;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.fragment.app.DialogFragment;
 
 import cf.bautroixa.maptest.R;
@@ -23,7 +24,52 @@ import cf.bautroixa.maptest.R;
  * github.com/phamngocduy98
  */
 public class OneDialog extends DialogFragment {
-    DialogInterface.OnClickListener positiveBtnClick, negativeBtnClick;
+
+    public static class Builder {
+        OneDialog instance;
+        public Builder() {
+            instance = new OneDialog();
+        }
+        public Builder title(@StringRes int titleRes){
+            instance.setTitleRes(titleRes);
+            return this;
+        }
+        public Builder message(@StringRes int messageRes){
+            instance.setMessageRes(messageRes);
+            return this;
+        }
+        public Builder posBtnText(@StringRes int posBtnRes){
+            instance.setPosBtnRes(posBtnRes);
+            return this;
+        }
+        public Builder negBtnText(@StringRes int negBtnRes){
+            instance.setNegBtnRes(negBtnRes);
+            return this;
+        }
+        public Builder body(View body){
+            instance.setCustomBody(body);
+            return this;
+        }
+        public Builder enableNegativeButton(boolean enable){
+            instance.setEnableNegativeButton(enable);
+            return this;
+        }
+        public Builder buttonClickListener(DialogInterface.OnClickListener buttonClickListener) {
+            instance.setButtonClickListener(buttonClickListener);
+            return this;
+        }
+        public OneDialog build(){
+            return instance;
+        }
+    }
+
+    DialogInterface.OnClickListener btnClickListener;
+    TextView tvTitle, tvMessage, tvBtnDivider;
+    LinearLayout containerBody;
+    View customBody;
+    Button btnPos, btnNeg;
+    boolean isEnableNegativeButton = false;
+    int titleRes = R.string.dialog_title, messageRes = R.string.dialog_messsage, posBtnRes = R.string.btn_got_it, negBtnRes = R.string.btn_cancel;
 
     public OneDialog() {
     }
@@ -31,64 +77,78 @@ public class OneDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        TextView tvMessage = new TextView(getContext());
-        tvMessage.setText(getMessageRes());
-        tvMessage.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
-        TypedValue typedValue = new TypedValue();
-        int paddingHorizontal = getContext().getTheme().resolveAttribute(R.attr.dialogPreferredPadding,typedValue, true)?TypedValue.complexToDimensionPixelSize(typedValue.data, getContext().getResources().getDisplayMetrics()):0;
-        tvMessage.setPadding(paddingHorizontal,32,paddingHorizontal,24);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle(getTitleRes())
-                .setView(tvMessage)
-                .setCancelable(false)
-                .setPositiveButton(getPositiveButtonTextRes(), positiveBtnClick);
-        if (isEnableNegativeButton()){
-            builder.setNegativeButton(getNegativeButtonTextRes(), negativeBtnClick);
-        }
-        AlertDialog dialog = builder.create();
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.getWindow().setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_radius_full_white);
-
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button positiveButton = ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextColor(Color.WHITE);
-                positiveButton.setBackgroundResource(R.drawable.btn_raised);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 2f);
-                positiveButton.setLayoutParams(params);
-                positiveButton.invalidate();
-            }
-        });
         return dialog;
     }
 
-    public int getTitleRes(){
-        return R.string.dialog_title;
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.theme_one_dialog, container, false);
+        tvTitle = v.findViewById(R.id.tv_title_one_dialog);
+        containerBody = v.findViewById(R.id.container_body_one_dialog);
+        tvMessage = v.findViewById(R.id.tv_message_one_dialog);
+        btnPos = v.findViewById(R.id.btn_positive_one_dialog);
+        tvBtnDivider = v.findViewById(R.id.tv_buttions_divider);
+        btnNeg = v.findViewById(R.id.btn_negative_one_dialog);
+
+        tvTitle.setText(titleRes);
+        btnPos.setText(posBtnRes);
+        btnPos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (btnClickListener != null) btnClickListener.onClick(getDialog(), DialogInterface.BUTTON_POSITIVE);
+            }
+        });
+        if (customBody != null){
+            containerBody.removeAllViews();
+            containerBody.addView(customBody);
+        } else {
+            tvMessage.setText(messageRes);
+        }
+        if (isEnableNegativeButton){
+            btnNeg.setText(negBtnRes);
+            btnNeg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (btnClickListener != null) btnClickListener.onClick(getDialog(), DialogInterface.BUTTON_NEGATIVE);
+                }
+            });
+        } else {
+            btnNeg.setVisibility(View.GONE);
+            tvBtnDivider.setVisibility(View.GONE);
+        }
+        return v;
     }
 
-    public int getMessageRes(){
-        return R.string.dialog_messsage;
+    public void setEnableNegativeButton(boolean enableNegativeButton) {
+        isEnableNegativeButton = enableNegativeButton;
     }
 
-
-    public int getPositiveButtonTextRes(){
-        return R.string.btn_got_it;
+    public void setTitleRes(int titleRes) {
+        this.titleRes = titleRes;
     }
 
-    public int getNegativeButtonTextRes(){
-        return R.string.btn_cancel;
+    public void setMessageRes(int messageRes) {
+        this.messageRes = messageRes;
     }
 
-    public boolean isEnableNegativeButton(){
-        return false;
+    public void setPosBtnRes(int posBtnRes) {
+        this.posBtnRes = posBtnRes;
     }
 
-    public void setNegativeBtnClick(DialogInterface.OnClickListener negativeBtnClick) {
-        this.negativeBtnClick = negativeBtnClick;
+    public void setNegBtnRes(int negBtnRes) {
+        this.negBtnRes = negBtnRes;
     }
 
-    public void setPositiveBtnClick(DialogInterface.OnClickListener positiveBtnClick) {
-        this.positiveBtnClick = positiveBtnClick;
+    public void setCustomBody(View customBody) {
+        this.customBody = customBody;
     }
+
+    public void setButtonClickListener(DialogInterface.OnClickListener btnClickListener) {
+        this.btnClickListener = btnClickListener;
+    }
+
 }

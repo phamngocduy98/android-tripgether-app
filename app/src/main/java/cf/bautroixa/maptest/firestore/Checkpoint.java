@@ -7,6 +7,7 @@ import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
 
 public class Checkpoint {
+    @Exclude String id;
     String name;
     GeoPoint coordinate;
     String location;
@@ -22,6 +23,15 @@ public class Checkpoint {
         this.coordinate = coordinate;
         this.location = location;
         this.time = time;
+    }
+
+    @Exclude
+    public String getId() {
+        return id;
+    }
+    @Exclude
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

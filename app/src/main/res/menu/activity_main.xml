@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_gather_activity_main"
+        android:icon="@drawable/ic_assistant_photo_black_24dp"
+        android:title="Gửi yêu cầu tập hợp"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/menu_share_activity_main"
         android:title="Chia sẻ chuyến đi"
         app:showAsAction="never" />
