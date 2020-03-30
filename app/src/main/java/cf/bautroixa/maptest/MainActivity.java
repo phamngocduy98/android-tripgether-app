@@ -226,20 +226,34 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                     mapFragment.drawRoute(null, latLng, null);
                 }
             });
-            ((TripOverviewFragment) fragment).setOnCheckpointChanged(new TripOverviewFragment.OnCheckpointChanged() {
+            ((TripOverviewFragment) fragment).setOnCheckpointChanged(new TripOverviewFragment.OnActiveCheckpointChanged() {
                 @Override
-                public void onChanged(int newPosition) {
-                    mapFragment.targetCheckpoint(newPosition);
+                public void onCheckpointChanged(String checkpointId) {
+                    mapFragment.targetCheckpoint(checkpointId);
                 }
             });
         } else if (fragment instanceof MapFragment) {
             ((MapFragment) fragment).setOnMapClicked(this);
+            ((MapFragment) fragment).setOnMarkerClickedListener(new MapFragment.OnMarkerClickedListener() {
+                @Override
+                public void onMarkerClick(String type, String id) {
+                    Log.d(TAG, "marker click"+type+"id="+id);
+                    if (type.equals(Collections.CHECKPOINTS)){
+                        mapFragment.targetCheckpoint(id);
+                        handleState(STATE_CHECKPOINT);
+                        tripOverviewFragment.selectCheckpoint(id);
+                    } else if (type.equals(Collections.USERS)){
+//                        selectedUser = user;
+//                        handleState(STATE_FRIEND_STATUS);
+                    }
+                }
+            });
         }
     }
 
     private void onUpdateCurrentUser(User user) {
         currentUser = user;
-        if (!currentUser.getAvatar().equals(user.getAvatar())) {
+        if (!user.getAvatar().equals(currentUser.getAvatar())) {
             Picasso.get().load(currentUser.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
         }
         currentTripRef = user.getActiveTrip();
@@ -282,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
                 replaceBottomSpace(FriendFragment.newInstance(selectedUser.getUserName()));
-                if (mapFragment != null) mapFragment.cameraTarget(null, selectedUser.getLatLng());
+                if (mapFragment != null) mapFragment.targetCamera(true, selectedUser.getLatLng());
                 break;
             case STATE_CHECKPOINT:
                 toggleToolbar(currentTripRef != null);
@@ -290,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
-                replaceBottomSpace(new TripOverviewFragment());
+                replaceBottomSpace(tripOverviewFragment);
                 break;
         }
         Log.d(TAG, "new state= " + state);

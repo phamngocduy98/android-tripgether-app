@@ -25,6 +25,7 @@
             android:id="@+id/tv_message_one_dialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="18dp"
             android:text="What to do for love?" />
 
         <EditText

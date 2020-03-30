@@ -57,6 +57,7 @@ public class FireStoreManager {
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot != null) {
                         currentUser = documentSnapshot.toObject(User.class);
+                        currentUser.setUserName(documentSnapshot.getId());
                         fetchCurrentTrip();
                     }
                 }
@@ -104,8 +105,8 @@ public class FireStoreManager {
                 }
                 for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                     Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
-                    String id = documentSnapshot.getId();
-                    checkpoints.put(id, checkpoint);
+                    checkpoint.setId(documentSnapshot.getId());
+                    checkpoints.put(documentSnapshot.getId(), checkpoint);
                 }
             }
         });

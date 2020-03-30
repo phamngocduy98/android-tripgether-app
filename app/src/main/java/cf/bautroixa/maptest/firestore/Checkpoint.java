@@ -8,9 +8,13 @@ import com.google.firebase.firestore.GeoPoint;
 
 public class Checkpoint {
     @Exclude String id;
+    @Exclude public static final String NAME = "name";
     String name;
+    @Exclude public static final String COORD = "coordinate";
     GeoPoint coordinate;
+    @Exclude public static final String LOCATION = "location";
     String location;
+    @Exclude public static final String TIME = "time";
     Timestamp time;
     @Exclude Marker marker;
     @Exclude LatLng latLng;
