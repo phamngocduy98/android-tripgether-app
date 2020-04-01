@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="cf.bautroixa.maptest">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -17,7 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".ChangePasswordActivity"></activity>
+        <activity android:name=".ForgotPasswordActivity" />
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".DetailProfileActivity" />
+        <activity android:name=".RegisterActivity" />
 
         <service
             android:name=".services.UpdateLocationService"
@@ -51,9 +57,6 @@
                     android:scheme="myschema" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ProfileActivity"
-            android:theme="@style/AppTheme.Transparent" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

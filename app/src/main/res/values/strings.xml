@@ -26,4 +26,6 @@
     <string name="btn_leave_trip">Leave trip</string>
     <string name="dialog_message_leave_trip">Bạn có chắc chắn muốn rời chuyến đi này không?</string>
     <string name="server_host">www.example.com</string>
+    <string name="detail_personal_information"><u>Thông tin cá nhân chi tiết</u></string>
+    <string name="avatar"><u>Ảnh đại diện</u></string>
 </resources>

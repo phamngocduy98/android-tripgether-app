@@ -43,6 +43,13 @@
 <!--        android:layout_width="300dp"-->
 <!--        android:layout_height="wrap_content"-->
 <!--        android:text="Register"/>-->
+    <TextView
+        android:id="@+id/tv_forgotPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quên mật khẩu?"
+        android:textColor="#03A9F4"
+        android:layout_marginBottom="30dp"/>
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
@@ -52,18 +59,18 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_marginTop="100dp">
+        android:layout_marginTop="70dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="17sp"
+            android:textSize="16sp"
             android:text="Chưa có tài khoản? "/>
         <TextView
             android:id="@+id/tv_register"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#0099ff"
-            android:textSize="17sp"
+            android:textSize="16sp"
             android:text="Đăng ký"/>
 
     </LinearLayout>

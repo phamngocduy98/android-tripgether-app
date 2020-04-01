@@ -13,8 +13,12 @@ public class User {
     String name;
     @Exclude public static final String AVATAR = "avatar";
     String avatar;
+    @Exclude public static final String IMAGENAME = "imageName";
+    String imageName;
     @Exclude public static final String PHONE = "phoneNumber";
     String phoneNumber;
+    @Exclude public static final String Email = "phoneNumber";
+    String email;
     @Exclude public static final String COORD = "currentCoord";
     GeoPoint currentCoord;
     @Exclude public static final String LOCATION = "currentLocation";
@@ -47,6 +51,14 @@ public class User {
         this.name = name;
     }
 
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
     public String getAvatar() {
         return avatar;
     }
@@ -61,6 +73,14 @@ public class User {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public GeoPoint getCurrentCoord() {
