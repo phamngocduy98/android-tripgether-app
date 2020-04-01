@@ -26,6 +26,15 @@
     <string name="btn_leave_trip">Leave trip</string>
     <string name="dialog_message_leave_trip">Bạn có chắc chắn muốn rời chuyến đi này không?</string>
     <string name="server_host">www.example.com</string>
+
     <string name="detail_personal_information"><u>Thông tin cá nhân chi tiết</u></string>
     <string name="avatar"><u>Ảnh đại diện</u></string>
+
+    <string name="dialog_message_choose_gather_position">Lựa chọn vị trí tập hợp. Lựa chọn vị trí hiện tại sẽ tạo điểm đến mới</string>
+    <string name="btn_pos_res_choose_checkpoint">Vị trí điểm đến</string>
+    <string name="btn_neg_current_position">Vị trí hiện tại</string>
+    <string name="dialog_title_gather">Gửi yêu cầu tập hợp</string>
+    <string name="dialog_title_select_checkpoint">Chọn một điểm đến</string>
+    <string name="dialog_title_enter_checkpoint_name">Nhập tên địa điểm</string>
+
 </resources>

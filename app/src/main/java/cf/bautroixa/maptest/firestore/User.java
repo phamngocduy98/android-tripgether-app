@@ -7,37 +7,60 @@ import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
 
 public class User {
-    @Exclude public static final String NO_USER = "notLoggedIn";
-    @Exclude String userName;
-    @Exclude public static final String NAME = "name";
+    @Exclude
+    public static final String NO_USER = "notLoggedIn";
+    @Exclude
+    public static final String USER_NAME = "userName";
+    @Exclude
+    public static final String NAME = "name";
+    @Exclude
+    public static final String AVATAR = "avatar";
+    @Exclude
+    public static final String PHONE = "phoneNumber";
+    @Exclude
+    public static final String COORD = "currentCoord";
+    @Exclude
+    public static final String LOCATION = "currentLocation";
+    @Exclude
+    public static final String EMAIL = "email";
+    @Exclude
+    public static final String SPEED = "speed";
+    @Exclude
+    public static final String BATTERY = "battery";
+    @Exclude
+    public static final String ACTIVE_TRIP = "activeTrip";
+
+    @Exclude
+    String userName;
     String name;
-    @Exclude public static final String AVATAR = "avatar";
     String avatar;
+
     @Exclude public static final String IMAGENAME = "imageName";
     String imageName;
-    @Exclude public static final String PHONE = "phoneNumber";
     String phoneNumber;
     @Exclude public static final String Email = "phoneNumber";
     String email;
-    @Exclude public static final String COORD = "currentCoord";
+
     GeoPoint currentCoord;
-    @Exclude public static final String LOCATION = "currentLocation";
     String currentLocation;
-    @Exclude public static final String SPEED = "speed";
+
     Long speed;
-    @Exclude public static final String BATTERY = "battery";
     int battery;
-    @Exclude public static final String ACTIVE_TRIP = "activeTrip";
     DocumentReference activeTrip;
-    @Exclude LatLng latLng;
-    @Exclude Marker marker;
+
+    @Exclude
+    LatLng latLng;
+    @Exclude
+    Marker marker;
 
     public User() {
     }
+
     @Exclude
     public String getUserName() {
         return userName;
     }
+
     @Exclude
     public void setUserName(String userName) {
         this.userName = userName;
@@ -75,13 +98,6 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public GeoPoint getCurrentCoord() {
         return currentCoord;
@@ -123,21 +139,31 @@ public class User {
         this.activeTrip = activeTrip;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Exclude
-    public LatLng getLatLng(){
-        if (this.latLng == null){
-            synchronized(this){
-                if (this.latLng == null && this.currentCoord!= null){
+    public LatLng getLatLng() {
+        if (this.latLng == null) {
+            synchronized (this) {
+                if (this.latLng == null && this.currentCoord != null) {
                     this.latLng = new LatLng(this.currentCoord.getLatitude(), this.currentCoord.getLongitude());
                 }
             }
         }
         return this.latLng;
     }
+
     @Exclude
     public Marker getMarker() {
         return marker;
     }
+
     @Exclude
     public void setMarker(Marker marker) {
         this.marker = marker;

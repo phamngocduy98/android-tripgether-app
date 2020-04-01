@@ -15,6 +15,8 @@ public class Trip {
     DocumentReference leader;
     @Exclude public static final String MEMBERS = "members";
     List<DocumentReference> members;
+    @Exclude public static final String ACTIVE_CHECKPOINT = "activeCheckpoint";
+    DocumentReference activeCheckpoint;
 
     public Trip() {
     }
@@ -48,5 +50,13 @@ public class Trip {
 
     public void setMembers(List<DocumentReference> members) {
         this.members = members;
+    }
+
+    public DocumentReference getActiveCheckpoint() {
+        return activeCheckpoint;
+    }
+
+    public void setActiveCheckpoint(DocumentReference activeCheckpoint) {
+        this.activeCheckpoint = activeCheckpoint;
     }
 }

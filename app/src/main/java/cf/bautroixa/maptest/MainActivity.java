@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,6 +43,7 @@ import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.theme.OneDialog;
+import cf.bautroixa.maptest.theme.OnePromptDialog;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.BatteryHelper;
@@ -224,20 +226,34 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                     mapFragment.drawRoute(null, latLng, null);
                 }
             });
-            ((TripOverviewFragment) fragment).setOnCheckpointChanged(new TripOverviewFragment.OnCheckpointChanged() {
+            ((TripOverviewFragment) fragment).setOnCheckpointChanged(new TripOverviewFragment.OnActiveCheckpointChanged() {
                 @Override
-                public void onChanged(int newPosition) {
-                    mapFragment.targetCheckpoint(newPosition);
+                public void onCheckpointChanged(String checkpointId) {
+                    mapFragment.targetCheckpoint(checkpointId);
                 }
             });
         } else if (fragment instanceof MapFragment) {
             ((MapFragment) fragment).setOnMapClicked(this);
+            ((MapFragment) fragment).setOnMarkerClickedListener(new MapFragment.OnMarkerClickedListener() {
+                @Override
+                public void onMarkerClick(String type, String id) {
+                    Log.d(TAG, "marker click"+type+"id="+id);
+                    if (type.equals(Collections.CHECKPOINTS)){
+                        mapFragment.targetCheckpoint(id);
+                        handleState(STATE_CHECKPOINT);
+                        tripOverviewFragment.selectCheckpoint(id);
+                    } else if (type.equals(Collections.USERS)){
+//                        selectedUser = user;
+//                        handleState(STATE_FRIEND_STATUS);
+                    }
+                }
+            });
         }
     }
 
     private void onUpdateCurrentUser(User user) {
         currentUser = user;
-        if (!currentUser.getAvatar().equals(user.getAvatar())) {
+        if (!user.getAvatar().equals(currentUser.getAvatar())) {
             Picasso.get().load(currentUser.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
         }
         currentTripRef = user.getActiveTrip();
@@ -247,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
                         currentTrip = task.getResult().toObject(Trip.class);
-                        tvTripName.setText(currentTrip.getName());
+                        tvTripName.setText(currentUser.getName());
                         tvTitle.setText(currentTrip.getName());
                     }
                 }
@@ -280,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
                 replaceBottomSpace(FriendFragment.newInstance(selectedUser.getUserName()));
-                if (mapFragment != null) mapFragment.cameraTarget(null, selectedUser.getLatLng());
+                if (mapFragment != null) mapFragment.targetCamera(true, selectedUser.getLatLng());
                 break;
             case STATE_CHECKPOINT:
                 toggleToolbar(currentTripRef != null);
@@ -288,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
-                replaceBottomSpace(new TripOverviewFragment());
+                replaceBottomSpace(tripOverviewFragment);
                 break;
         }
         Log.d(TAG, "new state= " + state);
@@ -417,56 +433,57 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_gather_activity_main:
+                OneDialog selectGatherTypeDialog = new OneDialog.Builder().title(R.string.dialog_title_gather).message(R.string.dialog_message_choose_gather_position)
+                        .enableNegativeButton(true)
+                        .posBtnText(R.string.btn_pos_res_choose_checkpoint)
+                        .negBtnText(R.string.btn_neg_current_position)
+                        .buttonClickListener(new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == DialogInterface.BUTTON_POSITIVE){
+                                    // chọn checkpoint
+                                    SelectCheckpointDialog selectCheckpointDialog = new SelectCheckpointDialog();
+                                    selectCheckpointDialog.setTitleRes(R.string.dialog_title_select_checkpoint);
+                                    selectCheckpointDialog.show(getSupportFragmentManager(), "select cp dialog");
+                                } else {
+                                    // vị trí hiện tại
+                                    OneDialog enterCheckpointNameDialog = new OnePromptDialog.Builder().title(R.string.dialog_title_enter_checkpoint_name)
+                                            .onResult(new OnePromptDialog.OnDialogResult() {
+                                                @Override
+                                                public void onDialogResult(Dialog dialog1, boolean isCanceled, String value) {
+                                                    Log.d(TAG, value);
+                                                    dialog1.dismiss();
+                                                }
+                                            }).build();
+                                    enterCheckpointNameDialog.show(getSupportFragmentManager(), "enter cp name");
+                                }
+                            }
+                        }).build();
+                selectGatherTypeDialog.show(getSupportFragmentManager(), "select gather position");
+                return true;
             case R.id.menu_share_activity_main:
                 Intent intent = new Intent(MainActivity.this, TripInvitationActivity.class);
                 intent.putExtra(Trip.ID, currentTripRef.getId());
                 startActivity(intent);
                 return true;
             case R.id.menu_leave_trip_activity_main:
-                LeaveTripConfirmDialog dialog = new LeaveTripConfirmDialog();
-                dialog.setPositiveBtnClick(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.setNegativeBtnClick(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        currentUserRef.update(User.ACTIVE_TRIP, null);
-                    }
-                });
-                dialog.show(getSupportFragmentManager(), "leave trip");
+                OneDialog leaveTripConfirmDialog = new OneDialog.Builder().message(R.string.dialog_message_leave_trip)
+                        .enableNegativeButton(true).buttonClickListener(new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == DialogInterface.BUTTON_POSITIVE){
+                                    currentUserRef.update(User.ACTIVE_TRIP, null);
+                                    dialog.dismiss();
+                                } else {
+                                    dialog.dismiss();
+                                }
+                            }
+                        }).build();
+                leaveTripConfirmDialog.show(getSupportFragmentManager(), "leave trip");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    public static class LeaveTripConfirmDialog extends OneDialog {
-        @Override
-        public int getTitleRes() {
-            return super.getTitleRes();
-        }
-
-        @Override
-        public int getMessageRes() {
-            return R.string.dialog_message_leave_trip;
-        }
-
-        @Override
-        public int getPositiveButtonTextRes() {
-            return R.string.btn_cancel;
-        }
-
-        @Override
-        public int getNegativeButtonTextRes() {
-            return R.string.btn_leave_trip;
-        }
-
-        @Override
-        public boolean isEnableNegativeButton() {
-            return true;
         }
     }
 }
