@@ -1,13 +1,9 @@
 package cf.bautroixa.maptest;
 
-import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -36,7 +31,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import cf.bautroixa.maptest.firestore.FireStoreManager;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.services.UpdateLocationService;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -59,6 +53,10 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         sharedPref = getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
+        if (!sharedPref.getString(User.USER_NAME, User.NO_USER).equals(User.NO_USER)) {
+            onLoginSuccess();
+        }
+
         mRegisterText=findViewById(R.id.tv_register);
         mUsernameField = findViewById(R.id.et_username);
         mPasswordField = findViewById(R.id.et_password);
@@ -141,6 +139,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            sharedPref.edit().putString(User.USER_NAME, mAuth.getCurrentUser().getUid()).apply();
                             onLoginSuccess();
                             // Sign in success, update UI with the signed-in user's information
 //                            Log.d(TAG, "signInWithCredential:success");
@@ -165,6 +164,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     FirebaseUser user = mAuth.getCurrentUser();
+                    sharedPref.edit().putString(User.USER_NAME, user.getUid()).apply();
                     onLoginSuccess();
                 }else{
                     Toast.makeText(LoginActivity.this, "Authentication failed.",
@@ -182,11 +182,10 @@ public class LoginActivity extends AppCompatActivity {
 
 
     public void onLoginSuccess() {
-        sharedPref.edit().putString(User.USER_NAME, mAuth.getCurrentUser().getUid()).apply();
-        Intent serviceIntent = new Intent(getApplicationContext(), UpdateLocationService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 12345, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager am = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, pendingIntent);
+//        Intent serviceIntent = new Intent(getApplicationContext(), UpdateLocationService.class);
+//        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 12345, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        AlarmManager am = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
+//        am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, pendingIntent);
 
         // TODO: await FireStoreManager to complete initiation
         FireStoreManager.getInstance(sharedPref.getString(User.USER_NAME, User.NO_USER), new FireStoreManager.OnInitCompleted() {
