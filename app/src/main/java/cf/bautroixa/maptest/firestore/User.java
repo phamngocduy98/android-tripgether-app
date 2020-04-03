@@ -36,10 +36,16 @@ public class User extends Data {
 
     String name;
     String avatar;
+
+    @Exclude public static final String IMAGENAME = "imageName";
+    String imageName;
     String phoneNumber;
+    @Exclude public static final String Email = "phoneNumber";
+    String email;
+
     GeoPoint currentCoord;
     String currentLocation;
-    String email;
+
     Long speed;
     int battery;
     DocumentReference activeTrip;
@@ -70,6 +76,14 @@ public class User extends Data {
         this.name = name;
     }
 
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
     public String getAvatar() {
         return avatar;
     }
@@ -85,6 +99,7 @@ public class User extends Data {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
 
     public GeoPoint getCurrentCoord() {
         return currentCoord;
