@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -24,22 +23,19 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
+import java.util.List;
 
 import cf.bautroixa.maptest.firestore.Collections;
+import cf.bautroixa.maptest.firestore.Data;
+import cf.bautroixa.maptest.firestore.FireStoreManager;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.theme.OneDialog;
@@ -47,12 +43,14 @@ import cf.bautroixa.maptest.theme.OnePromptDialog;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.BatteryHelper;
+import cf.bautroixa.maptest.utils.ImageHelper;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
 import cf.bautroixa.maptest.utils.UrlParser;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, MapFragment.OnMapClicked {
     private static final String TAG = "MainActivity";
     private FirebaseFirestore db;
+    private FireStoreManager manager;
     private SharedPreferences sharedPref;
     private HashMap<String, User> friends;
 
@@ -63,15 +61,14 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private static final int STATE_CHECKPOINT = 20;
 
     int state, lastState = 0;
-    String userName = "notLoggedIn";
+    String userName;
     User currentUser;
     Trip currentTrip;
-    DocumentReference currentUserRef, currentTripRef;
 
     User selectedUser = null;
 
     // fragment for tab
-    FriendListStatusFragment friendListStatusFragment;
+    FriendListFragment friendListStatusFragment;
     MapFragment mapFragment;
     FriendFragment friendFragment;
     TripOverviewFragment tripOverviewFragment;
@@ -86,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     View statusBar;
     Toolbar toolbar;
     ActionBar actionBar;
-    TextView tvTripName, tvTitle;
+    TextView tvSearchbarName, tvTitle;
     Button btnSos, btnQR;
     RoundedImageView imgAvatar;
     LinearLayout containerToolbar;
@@ -105,29 +102,15 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         setContentView(R.layout.activity_main);
         db = FirebaseFirestore.getInstance();
         sharedPref = getSharedPreferences(getString(R.string.shared_preference_name), MODE_PRIVATE);
-        userName = sharedPref.getString("userName", userName);
+        userName = sharedPref.getString(User.USER_NAME, User.NO_USER);
         // get
-        currentUserRef = db.collection(Collections.USERS).document(userName);
-        currentUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        manager = FireStoreManager.getInstance(userName);
+//        onUpdateCurrentUser(manager.getCurrentUser());
+        manager.getCurrentUser().addOnNewDocumentSnapshotListener(new Data.OnNewDocumentSnapshotListener<User>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    User user = documentSnapshot.toObject(User.class);
-                    onUpdateCurrentUser(user);
-                }
-            }
-        });
-        // listen changed
-        currentUserRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "error listen changed" + e.getMessage());
-                } else {
-                    User user = documentSnapshot.toObject(User.class);
-                    onUpdateCurrentUser(user);
-                }
+            public void onNewData(User user) {
+                onUpdateCurrentUser(user);
+                Log.d(TAG, "update user");
             }
         });
 
@@ -148,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         // get fragment
         mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.frag_map);
-        friendListStatusFragment = (FriendListStatusFragment) getSupportFragmentManager().findFragmentById(R.id.frag_friend_list);
+        friendListStatusFragment = (FriendListFragment) getSupportFragmentManager().findFragmentById(R.id.frag_friend_list);
         tripOverviewFragment = new TripOverviewFragment();
 
         bottomSheet();
@@ -160,22 +143,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
             }
         });
-
-        // service background
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                while (true){
-//                    try {
-//                        Thread.sleep(5000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    Log.d(TAG, "emiting status ...");
-//                    CurrentUserStatus.getInstance(MainActivity.this).sendStatus();
-//                }
-//            }
-//        }).start();
     }
 
     @Override
@@ -204,8 +171,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     @Override
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
-        if (fragment instanceof FriendListStatusFragment) {
-            ((FriendListStatusFragment) fragment).setOnFriendItemClickListener(new FriendListStatusFragment.OnFriendItemClickListener() {
+        if (fragment instanceof FriendListFragment) {
+            ((FriendListFragment) fragment).setOnFriendItemClickListener(new FriendListFragment.OnFriendItemClickListener() {
                 @Override
                 public void onClick(User user) {
                     selectedUser = user;
@@ -222,8 +189,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         } else if (fragment instanceof TripOverviewFragment) {
             ((TripOverviewFragment) fragment).setOnDrawRouteButtonClickedListener(new TripOverviewFragment.OnDrawRouteButtonClickedListener() {
                 @Override
-                public void onClick(LatLng latLng) {
-                    mapFragment.drawRoute(null, latLng, null);
+                public void onClick(List<LatLng> latLng) {
+                    mapFragment.drawRoute(latLng);
                 }
             });
             ((TripOverviewFragment) fragment).setOnCheckpointChanged(new TripOverviewFragment.OnActiveCheckpointChanged() {
@@ -252,24 +219,20 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     }
 
     private void onUpdateCurrentUser(User user) {
-        currentUser = user;
-        if (!user.getAvatar().equals(currentUser.getAvatar())) {
-            Picasso.get().load(currentUser.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
+        tvSearchbarName.setText(user.getName());
+        if (!user.getAvatar().equals(user.getAvatar())) {
+            ImageHelper.loadImage(user.getAvatar(), imgAvatar);
         }
-        currentTripRef = user.getActiveTrip();
-        if (currentTripRef != null) {
-            currentTripRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        if (manager.getCurrentTripRef() != null) {
+            bottomSheet.setVisibility(View.VISIBLE);
+            manager.getCurrentTrip().addOnNewDocumentSnapshotListener(new Data.OnNewDocumentSnapshotListener<Trip>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        currentTrip = task.getResult().toObject(Trip.class);
-                        tvTripName.setText(currentUser.getName());
-                        tvTitle.setText(currentTrip.getName());
-                    }
+                public void onNewData(Trip trip) {
+                    tvTitle.setText(trip.getName());
                 }
             });
         } else {
-            Log.d(TAG, "null trip");
+            bottomSheet.setVisibility(View.GONE);
         }
     }
 
@@ -290,17 +253,17 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(bottomSpace, false, ViewAnim.DIRECTION_DOWN);
                 break;
             case STATE_FRIEND_STATUS:
-                toggleToolbar(currentTripRef != null);
-                ViewAnim.toggleHideShow(tvTitle, currentTripRef != null, ViewAnim.DIRECTION_UP);
+                toggleToolbar(manager.getCurrentUser().getActiveTrip() != null);
+                ViewAnim.toggleHideShow(tvTitle, manager.getCurrentUser().getActiveTrip() != null, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
-                replaceBottomSpace(FriendFragment.newInstance(selectedUser.getUserName()));
+                replaceBottomSpace(FriendFragment.newInstance(selectedUser.getId()));
                 if (mapFragment != null) mapFragment.targetCamera(true, selectedUser.getLatLng());
                 break;
             case STATE_CHECKPOINT:
-                toggleToolbar(currentTripRef != null);
-                ViewAnim.toggleHideShow(tvTitle, currentTripRef != null, ViewAnim.DIRECTION_UP);
+                toggleToolbar(manager.getCurrentUser().getActiveTrip() != null);
+                ViewAnim.toggleHideShow(tvTitle, manager.getCurrentUser().getActiveTrip() != null, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
@@ -373,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         actionBar.setTitle("");
-        tvTripName = findViewById(R.id.tv_trip_name_activity_main);
+        tvSearchbarName = findViewById(R.id.tv_trip_name_activity_main);
         btnQR = findViewById(R.id.btn_qr_code_activity_main);
         btnSos = findViewById(R.id.btn_sos_activity_main);
         imgAvatar = findViewById(R.id.img_avatar_activity_main);
@@ -384,9 +347,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                     @Override
                     public void onResult(String result) {
                         String tripCode = UrlParser.parseTripCode(MainActivity.this, result);
-                        currentTripRef = db.collection(Collections.TRIPS).document(tripCode);
-                        currentUserRef.update(User.ACTIVE_TRIP, currentTripRef);
-                        currentTripRef.update(Trip.MEMBERS, FieldValue.arrayUnion(currentUserRef));
+                        DocumentReference tripRef = db.collection(Collections.TRIPS).document(tripCode);
+                        manager.getCurrentUser().joinTrip(tripRef);
+                        tripRef.update(Trip.MEMBERS, FieldValue.arrayUnion(manager.getCurrentUserRef()));
                     }
                 });
                 qrScanDialogFragment.show(getSupportFragmentManager(), "QR scanner");
@@ -464,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 return true;
             case R.id.menu_share_activity_main:
                 Intent intent = new Intent(MainActivity.this, TripInvitationActivity.class);
-                intent.putExtra(Trip.ID, currentTripRef.getId());
+                intent.putExtra(Trip.ID, manager.getCurrentUser().getActiveTrip().getId());
                 startActivity(intent);
                 return true;
             case R.id.menu_leave_trip_activity_main:
@@ -473,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (which == DialogInterface.BUTTON_POSITIVE){
-                                    currentUserRef.update(User.ACTIVE_TRIP, null);
+                                    manager.getCurrentUser().leaveTrip();
                                     dialog.dismiss();
                                 } else {
                                     dialog.dismiss();

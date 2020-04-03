@@ -1,6 +1,7 @@
 package cf.bautroixa.maptest;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,36 +10,37 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import cf.bautroixa.maptest.firestore.Collections;
+import cf.bautroixa.maptest.firestore.DatasManager;
+import cf.bautroixa.maptest.firestore.FireStoreManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.theme.RoundedImageView;
+import cf.bautroixa.maptest.theme.ViewAnim;
+import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class FriendListStatusFragment extends Fragment {
+import static android.content.Context.MODE_PRIVATE;
+
+public class FriendListFragment extends Fragment {
 
     private static final String TAG = "FriendListStatusFrag";
     private FirebaseFirestore db;
-    private HashMap<String, User> friends;
+    private FireStoreManager manager;
+    private SharedPreferences sharedPref;
+    private ArrayList<User> members;
+    DatasManager.OnItemInsertedListener onUserInsertedListener;
+    DatasManager.OnItemChangedListener onUserChangedListener;
+    DatasManager.OnItemRemovedListener onUserRemovedListener;
 
     TextView dragMark;
     SnapHelper snapHelper;
@@ -53,8 +55,8 @@ public class FriendListStatusFragment extends Fragment {
     private RecyclerView rvFriendList, rvFriendListLite;
     private FriendStatusAdapter friendStatusAdapter, friendStatusLiteAdapter;
 
-    public FriendListStatusFragment() {
-        friends = new HashMap<>();
+    public FriendListFragment() {
+        members = new ArrayList<>();
     }
 
     public void setOnFriendItemClickListener(OnFriendItemClickListener onFriendItemClickListener) {
@@ -70,94 +72,96 @@ public class FriendListStatusFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // get
         db = FirebaseFirestore.getInstance();
-        db.collection(Collections.USERS).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), MODE_PRIVATE);
+        manager = FireStoreManager.getInstance(sharedPref.getString(User.USER_NAME, User.NO_USER));
+        members = manager.getMembers();
+        friendStatusAdapter = new FriendStatusAdapter(getContext(), this.onFriendItemClickListener);
+        friendStatusLiteAdapter = new FriendStatusLiteAdapter(getContext(), this.onFriendItemClickListener);
+
+        onUserInsertedListener = new DatasManager.OnItemInsertedListener() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        User user = document.toObject(User.class);
-                        user.setUserName(document.getId());
-                        friends.put(document.getId(), user);
-                    }
-                } else {
-                    Log.w(TAG, "Error getting documents.", task.getException());
-                }
+            public void onItemInserted(int position) {
+                friendStatusAdapter.notifyItemInserted(position);
+                friendStatusLiteAdapter.notifyItemInserted(position);
+                Log.d(TAG, "insert"+position);
             }
-        });
-        // listen changed
-        db.collection(Collections.USERS).addSnapshotListener(new EventListener<QuerySnapshot>() {
+        };
+        onUserChangedListener = new DatasManager.OnItemChangedListener() {
             @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
-                    return;
-                }
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                    User user = documentSnapshot.toObject(User.class);
-                    user.setUserName(documentSnapshot.getId());
-                    friends.put(documentSnapshot.getId(), user);
-                }
-                ArrayList<User> userList = new ArrayList<>(friends.values());
-                friendStatusAdapter.updateDataSet(userList);
-                friendStatusLiteAdapter.updateDataSet(userList);
+            public void onItemChanged(int position) {
+                friendStatusAdapter.notifyItemChanged(position);
+                friendStatusLiteAdapter.notifyItemChanged(position);
+                Log.d(TAG, "change"+position);
             }
-        });
+        };
+        onUserRemovedListener = new DatasManager.OnItemRemovedListener<User>() {
+            @Override
+            public void onItemRemoved(int position, User data) {
+                friendStatusAdapter.notifyItemRemoved(position);
+                friendStatusLiteAdapter.notifyItemRemoved(position);
+                Log.d(TAG, "remove"+position);
+            }
+        };
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        manager.getMembersManager().addOnItemInsertedListener(onUserInsertedListener)
+                .addOnItemChangedListener(onUserChangedListener)
+                .addOnItemRemovedListener(onUserRemovedListener);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener)
+                .removeOnItemChangedListener(onUserChangedListener)
+                .removeOnItemRemovedListener(onUserRemovedListener);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_friend_list, container, false);
-        Context context = v.getContext();
 
         dragMark = v.findViewById(R.id.drag_mark_frag_friend_list_status);
 
         rvFriendList = v.findViewById(R.id.rv_friend_list);
         rvFriendListLite = v.findViewById(R.id.rv_friend_list_lite);
-        friendStatusAdapter = new FriendStatusAdapter(context, this.onFriendItemClickListener);
-        friendStatusLiteAdapter = new FriendStatusLiteAdapter(context, this.onFriendItemClickListener);
         rvFriendList.setAdapter(friendStatusAdapter);
         rvFriendListLite.setAdapter(friendStatusLiteAdapter);
-        rvFriendList.setLayoutManager(new LinearLayoutManager(context));
-        rvFriendListLite.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
+        rvFriendList.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvFriendListLite.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
 
         snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rvFriendListLite);
 
-        hideToolbar();
+        ViewAnim.toggleHideShow(dragMark, true, ViewAnim.DIRECTION_UP);
+        ViewAnim.toggleHideShow(rvFriendListLite, true, ViewAnim.DIRECTION_UP);
+
         return v;
     }
 
     public void onBottomSheetStateChanged(int newState) {
         if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-            showToolbar();
+            // hide Lite list
+            ViewAnim.toggleHideShow(dragMark, false, ViewAnim.DIRECTION_UP);
+            ViewAnim.toggleHideShow(rvFriendListLite, false, ViewAnim.DIRECTION_UP);
         }
         if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-            hideToolbar();
+            // show lite list
+            ViewAnim.toggleHideShow(dragMark, true, ViewAnim.DIRECTION_UP);
+            ViewAnim.toggleHideShow(rvFriendListLite, true, ViewAnim.DIRECTION_UP);
         }
     }
 
     public void onSlideBottomSheet(float percent) {
         rvFriendListLite.setTranslationY(-rvFriendListLite.getHeight() * percent);
+        rvFriendListLite.setAlpha(percent);
         rvFriendList.setTranslationY(-rvFriendListLite.getHeight() * percent);
-    }
-
-    public void hideToolbar() {
-//        dragMark.setVisibility(View.INVISIBLE);
-        dragMark.animate().translationY(0).alpha(1);
-//        rvFriendListLite.setVisibility(View.VISIBLE);
-        rvFriendListLite.animate().translationY(0).alpha(1);
-    }
-
-    public void showToolbar() {
-//        dragMark.setVisibility(View.VISIBLE);
-        dragMark.animate().translationY(dragMark.getHeight()).alpha(0);
-//        rvFriendListLite.setVisibility(View.INVISIBLE);
-        rvFriendListLite.animate().translationY(rvFriendListLite.getHeight()).alpha(0);
-//        rvFriendListLite.setVisibility(View.GONE);
+        rvFriendList.setAlpha(percent);
     }
 
 
@@ -167,7 +171,7 @@ public class FriendListStatusFragment extends Fragment {
         onFriendItemClickListener = null;
     }
 
-    public static class FriendStatusViewHolder extends RecyclerView.ViewHolder {
+    public class FriendStatusViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvLocation, tvCount, tvBattery;
         RoundedImageView imgAvatar;
         View view;
@@ -188,33 +192,35 @@ public class FriendListStatusFragment extends Fragment {
         }
 
         public void update(User user) {
-//            tvCount.setText("1");
-            currentUser = user;
             tvBattery.setText(user.getBattery() + "%");
             tvLocation.setText(user.getCurrentLocation());
             if (!user.getAvatar().equals(currentUser.getAvatar())) {
-                Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
+                ImageHelper.loadImage(user.getAvatar(), imgAvatar);
             }
+            if (user.getId().equals(manager.getCurrentTrip().getLeader().getId())){
+                tvCount.setText("LEADER");
+            } else {
+                tvCount.setVisibility(View.GONE);
+            }
+            currentUser = user;
         }
 
         public void bind(User user) {
             currentUser = user;
             tvName.setText(user.getName());
-            Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
+            ImageHelper.loadImage(user.getAvatar(), imgAvatar);
             this.update(user);
         }
     }
 
-    public static class FriendStatusAdapter extends RecyclerView.Adapter<FriendStatusViewHolder> {
+    public class FriendStatusAdapter extends RecyclerView.Adapter<FriendStatusViewHolder> {
 
         Context context;
-        ArrayList<User> userList;
         OnFriendItemClickListener onClickListener;
 
         public FriendStatusAdapter(Context context, OnFriendItemClickListener onFriendItemClickListener) {
             this.context = context;
             this.onClickListener = onFriendItemClickListener;
-            this.userList = new ArrayList<>();
             if (onFriendItemClickListener == null) {
                 Log.i(TAG, "null onFriendItemClickListener");
             }
@@ -222,11 +228,6 @@ public class FriendListStatusFragment extends Fragment {
 
         public void setOnFriendItemClickListener(OnFriendItemClickListener onFriendItemClickListener) {
             this.onClickListener = onFriendItemClickListener;
-        }
-
-        public void updateDataSet(ArrayList<User> newUserList) {
-            this.userList = newUserList;
-            this.notifyDataSetChanged();
         }
 
         @NonNull
@@ -238,7 +239,7 @@ public class FriendListStatusFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull FriendStatusViewHolder holder, final int position) {
-            final User user = this.userList.get(position);
+            final User user = members.get(position);
             holder.bind(user);
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -251,7 +252,7 @@ public class FriendListStatusFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull FriendStatusViewHolder holder, int position, @NonNull List<Object> payloads) {
             if (!payloads.isEmpty()) {
-                final User user = this.userList.get(position);
+                final User user = members.get(position);
                 holder.update(user);
                 holder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -267,11 +268,11 @@ public class FriendListStatusFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return userList.size();
+            return members.size();
         }
     }
 
-    public static class FriendStatusLiteViewHolder extends FriendStatusViewHolder {
+    public class FriendStatusLiteViewHolder extends FriendStatusViewHolder {
         public FriendStatusLiteViewHolder(@NonNull View itemView) {
             super(itemView);
         }
@@ -279,13 +280,17 @@ public class FriendListStatusFragment extends Fragment {
         @Override
         public void findView() {
             imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend_status_lite);
-            tvCount = itemView.findViewById(R.id.tv_count_status_item_friend);
+            tvCount = itemView.findViewById(R.id.tv_messages_count_item_friend_status_lite);
         }
 
         @Override
         public void bind(User user) {
-            Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
-//            tvCount.setText("1");
+            ImageHelper.loadImage(user.getAvatar(), imgAvatar);
+            if (user.getId().equals(manager.getCurrentTrip().getLeader().getId())){
+                tvCount.setText("L");
+            } else {
+                tvCount.setVisibility(View.GONE);
+            }
         }
 
         @Override
@@ -293,7 +298,7 @@ public class FriendListStatusFragment extends Fragment {
         }
     }
 
-    public static class FriendStatusLiteAdapter extends FriendStatusAdapter {
+    public class FriendStatusLiteAdapter extends FriendStatusAdapter {
         public FriendStatusLiteAdapter(Context context, OnFriendItemClickListener onFriendItemClickListener) {
             super(context, onFriendItemClickListener);
         }

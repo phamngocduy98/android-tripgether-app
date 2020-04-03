@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,26 +39,28 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.squareup.picasso.Picasso;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.constants.Constants;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
+import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.FireStoreManager;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.network_io.AppRequest;
-import cf.bautroixa.maptest.network_io.HttpRequest;
-import cf.bautroixa.maptest.types.MapBoxDirection;
 import cf.bautroixa.maptest.utils.CompassHelper;
 import cf.bautroixa.maptest.utils.CreateMarker;
+import cf.bautroixa.maptest.utils.ImageHelper;
 import cf.bautroixa.maptest.utils.PixelDPConverter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static cf.bautroixa.maptest.utils.CreateMarker.createMarker;
 
@@ -66,7 +69,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "MapFragment";
 
-    private FirebaseFirestore db;
     private FireStoreManager manager;
     private FusedLocationProviderClient fusedLocationClient;
     OnMapClicked onMapClicked;
@@ -74,6 +76,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     SharedPreferences sharedPref;
     String userName;
     Marker activeMarker;
+
+    DatasManager.OnItemInsertedListener onUserInsertedListener;
+    DatasManager.OnItemChangedListener onUserChangedListener;
+    DatasManager.OnItemRemovedListener<User> onUserRemovedListener;
+
+    DatasManager.OnItemInsertedListener onCheckpointInsertedListener;
+    DatasManager.OnItemChangedListener onCheckpointChangedListener;
+    DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
 
     int screenWidth, screenHeight;
 
@@ -86,15 +96,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LatLng currentLocation = new LatLng(21.0245, 105.84117);
     private Polyline routeLine = null;
 
-    // Views
-    private View posSelectedMarker;
-
     private boolean isMapLoaded = false, isMarkerLoaded = false, isCheckpointLoaded = false, focusMyLocation = true;
 
-    HashMap<String, User> friends;
-    HashMap<String, Checkpoint> checkpoints;
+    private ArrayList<User> members;
+    private ArrayList<Checkpoint> checkpoints;
 
     public MapFragment() {
+        members = new ArrayList<>();
+        checkpoints = new ArrayList<>();
     }
 
     public void setOnMapClicked(OnMapClicked onMapClicked) {
@@ -106,93 +115,54 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void sendUpdateCoord(Location location){
-        db.collection(Collections.USERS).document(userName).update(User.COORD, new GeoPoint(location.getLatitude(), location.getLongitude())).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Log.d(TAG, "update new coord"+userName);
-            }
-        });
+//        db.collection(Collections.USERS).document(userName).update(User.COORD, new GeoPoint(location.getLatitude(), location.getLongitude())).addOnCompleteListener(new OnCompleteListener<Void>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Void> task) {
+//                Log.d(TAG, "update new coord"+userName);
+//            }
+//        });
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        friends = new HashMap<>();
-        checkpoints = new HashMap<>();
+        Log.d(TAG, "onCreate");
 
         initScreenSize();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
         sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         userName = sharedPref.getString(User.USER_NAME, User.NO_USER);
-        db = FirebaseFirestore.getInstance();
         manager = FireStoreManager.getInstance(userName);
-        // get user
-        db.collection(Collections.USERS).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        User user = document.toObject(User.class);
-                        user.setUserName(document.getId());
-                        friends.put(document.getId(), user);
-                    }
-                    if (isMapLoaded && !isMarkerLoaded) initFriendMarkers();
-                } else {
-                    Log.w(TAG, "Error getting documents.", task.getException());
-                }
-            }
-        });
-        // listen user changed
-        db.collection(Collections.USERS).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
-                    return;
-                }
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                    User user = documentSnapshot.toObject(User.class);
-                    String id = documentSnapshot.getId();
-                    Marker marker = null;
-                    if (friends.get(id) == null || friends.get(id).getMarker() == null) { // newly added
-                        marker = createFriendMarker(user);
-                    } else { // update position
-                        marker = friends.get(id).getMarker();
-                        marker.setPosition(user.getLatLng());
-                    }
-                    user.setMarker(marker);
-                    friends.put(id, user);
-                }
-            }
-        });
+
+        members = manager.getMembers();
         checkpoints = manager.getCheckpoints();
-        // listen checkpoint added/changed
-        if (manager.getCurrentTripRef() != null) {
-            db.collection(Collections.checkpoints(manager.getCurrentTripRef().getId())).addSnapshotListener(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-                    for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                        Log.d(TAG, "update checkpoint");
-                        Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
-                        String id = documentSnapshot.getId();
-                        Marker marker = null;
-                        if (checkpoints.get(id) == null || checkpoints.get(id).getMarker() == null) { // newly added
-                            marker = createCheckpointMarker(checkpoint);
-                        } else { // update position
-                            marker = checkpoints.get(id).getMarker();
-                            marker.setPosition(checkpoint.getLatLng());
-                        }
-                        checkpoint.setMarker(marker);
-                        checkpoints.put(id, checkpoint);
-                    }
-                }
-            });
-        }
+        onUserInsertedListener = new DatasManager.OnItemInsertedListener() {
+            @Override
+            public void onItemInserted(int position) {
+                User user = members.get(position);
+                user.setMarker(createFriendMarker(user));
+            }
+        };
+        onUserRemovedListener = new DatasManager.OnItemRemovedListener<User>() {
+            @Override
+            public void onItemRemoved(int position, User user) {
+                if (user.getMarker().equals(activeMarker)) activeMarker = null;
+            }
+        };
+        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener() {
+            @Override
+            public void onItemInserted(int position) {
+                Checkpoint checkpoint = checkpoints.get(position);
+                checkpoint.setMarker(createCheckpointMarker(checkpoint));
+            }
+        };
+        onCheckpointRemovedListener = new DatasManager.OnItemRemovedListener<Checkpoint>() {
+            @Override
+            public void onItemRemoved(int position, Checkpoint checkpoint) {
+                if (checkpoint.getMarker().equals(activeMarker)) activeMarker = null;
+            }
+        };
     }
 
     @Override
@@ -203,8 +173,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // GG map fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_main);
         mapFragment.getMapAsync(this);
-        // find view
-        posSelectedMarker = (View) view.findViewById(R.id.pos_selected_marker);
         return view;
     }
 
@@ -262,15 +230,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onMapLoaded() {
                 isMapLoaded = true;
+                Log.d(TAG, "map loaded");
                 initFriendMarkers();
                 initMyLocationMarker();
                 initLocationAndCompass();
                 initCheckpointMarker();
-                if (checkpoints.get("BMcuFRQqoL09YmL2v7mH").getMarker() != null){
-                    Log.d(TAG, "VALID checkpoint ");
-                } else {
-                    Log.d(TAG, "INVALID checkpoint ");
-                }
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18));
             }
         });
@@ -318,50 +282,59 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     void initFriendMarkers() {
-        if (!isMapLoaded || isMarkerLoaded) return;
-        for (User user : friends.values()) {
+        if (!isMapLoaded) return;
+        for (User user : members) {
             user.setMarker(createFriendMarker(user));
         }
-        isMarkerLoaded = true;
     }
 
     void initCheckpointMarker() {
-        if (!isMapLoaded || isCheckpointLoaded) return;
-        for (Checkpoint checkpoint : checkpoints.values()) {
-            Marker marker = createCheckpointMarker(checkpoint);
-            checkpoint.setMarker(marker);
+        if (!isMapLoaded) return;
+        for (Checkpoint checkpoint: checkpoints) {
+            checkpoint.setMarker(createCheckpointMarker(checkpoint));
         }
-        isCheckpointLoaded = true;
     }
 
-    public Marker createFriendMarker(final User user) {
+    private Marker createFriendMarker(final User user) {
         if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
-        return mMap.addMarker(new MarkerOptions().position(user.getLatLng())
-                .title(user.getUserName())
-                .snippet(Collections.USERS)
-                .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker, new CreateMarker.ILayoutEditor() {
-                    @Override
-                    public void edit(View view) {
-                        ImageView markerImage = (ImageView) view.findViewById(R.id.img_marker_avatar);
-                        Picasso.get().load(user.getAvatar()).placeholder(R.drawable.user).into(markerImage);
-                    }
-                }))));
+        if (user.getMarker() == null){
+            user.setMarker(mMap.addMarker(new MarkerOptions().position(user.getLatLng())
+                    .title(user.getId())
+                    .snippet(Collections.USERS)
+                    .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
+                        @Override
+                        public void edit(View view) {
+                            ImageView markerImage = (ImageView) view.findViewById(R.id.img_avatar_map_marker_user);
+                            ImageHelper.loadImage(user.getAvatar(), markerImage);
+                        }
+                    })))));
+        }
+        return user.getMarker();
     }
 
-    public Marker createCheckpointMarker(Checkpoint checkpoint) {
-        if (!isMapLoaded || checkpoint == null) return null;
-        return mMap.addMarker(new MarkerOptions().position(checkpoint.getLatLng())
-                .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS));
+    private Marker createCheckpointMarker(Checkpoint checkpoint) {
+        if (!isMapLoaded || checkpoint == null || checkpoint.getLatLng() == null) return null;
+        if (checkpoint.getMarker() == null) {
+            checkpoint.setMarker(mMap.addMarker(new MarkerOptions().position(checkpoint.getLatLng())
+                    .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS)));
+        }
+        return checkpoint.getMarker();
     }
 
     void targetCamera(boolean includeMyLocation, GoogleMap.CancelableCallback cancelableCallback, LatLng... latLngs) {
-        if (isMapLoaded) {
+        if (isMapLoaded){
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (LatLng point : latLngs) {
                 builder.include(point);
             }
             if (includeMyLocation) builder.include(currentLocation);
             LatLngBounds bounds = builder.build();
+            targetCamera(bounds, cancelableCallback);
+        }
+    }
+
+    void targetCamera(LatLngBounds bounds, GoogleMap.CancelableCallback cancelableCallback) {
+        if (isMapLoaded) {
 //            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100), cancelableCallback); // padding 100
             final int toolbarStatusbarHeight = (int)PixelDPConverter.convertDpToPixel(61+25, getContext());
             // TODO: calculate real bottomSpace height
@@ -390,20 +363,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     void targetCheckpoint(String checkpointId) {
-        if (checkpoints.get("BMcuFRQqoL09YmL2v7mH").getMarker() != null){
-            Log.d(TAG, "VALID 2 checkpoint "+isCheckpointLoaded);
-        } else {
-            Log.d(TAG, "INVALID 2 checkpoint "+isCheckpointLoaded);
-        }
-        Checkpoint checkpoint = checkpoints.get(checkpointId);
-        Log.d(TAG, "target "+(checkpoint != null)+""+(checkpoint.getLatLng() != null)+""+(checkpoint.getMarker() != null));
-        if (checkpoint != null && checkpoint.getLatLng() != null) {
+        Checkpoint checkpoint = manager.getCheckpointsManager().get(checkpointId);
+        if (checkpoint != null && checkpoint.getLatLng() != null && getContext() != null) {
             Log.d(TAG, "targeting...");
             targetCamera(true, checkpoint.getLatLng());
             if (activeMarker != null) activeMarker.setIcon(null);
             activeMarker = checkpoint.getMarker();
-            if (activeMarker != null) activeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.yellow_marker));
+            if (activeMarker != null) activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
+                @Override
+                public void edit(View view) {
+                    TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
+                    tvName.setText("0");
+                }
+            }))));
         }
+    }
+
+    void drawRoute(List<LatLng> latLngs){
+        final LatLngBounds.Builder bounds = new LatLngBounds.Builder();
+        PolylineOptions line = new PolylineOptions().clickable(true).addAll(latLngs);
+        if (routeLine != null) routeLine.remove();
+        routeLine = mMap.addPolyline(line);
+        // add point to bound and apply bound to camera
+        for (LatLng latLng : latLngs) {
+            bounds.include(latLng);
+        }
+        targetCamera(bounds.build(), null);
     }
 
     void drawRoute(@Nullable LatLng fromN, final LatLng to, final GoogleMap.CancelableCallback callback) {
@@ -411,30 +396,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         final LatLng from = (fromN != null) ? fromN : currentLocation;
         bounds.include(from);
         bounds.include(to);
-        AppRequest.fetchRoute(getContext(), MapBoxDirection.DRIVING, from, to, new HttpRequest.Callback<MapBoxDirection>() {
-            @Override
-            public void onResponse(final MapBoxDirection res) {
-                getActivity().runOnUiThread(new Runnable() {
+        NavigationRoute.builder(getContext())
+                .accessToken(getString(R.string.config_mapbox_map_api_key))
+                .origin(Point.fromLngLat(from.longitude, from.latitude))
+                .destination(Point.fromLngLat(to.longitude, to.latitude))
+                .build()
+                .getRoute(new Callback<DirectionsResponse>() {
                     @Override
-                    public void run() {
-                        // draw lines
-                        PolylineOptions line = new PolylineOptions().clickable(true).add(from).addAll(res.latLngs).add(to);
-                        if (routeLine != null) routeLine.remove();
-                        routeLine = mMap.addPolyline(line);
-                        // add point to bound and apply bound to camera
-                        for (LatLng latLng : res.latLngs) {
-                            bounds.include(latLng);
+                    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                        for (DirectionsRoute route: response.body().routes()){
+                            List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
+                            ArrayList<LatLng> latLngs = new ArrayList<>();
+                            for (Point coord: coords){
+                                latLngs.add(new LatLng(coord.latitude(), coord.longitude()));
+                            }
+                            drawRoute(latLngs);
                         }
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 100), callback); // padding 100
+                    }
+
+                    @Override
+                    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                        Log.d(TAG, "Draw route failed");
                     }
                 });
-            }
-
-            @Override
-            public void onFailure(String reason) {
-                Log.d(TAG, "Draw route failed, reason=" + reason);
-            }
-        });
     }
 
     @Override
@@ -446,6 +430,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 return;
             }
         }
+        manager.getMembersManager().addOnItemInsertedListener(onUserInsertedListener).addOnItemRemovedListener(onUserRemovedListener);
+        manager.getCheckpointsManager().addOnItemInsertedListener(onCheckpointInsertedListener).addOnItemRemovedListener(onCheckpointRemovedListener);
         compass.start();
     }
 
@@ -453,6 +439,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onPause() {
         super.onPause();
         compass.stop();
+        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener).removeOnItemRemovedListener(onUserRemovedListener);;
+        manager.getCheckpointsManager().removeOnItemInsertedListener(onCheckpointInsertedListener).removeOnItemRemovedListener(onCheckpointRemovedListener);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        Log.d(TAG, "attach");
     }
 
     @Override

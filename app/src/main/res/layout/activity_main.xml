@@ -51,7 +51,7 @@
                 android:id="@+id/frag_friend_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:name="cf.bautroixa.maptest.FriendListStatusFragment"/>
+                android:name="cf.bautroixa.maptest.FriendListFragment"/>
         </LinearLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

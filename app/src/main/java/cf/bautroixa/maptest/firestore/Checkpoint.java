@@ -3,21 +3,23 @@ package cf.bautroixa.maptest.firestore;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
 
-public class Checkpoint {
-    @Exclude String id;
+public class Checkpoint extends Data {
     @Exclude public static final String NAME = "name";
-    String name;
     @Exclude public static final String COORD = "coordinate";
-    GeoPoint coordinate;
     @Exclude public static final String LOCATION = "location";
-    String location;
     @Exclude public static final String TIME = "time";
-    Timestamp time;
+
     @Exclude Marker marker;
     @Exclude LatLng latLng;
+
+    String name;
+    GeoPoint coordinate;
+    String location;
+    Timestamp time;
 
     public Checkpoint() {
     }
@@ -29,13 +31,24 @@ public class Checkpoint {
         this.time = time;
     }
 
+    @Override
     @Exclude
-    public String getId() {
-        return id;
+    public void onDocumentSnapshot(DocumentSnapshot documentSnapshot) {
+        Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
+        checkpoint.withId(documentSnapshot.getId()).withRef(documentSnapshot.getReference());
+        update(checkpoint);
     }
+
     @Exclude
-    public void setId(String id) {
-        this.id = id;
+    public void update(Checkpoint checkpoint){
+        this.name = checkpoint.name;
+        this.coordinate = checkpoint.coordinate;
+        this.location = checkpoint.location;
+        this.time = checkpoint.time;
+        this.latLng = new LatLng(coordinate.getLatitude(), coordinate.getLongitude());
+        if (this.marker != null){
+            marker.setPosition(this.latLng);
+        }
     }
 
     public String getName() {
@@ -89,5 +102,14 @@ public class Checkpoint {
             }
         }
         return this.latLng;
+    }
+
+    @Exclude
+    @Override
+    public void onRemove() {
+        super.onRemove();
+        if (this.marker != null){
+            marker.remove();
+        }
     }
 }

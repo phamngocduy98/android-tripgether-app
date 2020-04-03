@@ -39,7 +39,7 @@ public class SelectCheckpointDialog extends OneDialog {
         View body = inflater.inflate(R.layout.dialog_body_select_checkpoint, container, false);
         rv = body.findViewById(R.id.rv_dialog_body_select_checkpoint);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
-        rv.setAdapter(new CheckPointAdapter(new ArrayList<Checkpoint>(manager.getCheckpoints().values())));
+        rv.setAdapter(new CheckPointAdapter(new ArrayList<Checkpoint>(manager.getCheckpoints())));
         setCustomBody(body);
         View view = super.onCreateView(inflater, container, savedInstanceState);
         return view;

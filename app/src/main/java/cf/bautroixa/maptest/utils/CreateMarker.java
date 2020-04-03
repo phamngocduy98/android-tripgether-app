@@ -41,7 +41,7 @@ public class CreateMarker {
         return createBitmapFromLayout(context, layoutResId, new ILayoutEditor() {
             @Override
             public void edit(View view) {
-                ImageView markerImage = (ImageView) view.findViewById(R.id.img_marker_avatar);
+                ImageView markerImage = (ImageView) view.findViewById(R.id.img_avatar_map_marker_user);
                 markerImage.setImageResource(avatarRes);
             }
         });

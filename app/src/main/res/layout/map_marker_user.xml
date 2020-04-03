@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <ImageView
-        android:id="@+id/img_marker_bottom"
+        android:id="@+id/img_bg_map_marker_user"
         android:layout_width="50dp"
         android:layout_height="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -17,7 +17,7 @@
         app:srcCompat="@drawable/marker_bg" />
 
     <ImageView
-        android:id="@+id/img_marker_avatar"
+        android:id="@+id/img_avatar_map_marker_user"
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="5dp"

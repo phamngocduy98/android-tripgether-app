@@ -11,29 +11,27 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.squareup.picasso.Picasso;
 
-import cf.bautroixa.maptest.firestore.Collections;
+import java.util.ArrayList;
+
+import cf.bautroixa.maptest.firestore.Data;
+import cf.bautroixa.maptest.firestore.FireStoreManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.utils.BatteryHelper;
+import cf.bautroixa.maptest.utils.ImageHelper;
 
 public class FriendFragment extends Fragment {
     private static final String TAG = "FriendFragment";
     public static final String ARG_USER_NAME = "user_name";
 
     private FirebaseFirestore db;
+    private FireStoreManager manager;
     private User activeUser;
+    private Data.OnNewDocumentSnapshotListener activeUserListener;
     private OnDrawRouteButtonClickedListener mRouteBtnListener;
 
     TextView tvName, tvLocation, tvBattery, tvSpeed;
@@ -43,6 +41,9 @@ public class FriendFragment extends Fragment {
     int pos;
 
     public FriendFragment() {
+        // TODO: use shared ref to get username
+        manager = FireStoreManager.getInstance(User.NO_USER);
+        this.activeUser = new User();
     }
 
     public static FriendFragment newInstance(String userId) {
@@ -62,33 +63,29 @@ public class FriendFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         db = FirebaseFirestore.getInstance();
-        this.activeUser = new User();
         if (bundle != null) {
             String userName = bundle.getString(ARG_USER_NAME);
-            db.collection(Collections.USERS).document(userName).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            ArrayList<User> members = manager.getMembers();
+            activeUser = manager.getMembersManager().get(userName);
+            activeUserListener = new Data.OnNewDocumentSnapshotListener() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot documentSnapshot = task.getResult();
-                        activeUser = documentSnapshot.toObject(User.class);
-                        activeUser.setUserName(documentSnapshot.getId());
-                        updateView();
-                    }
-                }
-            });
-            db.collection(Collections.USERS).document(userName).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                @Override
-                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-                    activeUser = documentSnapshot.toObject(User.class);
-                    activeUser.setUserName(documentSnapshot.getId());
+                public void onNewData(Data data) {
                     updateView();
                 }
-            });
+            };
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (activeUserListener != null) activeUser.addOnNewDocumentSnapshotListener(activeUserListener);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (activeUserListener != null) activeUser.removeOnNewDocumentSnapshotListener(activeUserListener);
     }
 
     @Override
@@ -116,7 +113,7 @@ public class FriendFragment extends Fragment {
         btnDirection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRouteBtnListener.onClick(activeUser.getUserName(), activeUser.getLatLng());
+                mRouteBtnListener.onClick(activeUser.getId(), activeUser.getLatLng());
                 Log.d(TAG, "battery = " + BatteryHelper.getBatteryPercentage(getContext()));
             }
         });
@@ -131,13 +128,14 @@ public class FriendFragment extends Fragment {
     }
 
     void updateView() {
-        if (getContext() == null && isDetached()) return; // getContext() may return null if fragment detached or not attached
+        if (getContext() == null && isDetached())
+            return; // getContext() may return null if fragment detached or not attached
         if (activeUser != null) {
-            Picasso.get().load(activeUser.getAvatar()).placeholder(R.drawable.user).into(imgAvatar);
+            ImageHelper.loadImage(activeUser.getAvatar(), imgAvatar, 100, 100);
             tvName.setText(this.activeUser.getName());
             tvLocation.setText(this.activeUser.getCurrentLocation());
-            tvBattery.setText(this.activeUser.getBattery() + "%");
-            tvSpeed.setText(this.activeUser.getSpeed() + " m/s");
+            tvBattery.setText(String.format("%d%%", this.activeUser.getBattery()));
+            tvSpeed.setText(String.format("%d m/s", this.activeUser.getSpeed()));
         }
     }
 

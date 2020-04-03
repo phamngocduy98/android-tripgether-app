@@ -2,11 +2,13 @@ package cf.bautroixa.maptest.firestore;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
 
-public class User {
+public class User extends Data {
     @Exclude
     public static final String NO_USER = "notLoggedIn";
     @Exclude
@@ -29,9 +31,9 @@ public class User {
     public static final String BATTERY = "battery";
     @Exclude
     public static final String ACTIVE_TRIP = "activeTrip";
-
     @Exclude
-    String userName;
+    boolean isLeader;
+
     String name;
     String avatar;
     String phoneNumber;
@@ -51,13 +53,13 @@ public class User {
     }
 
     @Exclude
-    public String getUserName() {
-        return userName;
+    public boolean isLeader() {
+        return isLeader;
     }
 
     @Exclude
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setLeader(boolean leader) {
+        isLeader = leader;
     }
 
     public String getName() {
@@ -152,5 +154,47 @@ public class User {
     @Exclude
     public void setMarker(Marker marker) {
         this.marker = marker;
+    }
+
+    @Exclude
+    public Task<Void> joinTrip(DocumentReference tripRef) {
+        return this.getRef().update(ACTIVE_TRIP, tripRef);
+    }
+
+    @Exclude
+    public Task<Void> leaveTrip() {
+        return this.getRef().update(ACTIVE_TRIP, null);
+    }
+
+    @Exclude
+    @Override
+    public void onDocumentSnapshot(DocumentSnapshot documentSnapshot) {
+        User user = documentSnapshot.toObject(User.class);
+        if (user != null) update(user);
+    }
+    @Exclude
+    public void update(User user) {
+        this.name = user.name;
+        this.avatar = user.avatar;
+        this.phoneNumber = user.phoneNumber;
+        this.currentCoord = user.currentCoord;
+        this.currentLocation = user.currentLocation;
+        this.email = user.email;
+        this.speed = user.speed;
+        this.battery = user.battery;
+        this.activeTrip = user.activeTrip;
+        this.latLng = new LatLng(currentCoord.getLatitude(), currentCoord.getLongitude());
+        if (this.marker != null){
+            marker.setPosition(this.latLng);
+        }
+    }
+
+    @Exclude
+    @Override
+    public void onRemove() {
+        super.onRemove();
+        if (this.marker != null){
+            marker.remove();
+        }
     }
 }
