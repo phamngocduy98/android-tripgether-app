@@ -36,5 +36,7 @@
     <string name="dialog_title_gather">Gửi yêu cầu tập hợp</string>
     <string name="dialog_title_select_checkpoint">Chọn một điểm đến</string>
     <string name="dialog_title_enter_checkpoint_name">Nhập tên địa điểm</string>
+    <string name="dialog_title_leave_trip">Rời chuyến đi</string>
+    <string name="default_notification_channel_id">9999</string>
 
 </resources>

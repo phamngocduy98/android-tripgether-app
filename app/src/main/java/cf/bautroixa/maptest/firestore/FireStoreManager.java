@@ -36,8 +36,9 @@ public class FireStoreManager {
     private FireStoreManager(String userName, OnInitCompleted onInitCompleted) {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        if (mAuth.getCurrentUser() != null){
-            Log.d(TAG, "login success");
+        if (mAuth.getCurrentUser() == null) {
+            Log.w(TAG, "user not logged in!");
+            return;
         }
         currentUserRef = db.collection(Collections.USERS).document(userName);
         membersManager = new MembersManager();

@@ -3,10 +3,16 @@ package cf.bautroixa.maptest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -24,8 +30,14 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
+import com.mapbox.api.geocoding.v5.MapboxGeocoding;
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
+import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
+import com.mapbox.geojson.Point;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.network_io.AppRequest;
@@ -33,11 +45,16 @@ import cf.bautroixa.maptest.network_io.HttpRequest;
 import cf.bautroixa.maptest.theme.FullScreenDialogFragment;
 import cf.bautroixa.maptest.types.APILocation;
 import cf.bautroixa.maptest.utils.DateFormatter;
+import cf.bautroixa.maptest.utils.NoFilterArrayAdapter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class CreateTripCheckpointDialogFragment extends FullScreenDialogFragment implements OnMapReadyCallback {
-
+public class CreateCheckpointDialogFragment extends FullScreenDialogFragment implements OnMapReadyCallback {
+    private static final String TAG = "CreateCheckpointDialog";
     private GoogleMap mMap;
-    private EditText editLocation, editTime, editName;
+    private EditText editTime, editName;
+    private AutoCompleteTextView editLocation;
     private ImageView btnSearchLocation;
     private Button btnCancel, btnOk;
 
@@ -52,7 +69,7 @@ public class CreateTripCheckpointDialogFragment extends FullScreenDialogFragment
         void onCheckpointSet(Checkpoint checkpoint);
     }
 
-    public CreateTripCheckpointDialogFragment(OnCheckpointSetListener onCheckpointSetListener) {
+    public CreateCheckpointDialogFragment(OnCheckpointSetListener onCheckpointSetListener) {
         this.onCheckpointSetListener = onCheckpointSetListener;
     }
 
@@ -65,7 +82,7 @@ public class CreateTripCheckpointDialogFragment extends FullScreenDialogFragment
                 parent.removeView(view);
         }
         try {
-            view = inflater.inflate(R.layout.fragment_dialog_checkpoint_trip_create, container, false);
+            view = inflater.inflate(R.layout.fragment_dialog_create_checkpoint, container, false);
         } catch (InflateException e) {
             /* map is already there, just return view as it is */
         }
@@ -78,6 +95,59 @@ public class CreateTripCheckpointDialogFragment extends FullScreenDialogFragment
         editTime = view.findViewById(R.id.edit_time_checkpoint);
         btnCancel = view.findViewById(R.id.btn_cancel_checkpoint);
         btnOk = view.findViewById(R.id.btn_add_checkpoint);
+
+        editLocation.setThreshold(1);
+        final ArrayList<Point> points = new ArrayList<>();
+        final ArrayAdapter adapterLocations = new NoFilterArrayAdapter(getContext(), android.R.layout.simple_list_item_1, new ArrayList<String>());
+        editLocation.setAdapter(adapterLocations);
+        editLocation.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Point selectedPoint = points.get(position);
+                selectedLatLng = new LatLng(selectedPoint.latitude(), selectedPoint.longitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedLatLng, 18));
+            }
+        });
+        editLocation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                MapboxGeocoding mapboxGeocoding = MapboxGeocoding.builder()
+                        .accessToken(getString(R.string.config_mapbox_map_api_key))
+                        .query(s.toString())
+                        .build();
+                mapboxGeocoding.enqueueCall(new Callback<GeocodingResponse>() {
+                    @Override
+                    public void onResponse(Call<GeocodingResponse> call, Response<GeocodingResponse> response) {
+                        List<CarmenFeature> results = response.body().features();
+                        if (results.size() > 0) {
+                            // Log the first results Point.
+                            adapterLocations.clear();
+                            points.clear();
+                            for (CarmenFeature feature : results) {
+                                adapterLocations.add(feature.placeName());
+                                points.add(feature.center());
+                                Log.d(TAG, "address = " + feature.placeName());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeocodingResponse> call, Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         btnSearchLocation.setOnClickListener(new View.OnClickListener() {
             @Override

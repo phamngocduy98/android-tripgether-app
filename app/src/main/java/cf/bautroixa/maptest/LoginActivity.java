@@ -28,6 +28,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import cf.bautroixa.maptest.firestore.FireStoreManager;
 import cf.bautroixa.maptest.firestore.User;
@@ -52,9 +54,32 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        // Log and toast
+                        String msg = "token = " + token;
+                        Log.d(TAG, msg);
+                        Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        mAuth = FirebaseAuth.getInstance();
         sharedPref = getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         if (!sharedPref.getString(User.USER_NAME, User.NO_USER).equals(User.NO_USER)) {
-            onLoginSuccess();
+            if (mAuth.getCurrentUser() != null) {
+                onLoginSuccess();
+            }
         }
 
         mRegisterText=findViewById(R.id.tv_register);
@@ -64,7 +89,6 @@ public class LoginActivity extends AppCompatActivity {
         mForgotPasswordText=findViewById(R.id.tv_forgotPassword);
         SignInButton mSignInButton = findViewById(R.id.sign_in_button);
         mSignInButton.setSize(SignInButton.SIZE_WIDE);
-        mAuth = FirebaseAuth.getInstance();
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(googleClientId)
                 .requestEmail()

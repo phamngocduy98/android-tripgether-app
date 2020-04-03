@@ -33,6 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.List;
 
+import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.FireStoreManager;
@@ -397,33 +398,46 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_gather_activity_main:
-                OneDialog selectGatherTypeDialog = new OneDialog.Builder().title(R.string.dialog_title_gather).message(R.string.dialog_message_choose_gather_position)
-                        .enableNegativeButton(true)
-                        .posBtnText(R.string.btn_pos_res_choose_checkpoint)
-                        .negBtnText(R.string.btn_neg_current_position)
-                        .buttonClickListener(new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (which == DialogInterface.BUTTON_POSITIVE){
-                                    // chọn checkpoint
-                                    SelectCheckpointDialog selectCheckpointDialog = new SelectCheckpointDialog();
-                                    selectCheckpointDialog.setTitleRes(R.string.dialog_title_select_checkpoint);
-                                    selectCheckpointDialog.show(getSupportFragmentManager(), "select cp dialog");
-                                } else {
-                                    // vị trí hiện tại
-                                    OneDialog enterCheckpointNameDialog = new OnePromptDialog.Builder().title(R.string.dialog_title_enter_checkpoint_name)
-                                            .onResult(new OnePromptDialog.OnDialogResult() {
-                                                @Override
-                                                public void onDialogResult(Dialog dialog1, boolean isCanceled, String value) {
-                                                    Log.d(TAG, value);
-                                                    dialog1.dismiss();
-                                                }
-                                            }).build();
-                                    enterCheckpointNameDialog.show(getSupportFragmentManager(), "enter cp name");
+                OneDialog.Builder builder = new OneDialog.Builder();
+                builder.title(R.string.dialog_title_gather);
+                builder.message(R.string.dialog_message_choose_gather_position);
+                builder.enableNegativeButton(true);
+                builder.posBtnText(R.string.btn_pos_res_choose_checkpoint);
+                builder.negBtnText(R.string.btn_neg_current_position);
+                builder.buttonClickListener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, int which) {
+                        if (which == DialogInterface.BUTTON_POSITIVE) {
+                            // chọn checkpoint
+                            final SelectCheckpointDialog selectCheckpointDialog = new SelectCheckpointDialog();
+                            selectCheckpointDialog.setOnCheckpointSelectedListener(new SelectCheckpointDialog.OnCheckpointSelectedListener() {
+                                @Override
+                                public void onCheckpointSelected(Checkpoint checkpoint) {
+                                    manager.addRollUpPoint(checkpoint.getRef());
+                                    selectCheckpointDialog.dismiss();
+                                    dialog.dismiss();
                                 }
-                            }
-                        }).build();
-                selectGatherTypeDialog.show(getSupportFragmentManager(), "select gather position");
+                            });
+                            selectCheckpointDialog.show(getSupportFragmentManager(), "select cp dialog");
+                        } else {
+                            // vị trí hiện tại
+                            OneDialog enterCheckpointNameDialog = new OnePromptDialog.Builder().title(R.string.dialog_title_enter_checkpoint_name)
+                                    .onResult(new OnePromptDialog.OnDialogResult() {
+                                        @Override
+                                        public void onDialogResult(Dialog dialog1, boolean isCanceled, String value) {
+                                            if (!isCanceled) {
+                                                Log.d(TAG, value);
+                                                dialog.dismiss();
+                                            }
+                                            dialog1.dismiss();
+                                        }
+                                    }).build();
+                            enterCheckpointNameDialog.show(getSupportFragmentManager(), "enter cp name");
+                        }
+                    }
+                });
+                OneDialog selectRollupTypeDialog = builder.build();
+                selectRollupTypeDialog.show(getSupportFragmentManager(), "select gather position");
                 return true;
             case R.id.menu_share_activity_main:
                 Intent intent = new Intent(MainActivity.this, TripInvitationActivity.class);
@@ -431,8 +445,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 startActivity(intent);
                 return true;
             case R.id.menu_leave_trip_activity_main:
-                OneDialog leaveTripConfirmDialog = new OneDialog.Builder().message(R.string.dialog_message_leave_trip)
-                        .enableNegativeButton(true).buttonClickListener(new DialogInterface.OnClickListener() {
+                OneDialog leaveTripConfirmDialog = new OneDialog.Builder().title(R.string.dialog_title_leave_trip).message(R.string.dialog_message_leave_trip)
+                        .posBtnText(R.string.btn_leave_trip).enableNegativeButton(true).buttonClickListener(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (which == DialogInterface.BUTTON_POSITIVE){

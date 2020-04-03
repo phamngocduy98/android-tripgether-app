@@ -30,13 +30,15 @@ public class CheckpointsManager extends DatasManager<Checkpoint> {
                 if (e != null) {
                     Log.w(TAG, "Listen failed.", e);
                 }
-                for (DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()){
-                    if (documentChange.getType() == DocumentChange.Type.ADDED){
-                        DocumentSnapshot documentSnapshot = documentChange.getDocument();
-                        Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class).withId(documentSnapshot.getId()).withRef(documentSnapshot.getReference());
-                        checkpoint.setListenerRegistration(thisManager, null);
+                if (queryDocumentSnapshots != null) {
+                    for (DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
+                        if (documentChange.getType() == DocumentChange.Type.ADDED) {
+                            DocumentSnapshot documentSnapshot = documentChange.getDocument();
+                            Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class).withId(documentSnapshot.getId()).withRef(documentSnapshot.getReference());
+                            checkpoint.setListenerRegistration(thisManager, null);
+                        }
+                        Log.d(TAG, "fetch Checkpoints");
                     }
-                    Log.d(TAG, "fetch Checkpoints");
                 }
             }
         });

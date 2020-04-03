@@ -1,5 +1,8 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.Task;
@@ -202,6 +205,10 @@ public class User extends Data {
         if (this.marker != null){
             marker.setPosition(this.latLng);
         }
+    }
+
+    public Task<Void> sendUpdate(@NonNull String field, @Nullable Object value, Object... moreFieldsAndValues) {
+        return this.ref.update(field, value, moreFieldsAndValues);
     }
 
     @Exclude

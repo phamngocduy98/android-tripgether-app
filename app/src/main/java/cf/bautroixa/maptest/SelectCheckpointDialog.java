@@ -1,6 +1,7 @@
 package cf.bautroixa.maptest;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,12 +26,19 @@ public class SelectCheckpointDialog extends OneDialog {
     RecyclerView rv;
     FireStoreManager manager;
     SharedPreferences sharedPref;
+    OnCheckpointSelectedListener onCheckpointSelectedListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         manager = FireStoreManager.getInstance(sharedPref.getString(User.USER_NAME, User.NO_USER));
+        setButtonClickListener(new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
     }
 
     @Nullable
@@ -41,8 +49,20 @@ public class SelectCheckpointDialog extends OneDialog {
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         rv.setAdapter(new CheckPointAdapter(new ArrayList<Checkpoint>(manager.getCheckpoints())));
         setCustomBody(body);
+        setTitleRes(R.string.dialog_title_select_checkpoint);
+        setPosBtnRes(R.string.btn_cancel);
         View view = super.onCreateView(inflater, container, savedInstanceState);
         return view;
+    }
+
+    public void setOnCheckpointSelectedListener(OnCheckpointSelectedListener onCheckpointSelectedListener) {
+        this.onCheckpointSelectedListener = onCheckpointSelectedListener;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        onCheckpointSelectedListener = null;
     }
 
     public class CheckPointViewHolder extends RecyclerView.ViewHolder {
@@ -64,6 +84,10 @@ public class SelectCheckpointDialog extends OneDialog {
         }
     }
 
+    public interface OnCheckpointSelectedListener {
+        void onCheckpointSelected(Checkpoint checkpoint);
+    }
+
     public class CheckPointAdapter extends RecyclerView.Adapter<CheckPointViewHolder> {
 
         private final int TYPE_CHECKPOINT_ITEM = 0;
@@ -82,8 +106,16 @@ public class SelectCheckpointDialog extends OneDialog {
 
         @Override
         public void onBindViewHolder(@NonNull CheckPointViewHolder holder, int position) {
-                Checkpoint checkpoint = this.checkpoints.get(position);
-                ((CheckPointViewHolder) holder).bind(checkpoint);
+            final Checkpoint checkpoint = this.checkpoints.get(position);
+            holder.bind(checkpoint);
+            holder.view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onCheckpointSelectedListener != null) {
+                        onCheckpointSelectedListener.onCheckpointSelected(checkpoint);
+                    }
+                }
+            });
         }
 
         @Override

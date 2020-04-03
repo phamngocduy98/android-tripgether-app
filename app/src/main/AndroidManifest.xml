@@ -26,6 +26,13 @@
         <activity android:name=".RegisterActivity" />
 
         <service
+            android:name=".services.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
             android:name=".services.ScheduleService"
             android:enabled="true"
             android:exported="true"></service>
@@ -65,6 +72,15 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/config_gg_map_api_key" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_marker" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
 
         <activity
             android:name=".MainActivity"

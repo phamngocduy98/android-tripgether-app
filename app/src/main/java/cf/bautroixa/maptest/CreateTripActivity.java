@@ -230,7 +230,7 @@ public class CreateTripActivity extends AppCompatActivity {
                 ((AddCheckPointViewHolder) holder).view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        DialogFragment dialogFragment = new CreateTripCheckpointDialogFragment(new CreateTripCheckpointDialogFragment.OnCheckpointSetListener() {
+                        DialogFragment dialogFragment = new CreateCheckpointDialogFragment(new CreateCheckpointDialogFragment.OnCheckpointSetListener() {
                             @Override
                             public void onCheckpointSet(Checkpoint checkpoint) {
                                 checkpoints.add(checkpoint);
