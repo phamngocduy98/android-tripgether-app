@@ -2,14 +2,17 @@ package cf.bautroixa.maptest.firestore;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
 
@@ -25,7 +28,7 @@ public abstract class Data {
     @Exclude
     protected String id;
     @Exclude
-    protected ArrayList<OnNewDocumentSnapshotListener> onNewDocumentSnapshotListeners = new ArrayList<>();
+    protected ArrayList<OnNewValueListener> onNewValueListeners = new ArrayList<>();
 
     public Data() {
     }
@@ -54,23 +57,33 @@ public abstract class Data {
 
     @Exclude
     public void cancelListenerRegistration() {
-        listenerRegistration.remove();
+        if (listenerRegistration != null) listenerRegistration.remove();
     }
 
     @Exclude
-    public void addOnNewDocumentSnapshotListener(OnNewDocumentSnapshotListener listener) {
-        this.onNewDocumentSnapshotListeners.add(listener);
+    public void addOnNewValueListener(OnNewValueListener listener) {
+        this.onNewValueListeners.add(listener);
     }
 
     @Exclude
-    public void removeOnNewDocumentSnapshotListener(OnNewDocumentSnapshotListener listener) {
-        this.onNewDocumentSnapshotListeners.remove(listener);
+    public ArrayList<OnNewValueListener> getListeners() {
+        return this.onNewValueListeners;
+    }
+
+    @Exclude
+    public void restoreListeners(ArrayList<OnNewValueListener> backupListeners) {
+        this.onNewValueListeners.addAll(backupListeners);
+    }
+
+    @Exclude
+    public void removeOnNewValueListener(OnNewValueListener listener) {
+        this.onNewValueListeners.remove(listener);
     }
 
 
     @Exclude
-    public void setListenerRegistration(final DatasManager dataManager, OnNewDocumentSnapshotListener initListener) {
-        if (initListener != null) onNewDocumentSnapshotListeners.add(initListener);
+    public void setListenerRegistration(final DatasManager dataManager, OnNewValueListener initListener) {
+        if (initListener != null) onNewValueListeners.add(initListener);
         final Data thisData = this;
         this.listenerRegistration = this.ref.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
@@ -90,7 +103,7 @@ public abstract class Data {
                             onRemove();
                         }
                     }
-                    for (OnNewDocumentSnapshotListener listener : onNewDocumentSnapshotListeners) {
+                    for (OnNewValueListener listener : onNewValueListeners) {
                         listener.onNewData(thisData);
                     }
                 }
@@ -98,13 +111,24 @@ public abstract class Data {
         });
     }
 
+    @Exclude
     public abstract void onDocumentSnapshot(DocumentSnapshot documentSnapshot);
 
+    @Exclude
     public void onRemove() {
         cancelListenerRegistration();
     }
 
-    public interface OnNewDocumentSnapshotListener<T extends Data> {
+    @Exclude
+    public Task<Void> sendUpdate(@Nullable WriteBatch batch, @NonNull String field, @Nullable Object value, Object... moreFieldsAndValues) {
+        if (batch != null) {
+            batch.update(this.ref, field, value, moreFieldsAndValues);
+            return null;
+        }
+        return this.ref.update(field, value, moreFieldsAndValues);
+    }
+
+    public interface OnNewValueListener<T extends Data> {
         void onNewData(T data);
     }
 }

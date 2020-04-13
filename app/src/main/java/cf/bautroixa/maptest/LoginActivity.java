@@ -28,10 +28,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
-import cf.bautroixa.maptest.firestore.FireStoreManager;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.User;
 
 public class LoginActivity extends AppCompatActivity {
@@ -54,25 +52,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "getInstanceId failed", task.getException());
-                            return;
-                        }
-
-                        // Get new Instance ID token
-                        String token = task.getResult().getToken();
-
-                        // Log and toast
-                        String msg = "token = " + token;
-                        Log.d(TAG, msg);
-                        Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
-                    }
-                });
 
         mAuth = FirebaseAuth.getInstance();
         sharedPref = getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
@@ -203,21 +182,8 @@ public class LoginActivity extends AppCompatActivity {
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-
-
     public void onLoginSuccess() {
-//        Intent serviceIntent = new Intent(getApplicationContext(), UpdateLocationService.class);
-//        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 12345, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-//        AlarmManager am = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-//        am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, pendingIntent);
-
-        // TODO: await FireStoreManager to complete initiation
-        FireStoreManager.getInstance(sharedPref.getString(User.USER_NAME, User.NO_USER), new FireStoreManager.OnInitCompleted() {
-            @Override
-            public void onComplete() {
-
-            }
-        });
+        MainAppManager.getInstance().login(mAuth);
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();

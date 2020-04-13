@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -54,7 +53,8 @@
             style="@style/Button.RaisedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_assistant_photo_white_24dp"
+            android:drawableStart="@drawable/ic_assistant_photo_black_24dp"
+            android:drawableTint="@android:color/white"
             android:text="Điểm danh" />
 
         <Button
@@ -62,17 +62,26 @@
             style="@style/Button.RaisedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_directions_white_24dp"
+            android:drawableStart="@drawable/ic_directions_black_24dp"
+            android:drawableTint="@android:color/white"
             android:visibility="gone"
             android:text="Chỉ đường" />
 
         <Button
             android:id="@+id/btn_start_direction_item_checkpoint_frag_trip_overview"
-            style="@style/Button.FlatIconButton"
+            style="@style/ImageButton.FlatIconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/ic_navigation_black_24dp"
             android:text="Bắt đầu" />
+
+        <Button
+            android:id="@+id/btn_show_visitors_frag_trip_overview"
+            style="@style/Button.FlatButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="4 người đã điểm danh" />
 
     </LinearLayout>
 

@@ -6,9 +6,10 @@ import java.util.HashMap;
 public class DatasManager<T extends Data> {
     protected HashMap<String, Integer> mapIdWithIndex;
     protected ArrayList<T> list;
-    protected ArrayList<OnItemInsertedListener> onItemInsertedListeners;
-    protected ArrayList<OnItemChangedListener> onItemChangedListeners;
+    protected ArrayList<OnItemInsertedListener<T>> onItemInsertedListeners;
+    protected ArrayList<OnItemChangedListener<T>> onItemChangedListeners;
     protected ArrayList<OnItemRemovedListener<T>> onItemRemovedListeners;
+    protected ArrayList<OnDataSetChangedListener<T>> onDataSetChangedListeners;
 
     public DatasManager() {
         this.mapIdWithIndex = new HashMap<>();
@@ -16,6 +17,7 @@ public class DatasManager<T extends Data> {
         this.onItemInsertedListeners = new ArrayList<>();
         this.onItemChangedListeners = new ArrayList<>();
         this.onItemRemovedListeners = new ArrayList<>();
+        this.onDataSetChangedListeners = new ArrayList<>();
     }
 
     public void put(T data){
@@ -23,14 +25,14 @@ public class DatasManager<T extends Data> {
         Integer index = mapIdWithIndex.get(id);
         if (index != null){
             update(index, data);
-            for (OnItemChangedListener onItemChangedListener: onItemChangedListeners){
-                onItemChangedListener.onItemChanged(index);
+            for (OnItemChangedListener<T> onItemChangedListener : onItemChangedListeners) {
+                onItemChangedListener.onItemChanged(index, data);
             }
         } else {
             list.add(data);
             mapIdWithIndex.put(id, list.size()-1);
-            for (OnItemInsertedListener onItemInsertedListener: onItemInsertedListeners){
-                onItemInsertedListener.onItemInserted(list.size()-1);
+            for (OnItemInsertedListener<T> onItemInsertedListener : onItemInsertedListeners) {
+                onItemInsertedListener.onItemInserted(list.size() - 1, data);
             }
         }
     }
@@ -57,10 +59,18 @@ public class DatasManager<T extends Data> {
             for (int i=index;i<list.size();i++){
                 mapIdWithIndex.put(list.get(i).getId(), i);
             }
-            for (OnItemRemovedListener onItemRemovedListener: onItemRemovedListeners){
-                onItemRemovedListener.onItemRemoved(index, data);
+            for (OnItemRemovedListener<T> onItemRemovedListener : onItemRemovedListeners) {
+                onItemRemovedListener.onItemRemoved(index, (T) data);
             }
         }
+    }
+
+    public boolean contains(String id) {
+        return mapIdWithIndex.get(id) != null;
+    }
+
+    public int indexOf(String id) {
+        return mapIdWithIndex.get(id);
     }
 
     public  ArrayList<T> getData(){
@@ -69,17 +79,27 @@ public class DatasManager<T extends Data> {
 
     public void clear(){
         for (Data data : list){
+            // remove listener and relate property (like latLng, marker) of each data
             data.onRemove();
         }
         list.clear();
         mapIdWithIndex.clear();
+        onClear();
+        for (OnDataSetChangedListener<T> onDataSetChangedListener : onDataSetChangedListeners) {
+            onDataSetChangedListener.onDataSetChanged(list);
+        }
     }
 
-    public DatasManager addOnItemInsertedListener(OnItemInsertedListener listener){
+    public void onClear() {
+
+    }
+
+    public DatasManager addOnItemInsertedListener(OnItemInsertedListener<T> listener) {
         this.onItemInsertedListeners.add(listener);
         return this;
     }
-    public DatasManager addOnItemChangedListener(OnItemChangedListener listener){
+
+    public DatasManager addOnItemChangedListener(OnItemChangedListener<T> listener) {
         this.onItemChangedListeners.add(listener);
         return this;
     }
@@ -88,11 +108,17 @@ public class DatasManager<T extends Data> {
         return this;
     }
 
-    public DatasManager removeOnItemInsertedListener(OnItemInsertedListener listener){
+    public DatasManager addOnDataSetChangedListener(OnDataSetChangedListener<T> listener) {
+        this.onDataSetChangedListeners.add(listener);
+        return this;
+    }
+
+    public DatasManager removeOnItemInsertedListener(OnItemInsertedListener<T> listener) {
         this.onItemInsertedListeners.remove(listener);
         return this;
     }
-    public DatasManager removeOnItemChangedListener(OnItemChangedListener listener){
+
+    public DatasManager removeOnItemChangedListener(OnItemChangedListener<T> listener) {
         this.onItemChangedListeners.remove(listener);
         return this;
     }
@@ -101,13 +127,23 @@ public class DatasManager<T extends Data> {
         return this;
     }
 
-    public interface OnItemInsertedListener {
-        void onItemInserted(int position);
+    public DatasManager removeOnDataSetChangedListener(OnDataSetChangedListener<T> listener) {
+        this.onDataSetChangedListeners.remove(listener);
+        return this;
     }
-    public interface OnItemChangedListener {
-        void onItemChanged(int position);
+
+    public interface OnItemInsertedListener<T extends Data> {
+        void onItemInserted(int position, T data);
+    }
+
+    public interface OnItemChangedListener<T extends Data> {
+        void onItemChanged(int position, T data);
     }
     public interface OnItemRemovedListener<T extends Data> {
         void onItemRemoved(int position, T data);
+    }
+
+    public interface OnDataSetChangedListener<T extends Data> {
+        void onDataSetChanged(ArrayList<T> datas);
     }
 }

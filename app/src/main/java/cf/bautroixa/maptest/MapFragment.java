@@ -2,7 +2,6 @@ package cf.bautroixa.maptest;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -39,6 +38,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.GeoPoint;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
@@ -52,11 +52,12 @@ import java.util.List;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.DatasManager;
-import cf.bautroixa.maptest.firestore.FireStoreManager;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.utils.CompassHelper;
 import cf.bautroixa.maptest.utils.CreateMarker;
 import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.LatLngDistance;
 import cf.bautroixa.maptest.utils.PixelDPConverter;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,12 +70,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "MapFragment";
 
-    private FireStoreManager manager;
+    private MainAppManager manager;
     private FusedLocationProviderClient fusedLocationClient;
     OnMapClicked onMapClicked;
     OnMarkerClickedListener onMarkerClickedListener;
-    SharedPreferences sharedPref;
-    String userName;
     Marker activeMarker;
 
     DatasManager.OnItemInsertedListener onUserInsertedListener;
@@ -114,15 +113,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         this.onMarkerClickedListener = onMarkerClickedListener;
     }
 
-    public void sendUpdateCoord(Location location){
-//        db.collection(Collections.USERS).document(userName).update(User.COORD, new GeoPoint(location.getLatitude(), location.getLongitude())).addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                Log.d(TAG, "update new coord"+userName);
-//            }
-//        });
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,29 +121,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         initScreenSize();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
-        sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
-        userName = sharedPref.getString(User.USER_NAME, User.NO_USER);
-        manager = FireStoreManager.getInstance(userName);
+        manager = MainAppManager.getInstance();
 
         members = manager.getMembers();
         checkpoints = manager.getCheckpoints();
-        onUserInsertedListener = new DatasManager.OnItemInsertedListener() {
+        onUserInsertedListener = new DatasManager.OnItemInsertedListener<User>() {
             @Override
-            public void onItemInserted(int position) {
-                User user = members.get(position);
+            public void onItemInserted(int position, User user) {
                 user.setMarker(createFriendMarker(user));
             }
         };
         onUserRemovedListener = new DatasManager.OnItemRemovedListener<User>() {
             @Override
             public void onItemRemoved(int position, User user) {
-                if (user.getMarker().equals(activeMarker)) activeMarker = null;
+                if (activeMarker != null && activeMarker.equals(user.getMarker()))
+                    activeMarker = null;
             }
         };
-        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener() {
+        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener<Checkpoint>() {
             @Override
-            public void onItemInserted(int position) {
-                Checkpoint checkpoint = checkpoints.get(position);
+            public void onItemInserted(int position, Checkpoint checkpoint) {
                 checkpoint.setMarker(createCheckpointMarker(checkpoint));
             }
         };
@@ -196,6 +183,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public void onLocationResult(LocationResult locationResult) {
                 Location lastLocation = locationResult.getLastLocation();
                 currentLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                // TODO: if distance > currentUser.speed*10 (update every 10s) || distance > 50;
+                if (LatLngDistance.measureDistance(currentLocation, manager.getCurrentUser().getLatLng()) > 10) {
+                    manager.getCurrentUser().sendUpdate(null, User.COORD, new GeoPoint(currentLocation.latitude, currentLocation.longitude));
+                }
                 myLocationMarker.setPosition(currentLocation);
                 if (focusMyLocation) {
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation));
@@ -284,6 +275,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     void initFriendMarkers() {
         if (!isMapLoaded) return;
         for (User user : members) {
+            if (user.getMarker() != null) {
+                user.getMarker().remove();
+            }
             user.setMarker(createFriendMarker(user));
         }
     }
@@ -291,6 +285,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     void initCheckpointMarker() {
         if (!isMapLoaded) return;
         for (Checkpoint checkpoint: checkpoints) {
+            if (checkpoint.getMarker() != null) {
+                checkpoint.getMarker().remove();
+            }
             checkpoint.setMarker(createCheckpointMarker(checkpoint));
         }
     }
@@ -364,6 +361,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     void targetCheckpoint(String checkpointId) {
         Checkpoint checkpoint = manager.getCheckpointsManager().get(checkpointId);
+        final int checkpointIndex = manager.getCheckpointsManager().indexOf(checkpointId);
         if (checkpoint != null && checkpoint.getLatLng() != null && getContext() != null) {
             Log.d(TAG, "targeting...");
             targetCamera(true, checkpoint.getLatLng());
@@ -373,7 +371,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void edit(View view) {
                     TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
-                    tvName.setText("0");
+                    tvName.setText(String.valueOf(checkpointIndex));
                 }
             }))));
         }
@@ -464,11 +462,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenHeight = displayMetrics.heightPixels;
         screenWidth = displayMetrics.widthPixels;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public interface OnMarkerClickedListener {

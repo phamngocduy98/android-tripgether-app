@@ -20,8 +20,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -38,9 +39,9 @@ import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;
-import cf.bautroixa.maptest.firestore.FireStoreManager;
-import cf.bautroixa.maptest.firestore.Trip;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.firestore.Visit;
 import cf.bautroixa.maptest.utils.DateFormatter;
 import cf.bautroixa.maptest.utils.Formater;
 import cf.bautroixa.maptest.utils.LatLngDistance;
@@ -55,12 +56,11 @@ public class TripOverviewFragment extends Fragment {
 
     private FirebaseFirestore db;
     private SharedPreferences sharedPref;
-    private FireStoreManager manager;
+    DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
     private OnDrawRouteButtonClickedListener onDrawRouteButtonClickedListener = null;
     private OnActiveCheckpointChanged onCheckpointChanged = null;
-
-    DatasManager.OnItemInsertedListener onCheckpointInsertedListener;
-    DatasManager.OnItemChangedListener onCheckpointChangedListener;
+    DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
+    private MainAppManager manager;
     DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
 
     private ArrayList<Checkpoint> checkpoints;
@@ -74,6 +74,7 @@ public class TripOverviewFragment extends Fragment {
     RecyclerView rv;
     Adapter adapter;
     SnapHelper snapHelper;
+    private Data.OnNewValueListener<User> userOnNewValue;
 
     public TripOverviewFragment() {
         checkpoints = new ArrayList<>();
@@ -90,30 +91,30 @@ public class TripOverviewFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         db = FirebaseFirestore.getInstance();
-        String userName = sharedPref.getString(User.USER_NAME, User.NO_USER);
-        manager = FireStoreManager.getInstance(userName);
+        manager = MainAppManager.getInstance();
 
         checkpoints = manager.getCheckpoints();
         adapter = new Adapter();
 
-        manager.getCurrentUser().addOnNewDocumentSnapshotListener(new Data.OnNewDocumentSnapshotListener<User>() {
+        userOnNewValue = new Data.OnNewValueListener<User>() {
             @Override
             public void onNewData(User user) {
                 noTripLayout.setVisibility(user.getActiveTrip() == null?View.VISIBLE:View.GONE);
             }
-        });
-        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener() {
+        };
+        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener<Checkpoint>() {
             @Override
-            public void onItemInserted(int position) {
+            public void onItemInserted(int position, Checkpoint data) {
                 adapter.notifyItemInserted(position);
                 Log.d(TAG, "insert"+position);
             }
         };
-        onCheckpointChangedListener = new DatasManager.OnItemChangedListener() {
+        onCheckpointChangedListener = new DatasManager.OnItemChangedListener<Checkpoint>() {
             @Override
-            public void onItemChanged(int position) {
+            public void onItemChanged(int position, Checkpoint data) {
                 Log.d(TAG, "changed"+position);
                 adapter.notifyItemChanged(position);
             }
@@ -129,6 +130,11 @@ public class TripOverviewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume");
+        if (manager.isLoggedIn()) {
+            userOnNewValue.onNewData(manager.getCurrentUser());
+        }
+        manager.getCurrentUser().addOnNewValueListener(userOnNewValue);
         manager.getCheckpointsManager().addOnItemChangedListener(onCheckpointChangedListener)
                 .addOnItemInsertedListener(onCheckpointInsertedListener)
                 .addOnItemRemovedListener(onCheckpointRemovedListener);
@@ -137,6 +143,7 @@ public class TripOverviewFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        manager.getCurrentUser().removeOnNewValueListener(userOnNewValue);
         manager.getCheckpointsManager().removeOnItemChangedListener(onCheckpointChangedListener)
                 .removeOnItemInsertedListener(onCheckpointInsertedListener)
                 .removeOnItemRemovedListener(onCheckpointRemovedListener);
@@ -168,8 +175,12 @@ public class TripOverviewFragment extends Fragment {
                         if (getContext() != null) {
                             String tripCode = UrlParser.parseTripCode(getContext(), result);
                             DocumentReference tripRef = db.collection(Collections.TRIPS).document(tripCode);
-                            manager.getCurrentUser().joinTrip(tripRef);
-                            tripRef.update(Trip.MEMBERS, FieldValue.arrayUnion(manager.getCurrentUserRef()));
+                            manager.sendJoinTrip(null, tripRef, new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                }
+                            });
                         }
                     }
                 });
@@ -207,7 +218,7 @@ public class TripOverviewFragment extends Fragment {
     }
 
     public void selectCheckpoint(String checkpointId) {
-        Log.d(TAG, "select" + checkpoints.size());
+        onCheckpointChanged.onCheckpointChanged(checkpointId);
         for (int i = 0; i < checkpoints.size(); i++) {
             if (checkpointId.equals(checkpoints.get(i).getId())) {
                 rv.smoothScrollToPosition(i);
@@ -220,6 +231,7 @@ public class TripOverviewFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.d(TAG, "onAttach");
     }
 
     @Override
@@ -234,8 +246,9 @@ public class TripOverviewFragment extends Fragment {
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvLocation, tvTime;
-        Button btnRoute, btnStart, btnRollUp;
+        Button btnRoute, btnStart, btnRollUp, btnShowVisitors;
         ActionButton activeBtn;
+        DatasManager.OnItemInsertedListener<Visit> onItemInsertedListener;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -245,12 +258,22 @@ public class TripOverviewFragment extends Fragment {
             btnRoute = itemView.findViewById(R.id.btn_draw_route_item_checkpoint_frag_trip_overview);
             btnRollUp = itemView.findViewById(R.id.btn_roll_up_item_checkpoint_frag_trip_overview);
             btnStart = itemView.findViewById(R.id.btn_start_direction_item_checkpoint_frag_trip_overview);
+            btnShowVisitors = itemView.findViewById(R.id.btn_show_visitors_frag_trip_overview);
         }
 
         void bind(final Checkpoint checkpoint) {
             tvName.setText(checkpoint.getName());
             tvLocation.setText(checkpoint.getLocation());
             tvTime.setText(DateFormatter.format(checkpoint.getTime()));
+            btnShowVisitors.setText(String.format("%d người có mặt", checkpoint.getVisitsManager().getData().size()));
+
+            onItemInsertedListener = new DatasManager.OnItemInsertedListener<Visit>() {
+                @Override
+                public void onItemInserted(int position, Visit data) {
+                    btnShowVisitors.setText(String.format("%d người có mặt", position + 1));
+                }
+            };
+
             btnStart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -262,55 +285,76 @@ public class TripOverviewFragment extends Fragment {
                     }
                 }
             });
+            btnRoute.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final GeoPoint from = manager.getCurrentUser().getCurrentCoord();
+                    final GeoPoint to = checkpoint.getCoordinate();
+                    NavigationRoute.builder(getContext())
+                            .accessToken(getString(R.string.config_mapbox_map_api_key))
+                            .origin(Point.fromLngLat(from.getLongitude(), from.getLatitude()))
+                            .destination(Point.fromLngLat(to.getLongitude(), to.getLatitude()))
+                            .build()
+                            .getRoute(new Callback<DirectionsResponse>() {
+                                @Override
+                                public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                                    for (DirectionsRoute route : response.body().routes()) {
+                                        List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
+                                        ArrayList<LatLng> latLngs = new ArrayList<>();
+                                        latLngs.add(new LatLng(from.getLatitude(), from.getLongitude()));
+                                        for (Point coord : coords) {
+                                            latLngs.add(new LatLng(coord.latitude(), coord.longitude()));
+                                        }
+                                        latLngs.add(new LatLng(to.getLatitude(), to.getLongitude()));
+                                        btnRoute.setText(String.format("%s/%s", Formater.formatDistance(route.distance()), Formater.formatTime(route.duration())));
+                                        onDrawRouteButtonClickedListener.onClick(latLngs);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                                    Log.d(TAG, "get route failed");
+                                }
+                            });
+                }
+            });
+            btnRollUp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "diem danh");
+                    checkpoint.getVisitsManager().addVisit(manager.getCurrentUser()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "diem danh thanh cong!");
+                            }
+                        }
+                    });
+                }
+            });
+            btnShowVisitors.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "show visitors");
+                }
+            });
             updateBtn(checkpoint, LatLngDistance.measureDistance(manager.getCurrentUser().getLatLng(), checkpoint.getLatLng()) < 50 ? ActionButton.BTN_ROLL_UP : ActionButton.BTN_ROUTE);
         }
 
         void updateBtn(final Checkpoint checkpoint, ActionButton activeBtn) {
             if (activeBtn == ActionButton.BTN_ROLL_UP) {
                 btnRoute.setVisibility(View.GONE);
+                btnStart.setVisibility(View.GONE);
                 btnRollUp.setVisibility(View.VISIBLE);
-                btnRollUp.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d(TAG, "Diem danh ...");
-                    }
-                });
+                btnShowVisitors.setVisibility(View.VISIBLE);
+                checkpoint.getVisitsManager().addOnItemInsertedListener(onItemInsertedListener);
+
             } else {
                 btnRoute.setVisibility(View.VISIBLE);
+                btnStart.setVisibility(View.VISIBLE);
                 btnRollUp.setVisibility(View.GONE);
-                btnRoute.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        final GeoPoint from = manager.getCurrentUser().getCurrentCoord();
-                        final GeoPoint to = checkpoint.getCoordinate();
-                        NavigationRoute.builder(getContext())
-                                .accessToken(getString(R.string.config_mapbox_map_api_key))
-                                .origin(Point.fromLngLat(from.getLongitude(), from.getLatitude()))
-                                .destination(Point.fromLngLat(to.getLongitude(), to.getLatitude()))
-                                .build()
-                                .getRoute(new Callback<DirectionsResponse>() {
-                                    @Override
-                                    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-                                        for (DirectionsRoute route: response.body().routes()){
-                                            List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
-                                            ArrayList<LatLng> latLngs = new ArrayList<>();
-                                            latLngs.add(new LatLng(from.getLatitude(), from.getLongitude()));
-                                            for (Point coord: coords){
-                                                latLngs.add(new LatLng(coord.latitude(), coord.longitude()));
-                                            }
-                                            latLngs.add(new LatLng(to.getLatitude(), to.getLongitude()));
-                                            btnRoute.setText(String.format("%s/%s", Formater.formatDistance(route.distance()), Formater.formatTime(route.duration())));
-                                            onDrawRouteButtonClickedListener.onClick(latLngs);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-                                        Log.d(TAG, "get route failed");
-                                    }
-                                });
-                    }
-                });
+                btnShowVisitors.setVisibility(View.GONE);
+                checkpoint.getVisitsManager().removeOnItemInsertedListener(onItemInsertedListener);
             }
         }
     }

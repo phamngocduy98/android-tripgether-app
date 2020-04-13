@@ -22,6 +22,12 @@ public class Trip extends Data {
     public Trip() {
     }
 
+    /**
+     * Construct a Trip, leader automatically added to members
+     *
+     * @param name
+     * @param leader
+     */
     public Trip(String name, DocumentReference leader) {
         this.name = name;
         this.leader = leader;

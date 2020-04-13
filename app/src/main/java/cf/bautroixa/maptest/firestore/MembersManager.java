@@ -13,10 +13,12 @@ public class MembersManager extends DatasManager<User> {
 
     public void updateRefList(List<DocumentReference> documentReferences){
         // clean up removed item
-        for (Data data : list){
-            if (!documentReferences.contains(data.getRef())){
-                Log.d(TAG, "delete"+data.getId());
-                remove(data.getId());
+        for (int i = 0; i < list.size(); i++) {
+            User user = list.get(i);
+            if (!documentReferences.contains(user.getRef())) {
+                Log.d(TAG, "delete" + user.getId());
+                remove(user.getId());
+                i--;
             }
         }
         // add or update
@@ -26,7 +28,7 @@ public class MembersManager extends DatasManager<User> {
                 // add
                 Log.d(TAG, "add "+ref.getId());
                 User user = new User().withId(ref.getId()).withRef(ref);
-                user.setListenerRegistration(this, new Data.OnNewDocumentSnapshotListener<User>() {
+                user.setListenerRegistration(this, new Data.OnNewValueListener<User>() {
                     @Override
                     public void onNewData(User user) {
                         put(user);

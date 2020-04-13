@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MapTest</string>
+    <string name="app_name">Tripgether</string>
 
 
     <string name="config_gg_map_api_key">AIzaSyB0L5w8Q390UmPQBlZwAi1kcMF8KvwvsLE</string>

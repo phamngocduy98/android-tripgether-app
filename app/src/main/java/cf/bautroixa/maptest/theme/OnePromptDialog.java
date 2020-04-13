@@ -21,6 +21,39 @@ import cf.bautroixa.maptest.R;
  */
 public class OnePromptDialog extends OneDialog {
 
+    public void setOnDialogResultListener(OnDialogResult onDialogResult) {
+        this.onDialogResult = onDialogResult;
+    }
+
+    EditText editPrompt;
+    OnDialogResult onDialogResult;
+
+    public OnePromptDialog() {
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setEnableNegativeButton(true);
+        setButtonClickListener(new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (onDialogResult != null)
+                    onDialogResult.onDialogResult(getDialog(), which == DialogInterface.BUTTON_NEGATIVE, editPrompt.getText().toString());
+            }
+        });
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        editPrompt = v.findViewById(R.id.edit_prompt_one_dialog);
+        editPrompt.setVisibility(View.VISIBLE);
+        tvMessage.setVisibility(View.GONE);
+        return v;
+    }
+
     public static class Builder {
         OnePromptDialog instance;
 
@@ -54,46 +87,13 @@ public class OnePromptDialog extends OneDialog {
         }
 
         public Builder onResult(OnDialogResult onDialogResult) {
-            instance.setOnDialogSubmit(onDialogResult);
+            instance.setOnDialogResultListener(onDialogResult);
             return this;
         }
 
         public OnePromptDialog build() {
             return instance;
         }
-    }
-
-    EditText editPrompt;
-    OnDialogResult onDialogResult;
-
-    public OnePromptDialog() {
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setEnableNegativeButton(true);
-        setButtonClickListener(new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (onDialogResult != null)
-                    onDialogResult.onDialogResult(getDialog(), which == DialogInterface.BUTTON_NEGATIVE, editPrompt.getText().toString());
-            }
-        });
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
-        editPrompt = v.findViewById(R.id.edit_prompt_one_dialog);
-        editPrompt.setVisibility(View.VISIBLE);
-        tvMessage.setVisibility(View.GONE);
-        return v;
-    }
-
-    public void setOnDialogSubmit(OnDialogResult onDialogResult) {
-        this.onDialogResult = onDialogResult;
     }
 
     public interface OnDialogResult {

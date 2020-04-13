@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_less_radius_full_white_with_border"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="8dp">
+
+    <cf.bautroixa.maptest.theme.RoundedImageView
+        android:id="@+id/img_avatar_item_noti"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:borderRadius="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_notifications_black_24dp" />
+
+
+    <cf.bautroixa.maptest.theme.RoundedImageView
+        android:id="@+id/img_type_item_noti"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        app:borderRadius="18dp"
+        app:layout_constraintBottom_toBottomOf="@+id/img_avatar_item_noti"
+        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_noti"
+        app:srcCompat="@drawable/ic_sos_red_24dp" />
+
+    <TextView
+        android:id="@+id/tv_content_item_noti"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:maxLines="2"
+        android:text="TextView asdasd a asd asd asd asd ad das dasdasdasd adasd asd asd ad asdad adas asd asd asd"
+        app:layout_constraintBottom_toTopOf="@+id/tv_time_item_noti"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/img_avatar_item_noti"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_time_item_noti"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="1 phút trước"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tv_content_item_noti"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/tv_content_item_noti"
+        app:layout_constraintTop_toBottomOf="@+id/tv_content_item_noti" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

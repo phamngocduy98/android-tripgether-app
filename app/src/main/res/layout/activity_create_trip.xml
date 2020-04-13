@@ -21,7 +21,7 @@
     <Button
         android:id="@+id/btn_cancel_activity_create_trip"
         android:layout_height="wrap_content"
-        style="@style/Button.FlatIconButton"
+        style="@style/ImageButton.FlatIconButton"
         android:drawableStart="@drawable/ic_close_black_24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

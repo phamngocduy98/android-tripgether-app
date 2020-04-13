@@ -3,7 +3,6 @@ package cf.bautroixa.maptest;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -23,48 +22,43 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
 import java.util.List;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.Data;
-import cf.bautroixa.maptest.firestore.FireStoreManager;
+import cf.bautroixa.maptest.firestore.DatasManager;
+import cf.bautroixa.maptest.firestore.Event;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.OnePromptDialog;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
-import cf.bautroixa.maptest.utils.BatteryHelper;
 import cf.bautroixa.maptest.utils.ImageHelper;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
 import cf.bautroixa.maptest.utils.UrlParser;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, MapFragment.OnMapClicked {
     private static final String TAG = "MainActivity";
-    private FirebaseFirestore db;
-    private FireStoreManager manager;
-    private SharedPreferences sharedPref;
-    private HashMap<String, User> friends;
+    private static final int STATE_NOTIFICATION = 30;
 
     private static final int STATE_HIDE = -1;
     private static final int STATE_FRIEND_LIST = 0;
     private static final int STATE_FRIEND_LIST_EXPANDED = 1;
     private static final int STATE_FRIEND_STATUS = 10;
     private static final int STATE_CHECKPOINT = 20;
+    String userAvatar;
 
     int state, lastState = 0;
-    String userName;
-    User currentUser;
-    Trip currentTrip;
+    NavNotiFragment navNotiFragment;
 
     User selectedUser = null;
 
@@ -73,10 +67,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     MapFragment mapFragment;
     FriendFragment friendFragment;
     TripOverviewFragment tripOverviewFragment;
+    LinearLayout bottomSpace, bottomSheet, centerSpace;
 
     // Views
     BottomSheetBehavior bottomSheetBehavior;
-    LinearLayout bottomSpace, bottomSheet;
+    Data.OnNewValueListener<User> userOnNewValueListener;
     BottomNavigationView bottomNavigationView;
     FloatingActionButton fabMyLocation;
 
@@ -91,29 +86,16 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     // Utils / Helper
     ShakePhoneHelper shakePhoneHelper;
-    BatteryHelper batteryHelper;
-
-    public MainActivity() {
-        friends = new HashMap<>();
-    }
+    Data.OnNewValueListener<Trip> tripOnNewValueListener;
+    DatasManager.OnItemInsertedListener<Event> onEventInsertedListener;
+    private MainAppManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        db = FirebaseFirestore.getInstance();
-        sharedPref = getSharedPreferences(getString(R.string.shared_preference_name), MODE_PRIVATE);
-        userName = sharedPref.getString(User.USER_NAME, User.NO_USER);
-        // get
-        manager = FireStoreManager.getInstance(userName);
-//        onUpdateCurrentUser(manager.getCurrentUser());
-        manager.getCurrentUser().addOnNewDocumentSnapshotListener(new Data.OnNewDocumentSnapshotListener<User>() {
-            @Override
-            public void onNewData(User user) {
-                onUpdateCurrentUser(user);
-                Log.d(TAG, "update user");
-            }
-        });
+
+        manager = MainAppManager.getInstance();
 
         // bind view
         initStatusBarToolbar();
@@ -125,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             }
         });
         bottomSpace = findViewById(R.id.bottom_space);
+        centerSpace = findViewById(R.id.center_space);
         bottomSheet = findViewById(R.id.bottom_sheet);
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
@@ -134,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.frag_map);
         friendListStatusFragment = (FriendListFragment) getSupportFragmentManager().findFragmentById(R.id.frag_friend_list);
         tripOverviewFragment = new TripOverviewFragment();
+        navNotiFragment = new NavNotiFragment();
 
         bottomSheet();
 
@@ -144,17 +128,54 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
             }
         });
+        userOnNewValueListener = new Data.OnNewValueListener<User>() {
+            @Override
+            public void onNewData(User user) {
+                onUpdateCurrentUser(user);
+            }
+        };
+        tripOnNewValueListener = new Data.OnNewValueListener<Trip>() {
+            @Override
+            public void onNewData(Trip trip) {
+                tvTitle.setText(trip.getName());
+            }
+        };
+        onEventInsertedListener = new DatasManager.OnItemInsertedListener<Event>() {
+            @Override
+            public void onItemInserted(int position, Event data) {
+                bottomNavigationView.getOrCreateBadge(R.id.nav_notification_tab).setNumber(position + 1);
+            }
+        };
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            String checkpointId = bundle.getString("checkpointId", null);
+            if (checkpointId != null) {
+                mapFragment.targetCheckpoint(checkpointId);
+                handleState(STATE_CHECKPOINT);
+                tripOverviewFragment.selectCheckpoint(checkpointId);
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (manager.isLoggedIn()) {
+            userOnNewValueListener.onNewData(manager.getCurrentUser());
+        }
+        manager.getCurrentUser().addOnNewValueListener(userOnNewValueListener);
+        manager.getCurrentTrip().addOnNewValueListener(tripOnNewValueListener);
+        manager.getEventsManager().addOnItemInsertedListener(onEventInsertedListener);
         shakePhoneHelper.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        manager.getCurrentUser().removeOnNewValueListener(userOnNewValueListener);
+        manager.getCurrentTrip().removeOnNewValueListener(tripOnNewValueListener);
+        manager.getEventsManager().removeOnItemInsertedListener(onEventInsertedListener);
         shakePhoneHelper.stop();
     }
 
@@ -190,8 +211,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         } else if (fragment instanceof TripOverviewFragment) {
             ((TripOverviewFragment) fragment).setOnDrawRouteButtonClickedListener(new TripOverviewFragment.OnDrawRouteButtonClickedListener() {
                 @Override
-                public void onClick(List<LatLng> latLng) {
-                    mapFragment.drawRoute(latLng);
+                public void onClick(List<LatLng> latLngList) {
+                    mapFragment.drawRoute(latLngList);
                 }
             });
             ((TripOverviewFragment) fragment).setOnCheckpointChanged(new TripOverviewFragment.OnActiveCheckpointChanged() {
@@ -205,14 +226,13 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             ((MapFragment) fragment).setOnMarkerClickedListener(new MapFragment.OnMarkerClickedListener() {
                 @Override
                 public void onMarkerClick(String type, String id) {
-                    Log.d(TAG, "marker click"+type+"id="+id);
-                    if (type.equals(Collections.CHECKPOINTS)){
-                        mapFragment.targetCheckpoint(id);
+                    Log.d(TAG, "marker click" + type + "id=" + id);
+                    if (type.equals(Collections.CHECKPOINTS)) {
                         handleState(STATE_CHECKPOINT);
                         tripOverviewFragment.selectCheckpoint(id);
-                    } else if (type.equals(Collections.USERS)){
-//                        selectedUser = user;
-//                        handleState(STATE_FRIEND_STATUS);
+                    } else if (type.equals(Collections.USERS)) {
+                        selectedUser = manager.getMembersManager().get(id);
+                        handleState(STATE_FRIEND_STATUS);
                     }
                 }
             });
@@ -220,18 +240,14 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     }
 
     private void onUpdateCurrentUser(User user) {
+        Log.d(TAG, "update user");
         tvSearchbarName.setText(user.getName());
-        if (!user.getAvatar().equals(user.getAvatar())) {
+        if (user.getAvatar() != null && !user.getAvatar().equals(userAvatar)) {
             ImageHelper.loadImage(user.getAvatar(), imgAvatar);
         }
+        userAvatar = user.getAvatar();
         if (manager.getCurrentTripRef() != null) {
             bottomSheet.setVisibility(View.VISIBLE);
-            manager.getCurrentTrip().addOnNewDocumentSnapshotListener(new Data.OnNewDocumentSnapshotListener<Trip>() {
-                @Override
-                public void onNewData(Trip trip) {
-                    tvTitle.setText(trip.getName());
-                }
-            });
         } else {
             bottomSheet.setVisibility(View.GONE);
         }
@@ -252,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(tvTitle, false, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(bottomSheet, true, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, false, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(centerSpace, false, ViewAnim.DIRECTION_DOWN);
                 break;
             case STATE_FRIEND_STATUS:
                 toggleToolbar(manager.getCurrentUser().getActiveTrip() != null);
@@ -259,6 +276,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(centerSpace, false, ViewAnim.DIRECTION_DOWN);
                 replaceBottomSpace(FriendFragment.newInstance(selectedUser.getId()));
                 if (mapFragment != null) mapFragment.targetCamera(true, selectedUser.getLatLng());
                 break;
@@ -268,8 +286,18 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
                 ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
                 ViewAnim.toggleHideShow(bottomSpace, true, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(centerSpace, false, ViewAnim.DIRECTION_DOWN);
                 replaceBottomSpace(tripOverviewFragment);
                 break;
+            case STATE_NOTIFICATION:
+                toggleToolbar(true);
+                ViewAnim.toggleHideShow(tvTitle, true, ViewAnim.DIRECTION_UP);
+                tvTitle.setText("Thông báo");
+                ViewAnim.toggleHideShow(containerToolbar, false, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(bottomSheet, false, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(bottomSpace, false, ViewAnim.DIRECTION_DOWN);
+                ViewAnim.toggleHideShow(centerSpace, true, ViewAnim.DIRECTION_DOWN);
+                replaceCenterSpace(navNotiFragment);
         }
         Log.d(TAG, "new state= " + state);
     }
@@ -277,6 +305,12 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private void replaceBottomSpace(Fragment fragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.bottom_space, fragment);
+        ft.commit();
+    }
+
+    void replaceCenterSpace(Fragment fragment) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.center_space, fragment);
         ft.commit();
     }
 
@@ -348,9 +382,12 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                     @Override
                     public void onResult(String result) {
                         String tripCode = UrlParser.parseTripCode(MainActivity.this, result);
-                        DocumentReference tripRef = db.collection(Collections.TRIPS).document(tripCode);
-                        manager.getCurrentUser().joinTrip(tripRef);
-                        tripRef.update(Trip.MEMBERS, FieldValue.arrayUnion(manager.getCurrentUserRef()));
+                        manager.sendJoinTrip(tripCode, new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+
+                            }
+                        });
                     }
                 });
                 qrScanDialogFragment.show(getSupportFragmentManager(), "QR scanner");
@@ -367,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         imgAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ProfileActivity.class);
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 startActivity(intent);
             }
         });
@@ -381,6 +418,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 break;
             case R.id.nav_trip_tab:
                 handleState(STATE_CHECKPOINT);
+                break;
+            case R.id.nav_notification_tab:
+                handleState(STATE_NOTIFICATION);
                 break;
             case R.id.nav_bar_setting:
                 break;
@@ -413,25 +453,47 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                             selectCheckpointDialog.setOnCheckpointSelectedListener(new SelectCheckpointDialog.OnCheckpointSelectedListener() {
                                 @Override
                                 public void onCheckpointSelected(Checkpoint checkpoint) {
-                                    manager.addRollUpPoint(checkpoint.getRef());
+                                    selectCheckpointDialog.toggleProgressBar(true);
+                                    manager.sendAddRollUpPoint(null, checkpoint.getRef(), new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            selectCheckpointDialog.toggleProgressBar(false);
+                                            selectCheckpointDialog.dismiss();
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                }
+                            });
+                            selectCheckpointDialog.setButtonClickListener(new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
                                     selectCheckpointDialog.dismiss();
-                                    dialog.dismiss();
                                 }
                             });
                             selectCheckpointDialog.show(getSupportFragmentManager(), "select cp dialog");
                         } else {
                             // vị trí hiện tại
-                            OneDialog enterCheckpointNameDialog = new OnePromptDialog.Builder().title(R.string.dialog_title_enter_checkpoint_name)
-                                    .onResult(new OnePromptDialog.OnDialogResult() {
-                                        @Override
-                                        public void onDialogResult(Dialog dialog1, boolean isCanceled, String value) {
-                                            if (!isCanceled) {
-                                                Log.d(TAG, value);
+                            OnePromptDialog.Builder builder1 = new OnePromptDialog.Builder();
+                            builder1.title(R.string.dialog_title_enter_checkpoint_name);
+                            final OnePromptDialog enterCheckpointNameDialog = builder1.build();
+                            enterCheckpointNameDialog.setOnDialogResultListener(new OnePromptDialog.OnDialogResult() {
+                                @Override
+                                public void onDialogResult(Dialog dialog1, boolean isCanceled, String value) {
+                                    if (!isCanceled) {
+                                        enterCheckpointNameDialog.toggleProgressBar(true);
+                                        manager.sendAddRollUpPoint(value, new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                enterCheckpointNameDialog.toggleProgressBar(false);
+                                                enterCheckpointNameDialog.dismiss();
                                                 dialog.dismiss();
                                             }
-                                            dialog1.dismiss();
-                                        }
-                                    }).build();
+                                        });
+                                    } else {
+                                        enterCheckpointNameDialog.dismiss();
+                                    }
+                                }
+                            });
                             enterCheckpointNameDialog.show(getSupportFragmentManager(), "enter cp name");
                         }
                     }
@@ -445,18 +507,27 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 startActivity(intent);
                 return true;
             case R.id.menu_leave_trip_activity_main:
-                OneDialog leaveTripConfirmDialog = new OneDialog.Builder().title(R.string.dialog_title_leave_trip).message(R.string.dialog_message_leave_trip)
-                        .posBtnText(R.string.btn_leave_trip).enableNegativeButton(true).buttonClickListener(new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (which == DialogInterface.BUTTON_POSITIVE){
-                                    manager.getCurrentUser().leaveTrip();
-                                    dialog.dismiss();
-                                } else {
-                                    dialog.dismiss();
+                final OneDialog leaveTripConfirmDialog = new OneDialog.Builder().title(R.string.dialog_title_leave_trip)
+                        .message(R.string.dialog_message_leave_trip)
+                        .posBtnText(R.string.btn_leave_trip).enableNegativeButton(true)
+                        .build();
+                leaveTripConfirmDialog.setButtonClickListener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, int which) {
+                        if (which == DialogInterface.BUTTON_POSITIVE) {
+                            leaveTripConfirmDialog.toggleProgressBar(true);
+                            manager.sendLeaveTrip(null, new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    leaveTripConfirmDialog.toggleProgressBar(false);
+                                    leaveTripConfirmDialog.dismiss();
                                 }
-                            }
-                        }).build();
+                            });
+                        } else {
+                            dialog.dismiss();
+                        }
+                    }
+                });
                 leaveTripConfirmDialog.show(getSupportFragmentManager(), "leave trip");
                 return true;
             default:

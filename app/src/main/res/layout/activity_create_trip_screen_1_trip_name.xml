@@ -1,48 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:orientation="vertical">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:text="Hãy bắt đầu bằng cách đặt tên cho chuyến đi của bạn"
-        android:textColor="@android:color/black"
-        android:textSize="28dp" />
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="16dp">
 
     <EditText
-        android:id="@+id/edit_name_trip_create"
-        android:layout_width="match_parent"
+        android:id="@+id/edit_name_activity_trip_create"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="18dp"
         android:background="@android:color/transparent"
         android:ems="10"
         android:hint="Tên chuyến đi"
-        android:text=""
         android:inputType="textMultiLine"
         android:maxLines="2"
+        android:text=""
         android:textColor="@color/colorPrimary"
-        android:textSize="38dp" />
+        android:textSize="38dp"
+        app:layout_constraintBottom_toTopOf="@+id/tv_trip_name_hint_activity_create_trip"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/tv_trip_name_hint_activity_create_trip"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="(!) Vui lòng nhập tên chuyến đi"
         android:textColor="@android:color/holo_red_dark"
-        android:text="(!) Vui lòng nhập tên chuyến đi" />
+        app:layout_constraintBottom_toTopOf="@+id/btn_continue_screen1_activity_create_trip"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_name_activity_trip_create" />
 
     <Button
         android:id="@+id/btn_continue_screen1_activity_create_trip"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="18dp"
         style="@style/Button.RaisedButton"
-        android:text="Tiếp tục" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Tiếp tục"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

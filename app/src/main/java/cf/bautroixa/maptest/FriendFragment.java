@@ -19,7 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 
 import cf.bautroixa.maptest.firestore.Data;
-import cf.bautroixa.maptest.firestore.FireStoreManager;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.utils.BatteryHelper;
 import cf.bautroixa.maptest.utils.ImageHelper;
@@ -29,9 +29,9 @@ public class FriendFragment extends Fragment {
     public static final String ARG_USER_NAME = "user_name";
 
     private FirebaseFirestore db;
-    private FireStoreManager manager;
+    private MainAppManager manager;
     private User activeUser;
-    private Data.OnNewDocumentSnapshotListener activeUserListener;
+    private Data.OnNewValueListener activeUserListener;
     private OnDrawRouteButtonClickedListener mRouteBtnListener;
 
     TextView tvName, tvLocation, tvBattery, tvSpeed;
@@ -41,8 +41,7 @@ public class FriendFragment extends Fragment {
     int pos;
 
     public FriendFragment() {
-        // TODO: use shared ref to get username
-        manager = FireStoreManager.getInstance(User.NO_USER);
+        manager = MainAppManager.getInstance();
         this.activeUser = new User();
     }
 
@@ -67,7 +66,7 @@ public class FriendFragment extends Fragment {
             String userName = bundle.getString(ARG_USER_NAME);
             ArrayList<User> members = manager.getMembers();
             activeUser = manager.getMembersManager().get(userName);
-            activeUserListener = new Data.OnNewDocumentSnapshotListener() {
+            activeUserListener = new Data.OnNewValueListener() {
                 @Override
                 public void onNewData(Data data) {
                     updateView();
@@ -79,13 +78,13 @@ public class FriendFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (activeUserListener != null) activeUser.addOnNewDocumentSnapshotListener(activeUserListener);
+        if (activeUserListener != null) activeUser.addOnNewValueListener(activeUserListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (activeUserListener != null) activeUser.removeOnNewDocumentSnapshotListener(activeUserListener);
+        if (activeUserListener != null) activeUser.removeOnNewValueListener(activeUserListener);
     }
 
     @Override

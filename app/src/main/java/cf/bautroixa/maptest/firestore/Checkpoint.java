@@ -3,6 +3,7 @@ package cf.bautroixa.maptest.firestore;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
@@ -15,6 +16,8 @@ public class Checkpoint extends Data {
 
     @Exclude Marker marker;
     @Exclude LatLng latLng;
+    @Exclude
+    VisitsManager visitsManager;
 
     String name;
     GeoPoint coordinate;
@@ -29,6 +32,20 @@ public class Checkpoint extends Data {
         this.coordinate = coordinate;
         this.location = location;
         this.time = time;
+    }
+
+    @Exclude
+    @Override
+    public <T extends Data> T withRef(DocumentReference ref) {
+        T thisT = super.withRef(ref);
+        this.initVisitsManager();
+        return thisT;
+    }
+
+    @Exclude
+    public void initVisitsManager() {
+        this.visitsManager = new VisitsManager();
+        this.visitsManager.setCollectionListener(ref.collection(Collections.VISITORS), id);
     }
 
     @Override
@@ -90,6 +107,11 @@ public class Checkpoint extends Data {
     @Exclude
     public void setMarker(Marker marker) {
         this.marker = marker;
+    }
+
+    @Exclude
+    public VisitsManager getVisitsManager() {
+        return visitsManager;
     }
 
     @Exclude

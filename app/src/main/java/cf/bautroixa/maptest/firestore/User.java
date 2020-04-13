@@ -1,11 +1,7 @@
 package cf.bautroixa.maptest.firestore;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
@@ -14,6 +10,8 @@ import com.google.firebase.firestore.GeoPoint;
 public class User extends Data {
     @Exclude
     public static final String NO_USER = "notLoggedIn";
+    @Exclude
+    public static final String FCM_TOKEN = "fcmToken";
     @Exclude
     public static final String USER_NAME = "userName";
     @Exclude
@@ -52,6 +50,7 @@ public class User extends Data {
     Long speed;
     int battery;
     DocumentReference activeTrip;
+    String fcmToken;
 
     @Exclude
     LatLng latLng;
@@ -152,6 +151,14 @@ public class User extends Data {
         this.email = email;
     }
 
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
     @Exclude
     public LatLng getLatLng() {
         if (this.latLng == null) {
@@ -175,16 +182,6 @@ public class User extends Data {
     }
 
     @Exclude
-    public Task<Void> joinTrip(DocumentReference tripRef) {
-        return this.getRef().update(ACTIVE_TRIP, tripRef);
-    }
-
-    @Exclude
-    public Task<Void> leaveTrip() {
-        return this.getRef().update(ACTIVE_TRIP, null);
-    }
-
-    @Exclude
     @Override
     public void onDocumentSnapshot(DocumentSnapshot documentSnapshot) {
         User user = documentSnapshot.toObject(User.class);
@@ -205,10 +202,6 @@ public class User extends Data {
         if (this.marker != null){
             marker.setPosition(this.latLng);
         }
-    }
-
-    public Task<Void> sendUpdate(@NonNull String field, @Nullable Object value, Object... moreFieldsAndValues) {
-        return this.ref.update(field, value, moreFieldsAndValues);
     }
 
     @Exclude

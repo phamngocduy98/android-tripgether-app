@@ -1,132 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@android:color/white"
+    android:background="@color/colorBackground"
     android:orientation="vertical">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="fill_parent"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_dialog_create_checkpoint"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1.0">
+        android:background="#F2F2F2"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <fragment
+    <androidx.cardview.widget.CardView
+        android:id="@+id/container_map_checkpoint_select"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_dialog_create_checkpoint">
+
+        <com.google.android.gms.maps.MapView
             android:id="@+id/map_checkpoint_select"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="fill_parent"
-            android:layout_height="0.0dip"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <ImageView
-            android:layout_width="50.0dip"
-            android:layout_height="50.0dip"
-            android:layout_marginBottom="50.0dip"
-            app:layout_constraintBottom_toBottomOf="@id/map_checkpoint_select"
-            app:layout_constraintEnd_toEndOf="@id/map_checkpoint_select"
-            app:layout_constraintStart_toStartOf="@id/map_checkpoint_select"
-            app:layout_constraintTop_toTopOf="@id/map_checkpoint_select"
-            app:srcCompat="@drawable/marker" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="50dp"
+        app:layout_constraintBottom_toBottomOf="@id/container_map_checkpoint_select"
+        app:layout_constraintEnd_toEndOf="@+id/container_map_checkpoint_select"
+        app:layout_constraintStart_toStartOf="@+id/container_map_checkpoint_select"
+        app:layout_constraintTop_toTopOf="@id/container_map_checkpoint_select"
+        app:srcCompat="@drawable/marker" />
+
+    <AutoCompleteTextView
+        android:id="@+id/edit_search_location_checkpoint"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="6dp"
+        android:layout_weight="1"
+        android:background="@drawable/edit_bg_radius"
+        android:ems="10"
+        android:hint="Tìm kiếm địa điểm"
+        android:inputType="textPersonName"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/toolbar_dialog_create_checkpoint"
+        app:layout_constraintEnd_toStartOf="@+id/btn_my_location_dialog_create_checkpoint"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_back_dialog_create_checkpoint"
+        style="@style/ImageButton.FlatIconButton"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16.0dip"
-        android:layout_marginTop="16.0dip"
-        android:layout_marginRight="16.0dip"
-        android:layout_marginBottom="16.0dip"
-        android:orientation="vertical">
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_search_location_checkpoint"
+        app:layout_constraintStart_toStartOf="@+id/edit_search_location_checkpoint"
+        app:layout_constraintTop_toTopOf="@+id/edit_search_location_checkpoint"
+        app:srcCompat="@drawable/ic_keyboard_arrow_left_black_24dp" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Vị trí checkpoint" />
+    <ImageButton
+        android:id="@+id/btn_clear_edit_search"
+        style="@style/ImageButton.FlatIconButton"
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_search_location_checkpoint"
+        app:layout_constraintEnd_toEndOf="@+id/edit_search_location_checkpoint"
+        app:layout_constraintTop_toTopOf="@id/edit_search_location_checkpoint"
+        app:srcCompat="@drawable/ic_close_black_24dp" />
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+    <ImageButton
+        android:id="@+id/btn_my_location_dialog_create_checkpoint"
+        style="@style/ImageButton.FlatIconButton"
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/toolbar_dialog_create_checkpoint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_my_location_black_24dp" />
 
-            <AutoCompleteTextView
-                android:id="@+id/edit_location_checkpoint"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="Tìm kiếm..."
-                android:inputType="textPersonName" />
+    <View
+        android:id="@+id/bg_bottom_dialog_create_checkpoint"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_radius_full_white_with_border"
+        app:layout_constraintBottom_toTopOf="@id/btn_cancel_checkpoint"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/textView9" />
 
-            <ImageButton
-                android:id="@+id/btn_location_checkpoint_search"
-                style="@style/Button.FlatIconButton"
-                android:layout_width="50.0dip"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="-50.0dip"
-                app:srcCompat="@drawable/ic_search_black_24dp" />
-        </LinearLayout>
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:text="Tên địa điểm"
+        app:layout_constraintBottom_toTopOf="@+id/edit_name_dialog_checkpoint_trip_create"
+        app:layout_constraintEnd_toEndOf="@+id/edit_name_dialog_checkpoint_trip_create"
+        app:layout_constraintStart_toStartOf="@+id/edit_name_dialog_checkpoint_trip_create" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Tên địa điểm" />
+    <EditText
+        android:id="@+id/edit_name_dialog_checkpoint_trip_create"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/textView8"
+        app:layout_constraintEnd_toEndOf="@+id/btn_add_checkpoint"
+        app:layout_constraintStart_toStartOf="@+id/btn_cancel_checkpoint" />
 
-        <EditText
-            android:id="@+id/edit_name_dialog_checkpoint_trip_create"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName" />
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:text="Thời gian"
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Thời gian" />
+        app:layout_constraintBottom_toTopOf="@+id/edit_time_checkpoint"
+        app:layout_constraintEnd_toEndOf="@+id/edit_time_checkpoint"
+        app:layout_constraintStart_toStartOf="@+id/edit_time_checkpoint" />
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+    <EditText
+        android:id="@+id/edit_time_checkpoint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="00:00"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/btn_cancel_checkpoint"
+        app:layout_constraintEnd_toEndOf="@+id/btn_add_checkpoint"
+        app:layout_constraintStart_toStartOf="@+id/btn_cancel_checkpoint" />
 
-            <EditText
-                android:id="@+id/edit_time_checkpoint"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:focusable="false"
-                android:hint="00:00"
-                android:inputType="textPersonName" />
+    <Button
+        android:id="@+id/btn_add_checkpoint"
+        style="@style/Button.FlatButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="8dp"
+        android:text="Thêm"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_cancel_checkpoint" />
 
-            <ImageButton
-                style="@style/Button.FlatIconButton"
-                android:layout_width="50.0dip"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="-50.0dip"
-                app:srcCompat="@drawable/ic_edit_black_24dp" />
-        </LinearLayout>
+    <Button
+        android:id="@+id/btn_cancel_checkpoint"
+        style="@style/Button.FlatButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="8dp"
+        android:text="Hủy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_add_checkpoint"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_cancel_checkpoint"
-                style="@style/Button.FlatButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:text="Hủy" />
-
-            <Button
-                android:id="@+id/btn_add_checkpoint"
-                style="@style/Button.FlatButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:text="Thêm" />
-        </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

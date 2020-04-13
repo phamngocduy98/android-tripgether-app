@@ -1,8 +1,6 @@
 package cf.bautroixa.maptest;
 
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,22 +15,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
-import cf.bautroixa.maptest.firestore.FireStoreManager;
-import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.utils.DateFormatter;
 
 public class SelectCheckpointDialog extends OneDialog {
     RecyclerView rv;
-    FireStoreManager manager;
-    SharedPreferences sharedPref;
+    MainAppManager manager;
     OnCheckpointSelectedListener onCheckpointSelectedListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
-        manager = FireStoreManager.getInstance(sharedPref.getString(User.USER_NAME, User.NO_USER));
+        manager = MainAppManager.getInstance();
         setButtonClickListener(new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

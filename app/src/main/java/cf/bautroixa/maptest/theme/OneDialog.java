@@ -70,7 +70,7 @@ public class OneDialog extends DialogFragment {
     LinearLayout containerBody;
     View customBody;
     Button btnPos, btnNeg;
-    boolean isEnableNegativeButton = false;
+    boolean isEnableNegativeButton = false, isProcessing = false;
     int titleRes = R.string.dialog_title, messageRes = R.string.dialog_messsage, posBtnRes = R.string.btn_got_it, negBtnRes = R.string.btn_cancel;
 
     public OneDialog() {
@@ -118,7 +118,8 @@ public class OneDialog extends DialogFragment {
         btnPos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (btnClickListener != null) btnClickListener.onClick(getDialog(), DialogInterface.BUTTON_POSITIVE);
+                if (btnClickListener != null && !isProcessing)
+                    btnClickListener.onClick(getDialog(), DialogInterface.BUTTON_POSITIVE);
             }
         });
         if (customBody != null){
@@ -132,7 +133,8 @@ public class OneDialog extends DialogFragment {
             btnNeg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (btnClickListener != null) btnClickListener.onClick(getDialog(), DialogInterface.BUTTON_NEGATIVE);
+                    if (btnClickListener != null && !isProcessing)
+                        btnClickListener.onClick(getDialog(), DialogInterface.BUTTON_NEGATIVE);
                 }
             });
         } else {
@@ -140,6 +142,24 @@ public class OneDialog extends DialogFragment {
             tvBtnDivider.setVisibility(View.GONE);
         }
         return v;
+    }
+
+    public void toggleProgressBar(boolean onOff) {
+        isProcessing = onOff;
+        if (onOff) {
+            // ON
+            btnNeg.setVisibility(View.GONE);
+            tvBtnDivider.setVisibility(View.GONE);
+            btnPos.setText("Loading...");
+        } else {
+            // OFF
+            if (isEnableNegativeButton) {
+                btnNeg.setVisibility(View.VISIBLE);
+                tvBtnDivider.setVisibility(View.GONE);
+            }
+            btnPos.setText(posBtnRes);
+        }
+
     }
 
     public void setEnableNegativeButton(boolean enableNegativeButton) {

@@ -4,7 +4,14 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
 
+    <!-- STYLE -->
+    <color name="disableColorPrimary">#78008CFF</color>
+    <color name="colorControlActivate">#4297ff</color>
+    <color name="white">#fafafa</color>
+    <color name="colorBackground">#F2F2F2</color>
+    <color name="colorEditTextBg">#E6E6E6</color>
     <color name="colorGrey">#BBBBBB</color>
+
     <color name="colorItemOutcomingMessage">#0099ff</color>
     <color name="colorItemIncomingMessage">#f1f0f0</color>
     <color name="colorBorder">#D0D1D1</color>

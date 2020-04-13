@@ -2,11 +2,12 @@ package cf.bautroixa.maptest;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.InflateException;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,18 +17,23 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
 import com.mapbox.api.geocoding.v5.MapboxGeocoding;
@@ -55,8 +61,9 @@ public class CreateCheckpointDialogFragment extends FullScreenDialogFragment imp
     private GoogleMap mMap;
     private EditText editTime, editName;
     private AutoCompleteTextView editLocation;
-    private ImageView btnSearchLocation;
     private Button btnCancel, btnOk;
+    MapView mapView;
+    private ImageButton btnBack, btnMyLocation, btnClearLocation;
 
     private LatLng selectedLatLng = new LatLng(21.0245, 105.84117);
     private Calendar selectedTime = Calendar.getInstance();
@@ -76,25 +83,41 @@ public class CreateCheckpointDialogFragment extends FullScreenDialogFragment imp
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (view != null) {
-            ViewGroup parent = (ViewGroup) view.getParent();
-            if (parent != null)
-                parent.removeView(view);
-        }
-        try {
-            view = inflater.inflate(R.layout.fragment_dialog_create_checkpoint, container, false);
-        } catch (InflateException e) {
-            /* map is already there, just return view as it is */
-        }
-        final SupportMapFragment mapFragment = (SupportMapFragment) getFragmentManager().findFragmentById(R.id.map_checkpoint_select);
-        mapFragment.getMapAsync(this);
+        view = inflater.inflate(R.layout.fragment_dialog_create_checkpoint, container, false);
+        mapView = view.findViewById(R.id.map_checkpoint_select);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
 
-        editLocation = view.findViewById(R.id.edit_location_checkpoint);
-        btnSearchLocation = view.findViewById(R.id.btn_location_checkpoint_search);
+        editLocation = view.findViewById(R.id.edit_search_location_checkpoint);
+        btnClearLocation = view.findViewById(R.id.btn_clear_edit_search);
+        btnBack = view.findViewById(R.id.btn_back_dialog_create_checkpoint);
+        btnMyLocation = view.findViewById(R.id.btn_my_location_dialog_create_checkpoint);
         editName = view.findViewById(R.id.edit_name_dialog_checkpoint_trip_create);
         editTime = view.findViewById(R.id.edit_time_checkpoint);
         btnCancel = view.findViewById(R.id.btn_cancel_checkpoint);
         btnOk = view.findViewById(R.id.btn_add_checkpoint);
+
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
+
+        btnMyLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(getContext());
+                locationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (!task.isSuccessful()) return;
+                        Location location = task.getResult();
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18));
+                    }
+                });
+            }
+        });
 
         editLocation.setThreshold(1);
         final ArrayList<Point> points = new ArrayList<>();
@@ -108,6 +131,31 @@ public class CreateCheckpointDialogFragment extends FullScreenDialogFragment imp
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedLatLng, 18));
             }
         });
+        editLocation.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                String query = editLocation.getText().toString();
+                AppRequest.getGeocodingLatLng(getContext(), query, new HttpRequest.Callback<APILocation>() {
+                    @Override
+                    public void onResponse(final APILocation response) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(response.getLatLng(), 14));
+                                editLocation.setHint(response.getAddress());
+                                editLocation.setText("");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String reason) {
+
+                    }
+                });
+                return true;
+            }
+        });
         editLocation.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -115,6 +163,11 @@ public class CreateCheckpointDialogFragment extends FullScreenDialogFragment imp
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() <= 2) {
+                    btnClearLocation.setVisibility(View.GONE);
+                    return;
+                }
+                btnClearLocation.setVisibility(View.VISIBLE);
                 MapboxGeocoding mapboxGeocoding = MapboxGeocoding.builder()
                         .accessToken(getString(R.string.config_mapbox_map_api_key))
                         .query(s.toString())
@@ -149,28 +202,10 @@ public class CreateCheckpointDialogFragment extends FullScreenDialogFragment imp
             }
         });
 
-        btnSearchLocation.setOnClickListener(new View.OnClickListener() {
+        btnClearLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String query = editLocation.getText().toString();
-                AppRequest.getGeocodingLatLng(getContext(), query, new HttpRequest.Callback<APILocation>() {
-                    @Override
-                    public void onResponse(final APILocation response) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(response.getLatLng(), 14));
-                                editLocation.setHint(response.getAddress());
-                                editLocation.setText("");
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(String reason) {
-
-                    }
-                });
+                editLocation.setText("");
             }
         });
         final int hour = selectedTime.get(Calendar.HOUR_OF_DAY);
@@ -261,5 +296,48 @@ public class CreateCheckpointDialogFragment extends FullScreenDialogFragment imp
     public void onDetach() {
         super.onDetach();
         this.onCheckpointSetListener = null;
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mapView.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
     }
 }

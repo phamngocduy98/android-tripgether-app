@@ -1,7 +1,6 @@
 package cf.bautroixa.maptest;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,26 +16,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cf.bautroixa.maptest.firestore.DatasManager;
-import cf.bautroixa.maptest.firestore.FireStoreManager;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-import static android.content.Context.MODE_PRIVATE;
-
 public class FriendListFragment extends Fragment {
 
     private static final String TAG = "FriendListStatusFrag";
-    private FirebaseFirestore db;
-    private FireStoreManager manager;
-    private SharedPreferences sharedPref;
+    private MainAppManager manager;
     private ArrayList<User> members;
     DatasManager.OnItemInsertedListener onUserInsertedListener;
     DatasManager.OnItemChangedListener onUserChangedListener;
@@ -72,24 +66,22 @@ public class FriendListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = FirebaseFirestore.getInstance();
-        sharedPref = getContext().getSharedPreferences(getString(R.string.shared_preference_name), MODE_PRIVATE);
-        manager = FireStoreManager.getInstance(sharedPref.getString(User.USER_NAME, User.NO_USER));
+        manager = MainAppManager.getInstance();
         members = manager.getMembers();
         friendStatusAdapter = new FriendStatusAdapter(getContext(), this.onFriendItemClickListener);
         friendStatusLiteAdapter = new FriendStatusLiteAdapter(getContext(), this.onFriendItemClickListener);
 
-        onUserInsertedListener = new DatasManager.OnItemInsertedListener() {
+        onUserInsertedListener = new DatasManager.OnItemInsertedListener<User>() {
             @Override
-            public void onItemInserted(int position) {
+            public void onItemInserted(int position, User data) {
                 friendStatusAdapter.notifyItemInserted(position);
                 friendStatusLiteAdapter.notifyItemInserted(position);
                 Log.d(TAG, "insert"+position);
             }
         };
-        onUserChangedListener = new DatasManager.OnItemChangedListener() {
+        onUserChangedListener = new DatasManager.OnItemChangedListener<User>() {
             @Override
-            public void onItemChanged(int position) {
+            public void onItemChanged(int position, User data) {
                 friendStatusAdapter.notifyItemChanged(position);
                 friendStatusLiteAdapter.notifyItemChanged(position);
                 Log.d(TAG, "change"+position);
@@ -159,7 +151,7 @@ public class FriendListFragment extends Fragment {
 
     public void onSlideBottomSheet(float percent) {
         rvFriendListLite.setTranslationY(-rvFriendListLite.getHeight() * percent);
-        rvFriendListLite.setAlpha(percent);
+        rvFriendListLite.setAlpha(1 - percent);
         rvFriendList.setTranslationY(-rvFriendListLite.getHeight() * percent);
         rvFriendList.setAlpha(percent);
     }
@@ -172,10 +164,10 @@ public class FriendListFragment extends Fragment {
     }
 
     public class FriendStatusViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvLocation, tvCount, tvBattery;
-        RoundedImageView imgAvatar;
-        View view;
-        User currentUser;
+        protected TextView tvName, tvLocation, tvCount, tvBattery;
+        protected RoundedImageView imgAvatar;
+        protected View view;
+        protected User currentUser;
 
         public FriendStatusViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -197,10 +189,14 @@ public class FriendListFragment extends Fragment {
             if (!user.getAvatar().equals(currentUser.getAvatar())) {
                 ImageHelper.loadImage(user.getAvatar(), imgAvatar);
             }
-            if (user.getId().equals(manager.getCurrentTrip().getLeader().getId())){
-                tvCount.setText("LEADER");
+            if (manager.getSosRequestsManager().contains(user.getId())) {
+                tvCount.setText("SOS");
             } else {
-                tvCount.setVisibility(View.GONE);
+                if (user.getId().equals(manager.getCurrentTrip().getLeader().getId())) {
+                    tvCount.setText("Leader");
+                } else {
+                    tvCount.setVisibility(View.GONE);
+                }
             }
             currentUser = user;
         }

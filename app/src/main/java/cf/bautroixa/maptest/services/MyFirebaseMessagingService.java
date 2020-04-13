@@ -10,13 +10,25 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import cf.bautroixa.maptest.LoginActivity;
+import java.util.Iterator;
+import java.util.Map;
+
+import cf.bautroixa.maptest.NotifyActivity;
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.SplashScreenActivity;
+import cf.bautroixa.maptest.data.FcmMessage;
+import cf.bautroixa.maptest.data.NotificationItem;
+import cf.bautroixa.maptest.firestore.Event;
+import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.firestore.User;
 
 /**
  * NOTE: There can only be one service in each app that receives FCM messages. If multiple
@@ -32,6 +44,17 @@ import cf.bautroixa.maptest.R;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
+    private MainAppManager manager;
+
+    public MyFirebaseMessagingService() {
+        manager = MainAppManager.getInstance();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        manager = MainAppManager.getInstance();
+    }
 
     /**
      * Called when message is received.
@@ -62,15 +85,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
         // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0) {
+        Map<String, String> data = remoteMessage.getData();
+        if (data.size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-
-            if (/* Check if data needs to be processed by long running job */ true) {
-                // For long-running tasks (10 seconds or more) use WorkManager.
-                scheduleJob();
+            FcmMessage fcmMessage = FcmMessage.fromHashMap(data);
+            if (fcmMessage.getPriority().equals(FcmMessage.Priority.HIGH)) {
+                //high priority event => handleNow (within 10 seconds)
+                handleNowIntentToNotificationActivity(data);
             } else {
-                // Handle message within 10 seconds
-                handleNow();
+                // low priority event => show small notification
+                Event event = manager.getEventsManager().get(fcmMessage.getEventRefId());
+                NotificationItem notificationItem = event.getNotificationItem(manager);
+                sendNotification(notificationItem.getIntroContent(), notificationItem.getShortContent());
             }
 
         }
@@ -94,13 +120,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * is initially generated so this is where you would retrieve the token.
      */
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(final String token) {
         Log.d(TAG, "Refreshed token: " + token);
-
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
-        sendRegistrationToServer(token);
+        if (manager.isLoggedIn()) {
+            manager.getCurrentUser().sendUpdate(null, User.FCM_TOKEN, token).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Log.d(TAG, "Update token to firestore: " + token);
+                }
+            });
+        }
     }
     // [END on_new_token]
 
@@ -116,31 +145,27 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     /**
-     * Handle time allotted to BroadcastReceivers.
+     * handleNowIntentToNotificationActivity
+     * TODO: Undeleted note from Google: Handle time allotted to BroadcastReceivers.
      */
-    private void handleNow() {
-        Log.d(TAG, "Short lived task is done.");
-    }
-
-    /**
-     * Persist token to third-party servers.
-     * <p>
-     * Modify this method to associate the user's FCM InstanceID token with any server-side account
-     * maintained by your application.
-     *
-     * @param token The new token.
-     */
-    private void sendRegistrationToServer(String token) {
-        // TODO: Implement this method to send token to your app server.
+    private void handleNowIntentToNotificationActivity(Map<String, String> data) {
+        Intent intent = new Intent(this, NotifyActivity.class);
+        Iterator<Map.Entry<String, String>> it = data.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> pair = it.next();
+            Log.d(TAG, pair.getKey() + " = " + pair.getValue());
+            intent.putExtra(pair.getKey(), pair.getValue());
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     /**
      * Create and show a simple notification containing the received FCM message.
-     *
-     * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody) {
-        Intent intent = new Intent(this, LoginActivity.class);
+    private void sendNotification(String title, String messageBody) {
+        Intent intent = new Intent(this, SplashScreenActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
@@ -149,8 +174,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.ic_marker)
-                        .setContentTitle("Tripgether FCM")
+                        .setSmallIcon(R.drawable.ic_tripgether)
+                        .setContentTitle(title)
                         .setContentText(messageBody)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
@@ -162,7 +187,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
-                    "Channel human readable title",
+                    "Thông báo tập hợp và cảnh báo SOS",
                     NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
