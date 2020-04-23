@@ -35,28 +35,15 @@
             android:ems="10"
             android:visibility="gone"
             android:inputType="textPersonName"
-            android:text="Name" />
+            android:text="" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="22dp"
+        android:divider="@drawable/divider"
         android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btn_positive_one_dialog"
-            style="@style/Button.FlatButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@android:string/ok" />
-
-        <TextView
-            android:id="@+id/tv_buttions_divider"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="|" />
 
         <Button
             android:id="@+id/btn_negative_one_dialog"
@@ -65,6 +52,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/btn_cancel" />
+        <Button
+            android:id="@+id/btn_positive_one_dialog"
+            style="@style/Button.FlatButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/ok" />
     </LinearLayout>
 
 </LinearLayout>

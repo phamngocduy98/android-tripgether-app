@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,7 +7,7 @@
 
     <fragment
         android:id="@+id/frag_map"
-        android:name="cf.bautroixa.maptest.MapFragment"
+        android:name="cf.bautroixa.maptest.TabMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="0dp">
@@ -16,21 +15,11 @@
     </fragment>
 
 
-    <LinearLayout
-        android:id="@+id/center_space"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_activity_main_layout"></LinearLayout>
-
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinatorLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintBottom_toTopOf="@+id/frag_bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -53,15 +42,16 @@
             android:id="@+id/bottom_sheet"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_radius_top_white_with_border"
+            android:background="@drawable/bg_radius_full_white_with_border"
             app:behavior_hideable="false"
             app:behavior_peekHeight="104dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
             <fragment
                 android:id="@+id/frag_friend_list"
+                android:name="cf.bautroixa.maptest.BottomSheetMemberListFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:name="cf.bautroixa.maptest.FriendListFragment"/>
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
@@ -76,24 +66,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"></LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/navigation"
-        app:theme="@style/BottomNavigationView"
-        android:background="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/frag_map"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" >
-
-    </com.google.android.material.bottomnavigation.BottomNavigationView>
-
-    <include
-        android:id="@+id/toolbar_activity_main_layout"
-        layout="@layout/toolbar_activity_main"
+    <LinearLayout
+        android:id="@+id/center_space"
         android:layout_width="0dp"
-        android:layout_height="61dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/frag_bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_status_bar_activity_main"></LinearLayout>
+
+    <fragment
+        android:id="@+id/frag_search"
+        android:name="cf.bautroixa.maptest.SearchFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/frag_bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view_status_bar_activity_main" />
@@ -102,10 +90,19 @@
         android:id="@+id/view_status_bar_activity_main"
         android:layout_width="0dp"
         android:layout_height="30dp"
-        android:background="@android:color/white"
+        android:background="@color/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <fragment
+        android:id="@+id/frag_bottom_navigation"
+        android:name="cf.bautroixa.maptest.BottomNavigationFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

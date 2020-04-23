@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#008cff</color>
+    <color name="colorPrimaryDark">#008cff</color>
+    <color name="colorAccent">#00BCD4</color>
 
     <!-- STYLE -->
+    <color name="colorText">#4C4C4C</color>
+    <color name="colorTextSecondary">#979797</color>
+    <color name="colorButtonBg">#DA008CFF</color>
+    <color name="colorButtonBgSelected">#C600BCD4</color>
+    <color name="colorTextButton">#008cff</color>
+    <color name="colorBackground">#F2F2F2</color>
+    <color name="colorEditTextBg">#E6E6E6</color>
+    <color name="colorBgNavigationBar">#F0F0F5</color>
+
+
     <color name="disableColorPrimary">#78008CFF</color>
     <color name="colorControlActivate">#4297ff</color>
     <color name="white">#fafafa</color>
-    <color name="colorBackground">#F2F2F2</color>
-    <color name="colorEditTextBg">#E6E6E6</color>
+
     <color name="colorGrey">#BBBBBB</color>
 
     <color name="colorItemOutcomingMessage">#0099ff</color>

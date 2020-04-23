@@ -6,6 +6,43 @@
         <item name="colorPrimary">#008cff</item>
         <item name="colorPrimaryDark">#008cff</item>
         <item name="colorAccent">#00BCD4</item>
+
+        <item name="android:statusBarColor">#000</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <style name="NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="colorPrimary">#008cff</item>
+        <item name="colorPrimaryDark">#008cff</item>
+        <item name="colorAccent">#00BCD4</item>
+
+        <item name="android:statusBarColor">#000</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <style name="NoActionBar.NoStatusBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:windowContentOverlay">@null</item>
+
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
+        <item name="colorPrimary">#008cff</item>
+        <item name="colorPrimaryDark">#008cff</item>
+        <item name="colorAccent">#00BCD4</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+        <!--        <item name="android:windowTranslucentNavigation">true</item>-->
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="AppTheme.Transparent">
@@ -33,25 +70,15 @@
         <item name="colorOnBackground">#212121</item>
     </style>
 
-    <style name="BottomNavigationView" parent="Theme.MaterialComponents.Light">
-        <item name="colorPrimary">#212121</item>
-        <item name="colorPrimaryVariant">#000000</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="colorSecondary">#2962FF</item>
-        <item name="colorSecondaryVariant">#0039CB</item>
-        <item name="colorOnSecondary">#FFFFFF</item>
-        <item name="colorError">#F44336</item>
-        <item name="colorOnError">#FFFFFF</item>
-        <item name="colorSurface">#FFFFFF</item>
-        <item name="colorOnSurface">#212121</item>
-        <item name="android:colorBackground">#FFD600</item>
-        <item name="colorOnBackground">#212121</item>
-    </style>
-
     <style name="OneUI.Dialog" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="bottomSheetStyle">@style/OneUI.Dialog.BottomSheetStyle</item>
+    </style>
+
+    <style name="OneUI.Dialog.BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
     </style>
 
     <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
@@ -69,6 +96,16 @@
         <item name="android:textAlignment">center</item>
     </style>
 
+    <style name="OneUI.RadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:button">@null</item>
+        <item name="android:drawableBottom">?android:attr/listChoiceIndicatorSingle</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/radio_button</item>
+        <item name="android:buttonTint">@color/colorTextButton</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
     <style name="TextView.LongBadge" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">15sp</item>
@@ -78,27 +115,6 @@
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
         <item name="android:textAlignment">center</item>
-    </style>
-
-    <style name="NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:textColor">@android:color/black</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="NoActionBar.NoStatusBar" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:textColor">@android:color/black</item>
-        <item name="android:windowContentOverlay">@null</item>
-
-        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
-        <item name="colorPrimary">#008cff</item>
-        <item name="colorPrimaryDark">#008cff</item>
-        <item name="colorAccent">#00BCD4</item>
-
-        <item name="android:windowTranslucentStatus">true</item>
-<!--        <item name="android:windowTranslucentNavigation">true</item>-->
-        <item name="android:statusBarColor">@android:color/black</item>
     </style>
 
     <style name="DialogTheme" parent="@style/Base.Theme.AppCompat.Light.Dialog">
@@ -130,13 +146,30 @@
     </style>
 
     <style name="OneUI.TabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">?attr/colorAccent</item>
-        <item name="tabIndicatorHeight">0dp</item>
+        <item name="android:layout_height">50dp</item>
         <item name="tabPaddingStart">15dp</item>
         <item name="tabPaddingEnd">15dp</item>
+        <item name="tabIndicator">@drawable/tab_indicator</item>
+        <item name="tabIndicatorColor">@color/colorText</item>
+        <item name="tabIndicatorHeight">40dp</item>
+        <item name="tabIndicatorGravity">center</item>
         <item name="tabBackground">?attr/selectableItemBackground</item>
         <item name="tabTextAppearance">@style/OneUI.TabTextAppearance</item>
-        <item name="tabSelectedTextColor">@color/colorAccent</item>
+        <item name="tabSelectedTextColor">@color/colorText</item>
+    </style>
+
+    <style name="OneUI.TabLayout.BottomNavigation" parent="Widget.Design.TabLayout">
+        <item name="android:layout_height">50dp</item>
+        <item name="tabPaddingStart">15dp</item>
+        <item name="tabPaddingEnd">15dp</item>
+        <item name="tabIndicator">@drawable/indicator_bottom_navigation</item>
+        <item name="tabIndicatorColor">@color/colorTextButton</item>
+        <item name="tabIndicatorFullWidth">false</item>
+        <item name="tabIndicatorHeight">20dp</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabBackground">?attr/selectableItemBackground</item>
+        <item name="tabTextAppearance">@style/OneUI.TabTextAppearance</item>
+        <item name="tabSelectedTextColor">@color/colorTextButton</item>
     </style>
 
     <style name="OneUI.TabTextAppearance" parent="TextAppearance.Design.Tab">
@@ -166,6 +199,16 @@
         <!--Any text styling can be done here-->
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="OneUI.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:background">@drawable/bg_switch</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:textColor">@color/switch_text</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
 </resources>

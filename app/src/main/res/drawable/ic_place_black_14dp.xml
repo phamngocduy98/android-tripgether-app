@@ -4,5 +4,6 @@
         android:width="16dp"
         android:height="16dp"
         android:drawable="@drawable/ic_place_white_24dp"
-        android:end="8dp" />
+        android:end="4dp"
+        android:top="2dp" />
 </layer-list>

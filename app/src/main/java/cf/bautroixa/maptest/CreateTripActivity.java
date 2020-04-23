@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -10,16 +11,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.vipulasri.timelineview.TimelineView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -30,24 +32,25 @@ import java.util.ArrayList;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.theme.OneAppbarActivity;
+import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.KeyboardHelper;
 
-public class CreateTripActivity extends AppCompatActivity {
+public class CreateTripActivity extends OneAppbarActivity {
 
     private static final String TAG = "CreateTripActivity";
-    TextView tvStep, tvCode, tvTripNameHint;
+    TextView tvCode, tvTripNameHint;
     ArrayList<View> screens;
     int activeScreen = 0;
 
     RecyclerView rvCheckpoints;
     ArrayList<Checkpoint> checkpoints;
-    Button btnCancel, btnNext1, btnAddCheckpoint, btnNext2, btnShare, btnFinish;
+    Button btnAddCheckpoint, btnCreateTrip, btnShare, btnFinish;
     ImageView imgQR;
     EditText editTripName;
     Group groupNoCheckpoint;
-    CheckPointAdapter adapter;
+    CheckpointsAdapter adapter;
     private MainAppManager manager;
 
     @Override
@@ -60,6 +63,7 @@ public class CreateTripActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_trip);
+        setTitle("Tạo chuyến đi");
 
         manager = MainAppManager.getInstance();
         checkpoints = new ArrayList<>();
@@ -67,33 +71,25 @@ public class CreateTripActivity extends AppCompatActivity {
 
         addScreen(findViewById(R.id.screen_1_activity_create_trip));
         addScreen(findViewById(R.id.screen_2_activity_create_trip));
-        addScreen(findViewById(R.id.screen_3_activity_create_trip));
-
-        // header
-        tvStep = findViewById(R.id.tv_step_activity_create_trip);
-        btnCancel = findViewById(R.id.btn_cancel_activity_create_trip);
         // screen1
         editTripName = findViewById(R.id.edit_name_activity_trip_create);
         tvTripNameHint = findViewById(R.id.tv_trip_name_hint_activity_create_trip);
-        btnNext1 = findViewById(R.id.btn_continue_screen1_activity_create_trip);
-        // screen 2
-        btnNext2 = findViewById(R.id.btn_continue_screen2_activity_create_trip);
-        groupNoCheckpoint = findViewById(R.id.group_no_checkpoint);
+
         rvCheckpoints = findViewById(R.id.rv_checkpoint_trip_create);
         rvCheckpoints.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CheckPointAdapter(checkpoints);
+        adapter = new CheckpointsAdapter();
         rvCheckpoints.setAdapter(adapter);
         btnAddCheckpoint = findViewById(R.id.btn_add_checkpoint_activity_create_trip);
+
+        btnCreateTrip = findViewById(R.id.btn_continue_screen2_activity_create_trip);
         // screen 3
         tvCode = findViewById(R.id.tv_code_activity_create_trip);
         imgQR = findViewById(R.id.img_qr_code_activity_create_trip);
         btnShare = findViewById(R.id.btn_share_activity_create_trip);
         btnFinish = findViewById(R.id.btn_finish_activity_create_trip);
 
-        screen2NoCheckpoint();
-
-        tvStep.setText(String.format(getString(R.string.tv_step_activity_create_trip), 1, 3));
-        btnCancel.setOnClickListener(new View.OnClickListener() {
+        setSubtitle(String.format(getString(R.string.tv_step_activity_create_trip), 1, 2));
+        setBackButtonOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -116,38 +112,28 @@ public class CreateTripActivity extends AppCompatActivity {
 
             }
         });
-        btnNext1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (tvTripNameHint.getVisibility() == View.VISIBLE) return;
-                editTripName.clearFocus();
-                KeyboardHelper.hideSoftKeyboard(CreateTripActivity.this);
-                renderScreen(1);
-            }
-        });
         btnAddCheckpoint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment dialogFragment = new CreateCheckpointDialogFragment(new CreateCheckpointDialogFragment.OnCheckpointSetListener() {
+                DialogFragment dialogFragment = DialogCheckpointEditFragment.newInstance(new DialogCheckpointEditFragment.OnCheckpointSetListener() {
                     @Override
                     public void onCheckpointSet(Checkpoint checkpoint) {
                         checkpoints.add(checkpoint);
                         adapter.notifyItemInserted(checkpoints.size());
-                        screen2NoCheckpoint();
                     }
                 });
                 dialogFragment.show(getSupportFragmentManager(), "create trip checkpoint fragment");
                 Log.d(TAG, "show dialog");
             }
         });
-        btnNext2.setOnClickListener(new View.OnClickListener() {
+        btnCreateTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DocumentReference newTripRef = manager.sendCreateTrip(editTripName.getText().toString(), checkpoints, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            renderScreen(2);
+                            renderScreen(1);
                         }
                     }
                 });
@@ -191,91 +177,110 @@ public class CreateTripActivity extends AppCompatActivity {
     private void renderScreen(int position) {
         if (position < 0 || position >= screens.size()) return;
         activeScreen = position;
-        tvStep.setText(String.format(getString(R.string.tv_step_activity_create_trip), activeScreen + 1, 3));
+        setSubtitle(String.format(getString(R.string.tv_step_activity_create_trip), activeScreen + 1, 2));
         for (int i = 0; i < screens.size(); i++) {
             ViewAnim.toggleHideShow(screens.get(i), i == position, ViewAnim.DIRECTION_RIGHT);
         }
     }
 
-    protected void screen2NoCheckpoint() {
-        if (checkpoints.size() == 0) {
-            groupNoCheckpoint.setVisibility(View.VISIBLE);
-            rvCheckpoints.setVisibility(View.INVISIBLE);
-        } else {
-            groupNoCheckpoint.setVisibility(View.INVISIBLE);
-            rvCheckpoints.setVisibility(View.VISIBLE);
-        }
+
+    public interface Payload {
+        int SET_ACTIVE_CHECKPOINT = 1;
+        int UNSET_ACTIVE_CHECKPOINT = 2;
     }
 
-
-    public class CheckPointViewHolder extends RecyclerView.ViewHolder {
-        public static final int TYPE_TOP = 0;
-        public static final int TYPE_FULL = 1;
-        public static final int TYPE_NORMAL = 2;
-        public static final int TYPE_BOT = 3;
+    public class CheckpointVH extends RecyclerView.ViewHolder {
+        public TimelineView mTimelineView;
         TextView tvName, tvTime, tvLocation;
+        ImageButton btnEdit;
         View view;
 
-        public CheckPointViewHolder(@NonNull View itemView, int viewType) {
+        public CheckpointVH(@NonNull View itemView, int viewType) {
             super(itemView);
             view = itemView;
-            switch (viewType) {
-                case TYPE_TOP:
-                    view.setBackgroundResource(R.drawable.bg_radius_top_white_with_border);
-                    break;
-                case TYPE_NORMAL:
-                    view.setBackgroundResource(R.drawable.bg_no_radius_white_with_border);
-                    break;
-                case TYPE_BOT:
-                    view.setBackgroundResource(R.drawable.bg_radius_bot_white_with_border);
-                    break;
-                default:
-                    view.setBackgroundResource(R.drawable.bg_radius_full_white_with_border);
-            }
             tvName = itemView.findViewById(R.id.tv_name_item_checkpoint);
             tvLocation = itemView.findViewById(R.id.tv_location_item_checkpoint);
             tvTime = itemView.findViewById(R.id.tv_time_item_checkpoint);
+            btnEdit = itemView.findViewById(R.id.btn_edit_item_checkpoint);
+            mTimelineView = itemView.findViewById(R.id.timeline);
+            mTimelineView.initLine(viewType);
         }
 
-        public void bind(Checkpoint checkpoint) {
+        public void bind(final int index) {
+            final Checkpoint checkpoint = checkpoints.get(index);
             tvName.setText(checkpoint.getName());
             tvTime.setText(DateFormatter.format(checkpoint.getTime()));
             tvLocation.setText(checkpoint.getLocation());
+
+            mTimelineView.setMarker(getResources().getDrawable(R.drawable.bg_item_message_outcoming));
+
+            mTimelineView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final OneDialog confirmationDialog = new OneDialog.Builder().title(R.string.dialog_title_confirm_set_active_checkpoint)
+                            .message(R.string.dialog_message_confirm_set_active_checkpoint)
+                            .enableNegativeButton(true).build();
+                    confirmationDialog.setButtonClickListener(new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(final DialogInterface dialog, int which) {
+                            if (which == DialogInterface.BUTTON_POSITIVE) {
+                                confirmationDialog.toggleProgressBar(true);
+                                manager.sendAddCheckInLocation(null, checkpoint.getRef(), new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        confirmationDialog.toggleProgressBar(false);
+                                        dialog.dismiss();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    confirmationDialog.show(getSupportFragmentManager(), "confirm set active trip");
+                }
+            });
+            btnEdit.setVisibility(View.VISIBLE);
+            btnEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DialogCheckpointEditFragment.newInstance(checkpoint, new DialogCheckpointEditFragment.OnCheckpointSetListener() {
+                        @Override
+                        public void onCheckpointSet(Checkpoint newCheckpoint) {
+                            checkpoints.set(index, newCheckpoint);
+                            adapter.notifyItemChanged(index);
+                        }
+                    }, new DialogCheckpointEditFragment.OnDeleteCheckpointListener() {
+                        @Override
+                        public void onCheckpointDeleted() {
+                            checkpoints.remove(index);
+                            adapter.notifyItemRemoved(index);
+                        }
+                    }).show(getSupportFragmentManager(), "edit checkpoint");
+                }
+            });
         }
     }
 
-    public class CheckPointAdapter extends RecyclerView.Adapter<CheckPointViewHolder> {
-        ArrayList<Checkpoint> checkpoints;
-
-        public CheckPointAdapter(ArrayList<Checkpoint> checkpoints) {
-            this.checkpoints = checkpoints;
-        }
+    public class CheckpointsAdapter extends RecyclerView.Adapter<CheckpointVH> {
 
         @NonNull
         @Override
-        public CheckPointViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new CheckPointViewHolder(getLayoutInflater().inflate(R.layout.activity_create_trip_item_checkpoint, parent, false), viewType);
+        public CheckpointVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new CheckpointVH(getLayoutInflater().inflate(R.layout.item_checkpoint_with_timeline, parent, false), viewType);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull CheckPointViewHolder holder, int position) {
-            Checkpoint checkpoint = this.checkpoints.get(position);
-            holder.bind(checkpoint);
+        public void onBindViewHolder(@NonNull CheckpointVH holder, int position) {
+            holder.bind(position);
         }
+
         @Override
         public int getItemViewType(int position) {
-            if (position == 0) {
-                if (getItemCount() > 1) return CheckPointViewHolder.TYPE_TOP;
-                else return CheckPointViewHolder.TYPE_FULL;
-            } else if (position == getItemCount() - 1) {
-                return CheckPointViewHolder.TYPE_BOT;
-            }
-            return CheckPointViewHolder.TYPE_NORMAL;
+            return TimelineView.getTimeLineViewType(position, getItemCount());
         }
 
         @Override
         public int getItemCount() {
-            return this.checkpoints.size();
+            return checkpoints.size();
         }
     }
 }

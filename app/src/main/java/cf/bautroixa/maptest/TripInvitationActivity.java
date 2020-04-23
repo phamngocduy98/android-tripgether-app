@@ -23,7 +23,7 @@ public class TripInvitationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_trip_screen_3_invitation);
+        setContentView(R.layout.activity_create_trip_screen_2_invitation);
 
         Bundle bundle = getIntent().getExtras();
         String tripId = bundle.getString(Trip.ID, "Error: No trip");

@@ -63,6 +63,7 @@ public abstract class Data {
     @Exclude
     public void addOnNewValueListener(OnNewValueListener listener) {
         this.onNewValueListeners.add(listener);
+//        listener.onNewData(this); TODO: send current value on first register
     }
 
     @Exclude
@@ -120,6 +121,7 @@ public abstract class Data {
     }
 
     @Exclude
+    @Nullable
     public Task<Void> sendUpdate(@Nullable WriteBatch batch, @NonNull String field, @Nullable Object value, Object... moreFieldsAndValues) {
         if (batch != null) {
             batch.update(this.ref, field, value, moreFieldsAndValues);

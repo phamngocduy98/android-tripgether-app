@@ -1,5 +1,7 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -20,43 +22,44 @@ public class DatasManager<T extends Data> {
         this.onDataSetChangedListeners = new ArrayList<>();
     }
 
-    public void put(T data){
+    public void put(T data) {
         String id = data.getId();
         Integer index = mapIdWithIndex.get(id);
-        if (index != null){
+        if (index != null) {
             update(index, data);
             for (OnItemChangedListener<T> onItemChangedListener : onItemChangedListeners) {
                 onItemChangedListener.onItemChanged(index, data);
             }
         } else {
             list.add(data);
-            mapIdWithIndex.put(id, list.size()-1);
+            mapIdWithIndex.put(id, list.size() - 1);
             for (OnItemInsertedListener<T> onItemInsertedListener : onItemInsertedListeners) {
                 onItemInsertedListener.onItemInserted(list.size() - 1, data);
             }
         }
     }
 
-    public T get(String id){
+    @Nullable
+    public T get(String id) {
         Integer index = mapIdWithIndex.get(id);
-        if (index != null){
+        if (index != null) {
             return list.get(index);
         }
         return null;
     }
 
-    public void update(int index, T data){
+    public void update(int index, T data) {
         list.set(index, data);
     }
 
-    public void remove(String id){
+    public void remove(String id) {
         Integer index = mapIdWithIndex.get(id);
-        if (index != null){
+        if (index != null) {
             Data data = list.get(index);
             data.onRemove();
             list.remove(index.intValue());
             mapIdWithIndex.remove(id);
-            for (int i=index;i<list.size();i++){
+            for (int i = index; i < list.size(); i++) {
                 mapIdWithIndex.put(list.get(i).getId(), i);
             }
             for (OnItemRemovedListener<T> onItemRemovedListener : onItemRemovedListeners) {
@@ -73,12 +76,12 @@ public class DatasManager<T extends Data> {
         return mapIdWithIndex.get(id);
     }
 
-    public  ArrayList<T> getData(){
+    public ArrayList<T> getData() {
         return list;
     }
 
-    public void clear(){
-        for (Data data : list){
+    public void clear() {
+        for (Data data : list) {
             // remove listener and relate property (like latLng, marker) of each data
             data.onRemove();
         }
@@ -94,40 +97,42 @@ public class DatasManager<T extends Data> {
 
     }
 
-    public DatasManager addOnItemInsertedListener(OnItemInsertedListener<T> listener) {
+    public DatasManager<T> addOnItemInsertedListener(OnItemInsertedListener<T> listener) {
         this.onItemInsertedListeners.add(listener);
         return this;
     }
 
-    public DatasManager addOnItemChangedListener(OnItemChangedListener<T> listener) {
+    public DatasManager<T> addOnItemChangedListener(OnItemChangedListener<T> listener) {
         this.onItemChangedListeners.add(listener);
         return this;
     }
-    public DatasManager addOnItemRemovedListener(OnItemRemovedListener<T> listener){
+
+    public DatasManager<T> addOnItemRemovedListener(OnItemRemovedListener<T> listener) {
         this.onItemRemovedListeners.add(listener);
         return this;
     }
 
-    public DatasManager addOnDataSetChangedListener(OnDataSetChangedListener<T> listener) {
+    public DatasManager<T> addOnDataSetChangedListener(OnDataSetChangedListener<T> listener) {
         this.onDataSetChangedListeners.add(listener);
         return this;
     }
 
-    public DatasManager removeOnItemInsertedListener(OnItemInsertedListener<T> listener) {
+    public DatasManager<T> removeOnItemInsertedListener(OnItemInsertedListener<T> listener) {
         this.onItemInsertedListeners.remove(listener);
         return this;
     }
 
-    public DatasManager removeOnItemChangedListener(OnItemChangedListener<T> listener) {
+    public DatasManager<T> removeOnItemChangedListener(OnItemChangedListener<T> listener) {
         this.onItemChangedListeners.remove(listener);
         return this;
     }
-    public DatasManager removeOnItemRemovedListener(OnItemRemovedListener<T> listener){
+
+    public DatasManager<T> removeOnItemRemovedListener(OnItemRemovedListener<T> listener) {
         this.onItemRemovedListeners.remove(listener);
         return this;
     }
 
-    public DatasManager removeOnDataSetChangedListener(OnDataSetChangedListener<T> listener) {
+    public DatasManager<T> removeOnDataSetChangedListener(OnDataSetChangedListener<T> listener) {
         this.onDataSetChangedListeners.remove(listener);
         return this;
     }
@@ -139,6 +144,7 @@ public class DatasManager<T extends Data> {
     public interface OnItemChangedListener<T extends Data> {
         void onItemChanged(int position, T data);
     }
+
     public interface OnItemRemovedListener<T extends Data> {
         void onItemRemoved(int position, T data);
     }

@@ -21,9 +21,10 @@
         android:id="@+id/container_map_checkpoint_select"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
         app:cardCornerRadius="30dp"
         app:cardElevation="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/textView9"
+        app:layout_constraintBottom_toTopOf="@+id/textView8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar_dialog_create_checkpoint">
@@ -43,7 +44,7 @@
         app:layout_constraintEnd_toEndOf="@+id/container_map_checkpoint_select"
         app:layout_constraintStart_toStartOf="@+id/container_map_checkpoint_select"
         app:layout_constraintTop_toTopOf="@id/container_map_checkpoint_select"
-        app:srcCompat="@drawable/marker" />
+        app:srcCompat="@drawable/ic_marker_red_png" />
 
     <AutoCompleteTextView
         android:id="@+id/edit_search_location_checkpoint"
@@ -114,6 +115,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
         android:text="Tên địa điểm"
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toTopOf="@+id/edit_name_dialog_checkpoint_trip_create"
         app:layout_constraintEnd_toEndOf="@+id/edit_name_dialog_checkpoint_trip_create"
         app:layout_constraintStart_toStartOf="@+id/edit_name_dialog_checkpoint_trip_create" />
@@ -134,9 +136,10 @@
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
         android:text="Thời gian"
-
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toTopOf="@+id/edit_time_checkpoint"
         app:layout_constraintEnd_toEndOf="@+id/edit_time_checkpoint"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/edit_time_checkpoint" />
 
     <EditText

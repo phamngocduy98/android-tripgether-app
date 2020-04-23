@@ -23,7 +23,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import cf.bautroixa.maptest.network_io.HttpRequest;
 import cf.bautroixa.maptest.utils.FailedTask;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainAppManager {
     private static final String TAG = "MainAppManager";
@@ -189,20 +193,36 @@ public class MainAppManager {
     }
 
     public void sendJoinTrip(@Nullable WriteBatch batch, DocumentReference tripRef, OnCompleteListener<Void> onCompleteListener) {
-        if (getCurrentTripRef() != null || currentUser == null) {
-            onCompleteListener.onComplete(new FailedTask<Void>("User not logged in or already join a trip"));
-            return;
-        }
-        if (batch == null) batch = db.batch();
-        currentUser.sendUpdate(batch, User.ACTIVE_TRIP, tripRef);
-        eventsManager.create(batch, new Event(Event.Type.USER_ADDED, null, getCurrentUserRef(), null));
-        currentTrip.sendUpdate(batch, Trip.MEMBERS, FieldValue.arrayUnion(currentUserRef));
-
-        batch.commit().addOnCompleteListener(onCompleteListener);
+//        if (getCurrentTripRef() != null || currentUser == null) {
+//            onCompleteListener.onComplete(new FailedTask<Void>("User not logged in or already join a trip"));
+//            return;
+//        }
+//        if (batch == null) batch = db.batch();
+//        currentUser.sendUpdate(batch, User.ACTIVE_TRIP, tripRef);
+////        eventsManager.create(batch, new Event(Event.Type.USER_ADDED, null, getCurrentUserRef(), null));
+//        currentTrip.sendUpdate(batch, Trip.MEMBERS, FieldValue.arrayUnion(currentUserRef));
+//
+//        batch.commit().addOnCompleteListener(onCompleteListener);
     }
 
-    public void sendJoinTrip(String tripRefId, OnCompleteListener<Void> onCompleteListener) {
-        sendJoinTrip(null, db.collection(Collections.TRIPS).document(tripRefId), onCompleteListener);
+    public void sendJoinTrip(String tripRefId, final OnComplete onComplete) {
+//        sendJoinTrip(null, db.collection(Collections.TRIPS).document(tripRefId), onCompleteListener);
+        HttpRequest.getInstance().getTripService().joinTrip("omMSekFQ9cc45qljkrZpGXXZncg1", "lNDdjhIGvpWsjUdewVNn").enqueue(new Callback<HttpRequest.APIResponse>() {
+            @Override
+            public void onResponse(Call<HttpRequest.APIResponse> call, Response<HttpRequest.APIResponse> response) {
+                if (response.isSuccessful()) {
+                    HttpRequest.APIResponse res = response.body();
+                    onComplete.onComplete(res.success);
+                }
+                Log.d(TAG, "sendJoinTrip response");
+            }
+
+            @Override
+            public void onFailure(Call<HttpRequest.APIResponse> call, Throwable t) {
+                Log.d(TAG, "sendJoinTrip failed: " + t.getMessage());
+                onComplete.onComplete(false);
+            }
+        });
     }
 
     public void sendLeaveTrip(@Nullable WriteBatch batch, OnCompleteListener<Void> onCompleteListener) {
@@ -218,7 +238,7 @@ public class MainAppManager {
         batch.commit().addOnCompleteListener(onCompleteListener);
     }
 
-    public void sendAddRollUpPoint(@Nullable WriteBatch batch, DocumentReference checkpointRef, OnCompleteListener<Void> onCompleteListener) {
+    public void sendAddCheckInLocation(@Nullable WriteBatch batch, DocumentReference checkpointRef, OnCompleteListener<Void> onCompleteListener) {
         if (getCurrentTripRef() != null) {
             if (batch == null) batch = db.batch();
             currentTrip.sendUpdate(batch, Trip.ACTIVE_CHECKPOINT, checkpointRef);
@@ -227,12 +247,12 @@ public class MainAppManager {
         }
     }
 
-    public void sendAddRollUpPoint(String gatherPointName, OnCompleteListener<Void> onCompleteListener) {
-        Checkpoint checkpoint = new Checkpoint(gatherPointName, currentUser.getCurrentCoord(), currentUser.getCurrentLocation(), new Timestamp(new Date()));
+    public void sendAddCheckInLocation(String placeName, OnCompleteListener<Void> onCompleteListener) {
+        Checkpoint checkpoint = new Checkpoint(placeName, currentUser.getCurrentCoord(), currentUser.getCurrentLocation(), new Timestamp(new Date()));
         if (getCurrentTripRef() != null) {
             WriteBatch writeBatch = db.batch();
             DocumentReference newCheckpointRef = checkpointsManager.create(writeBatch, checkpoint);
-            sendAddRollUpPoint(writeBatch, newCheckpointRef, onCompleteListener);
+            sendAddCheckInLocation(writeBatch, newCheckpointRef, onCompleteListener);
         }
     }
 
@@ -258,6 +278,13 @@ public class MainAppManager {
 
         batch.commit().addOnCompleteListener(onCompleteListener);
         return tripRef;
+    }
+
+    public void sendSosRequest(SosRequest sosRequest, OnCompleteListener<Void> onCompleteListener) {
+        WriteBatch batch = db.batch();
+        sosRequestsManager.create(batch, this.currentUser, sosRequest);
+        eventsManager.create(batch, new Event(Event.Type.USER_SOS_ADDED, sosRequest.getRef(), this.currentUserRef, null));
+        batch.commit().addOnCompleteListener(onCompleteListener);
     }
 
     public User getCurrentUser() {
@@ -292,6 +319,14 @@ public class MainAppManager {
         return membersManager.getData();
     }
 
+    public @Nullable
+    Checkpoint getActiveCheckpoint() {
+        if (this.getCurrentTripRef() != null && this.currentTrip.getActiveCheckpoint() != null) {
+            return this.getCheckpointsManager().get(this.currentTrip.getActiveCheckpoint().getId());
+        }
+        return null;
+    }
+
     public DocumentReference getCurrentUserRef() {
         return currentUserRef;
     }
@@ -302,5 +337,9 @@ public class MainAppManager {
 
     public interface OnInitCompleted {
         void onComplete(MainAppManager manager);
+    }
+
+    public interface OnComplete {
+        void onComplete(boolean isSuccessful);
     }
 }

@@ -27,7 +27,7 @@ public abstract class CollectionsManager<T extends Data> extends DatasManager<T>
     }
 
     public DocumentReference create(@Nullable WriteBatch batch, T data) {
-        DocumentReference newDataRef = ref.document();
+        DocumentReference newDataRef = data.getId() != null ? ref.document(data.getId()) : ref.document();
         if (batch != null) {
             batch.set(newDataRef, data);
         } else {
@@ -36,10 +36,21 @@ public abstract class CollectionsManager<T extends Data> extends DatasManager<T>
         return newDataRef;
     }
 
+    public DocumentReference delete(@Nullable WriteBatch batch, String id) {
+        DocumentReference dataRef = ref.document(id);
+        if (batch != null) {
+            batch.delete(dataRef);
+        } else {
+            dataRef.delete();
+        }
+        return dataRef;
+    }
+
     public void setCollectionListener(CollectionReference collectionReference, String id) {
         if (id == null || this.parentCollectionId.equals(id)) return;
         this.ref = collectionReference;
         final CollectionsManager thisManager = this;
+        if (listenerRegistration != null) listenerRegistration.remove();
         listenerRegistration = collectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -50,6 +61,7 @@ public abstract class CollectionsManager<T extends Data> extends DatasManager<T>
                     for (DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
                         if (documentChange.getType() == DocumentChange.Type.ADDED) {
                             DocumentSnapshot documentSnapshot = documentChange.getDocument();
+                            //TODO: what??? why fetched data need to be refetched :V, edit ADDED
                             T data = documentSnapshotToObject(documentSnapshot).withId(documentSnapshot.getId()).withRef(documentSnapshot.getReference());
                             data.setListenerRegistration(thisManager, null);
                         }

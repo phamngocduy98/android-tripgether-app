@@ -1,6 +1,5 @@
 package cf.bautroixa.maptest.theme;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +10,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.fragment.app.FragmentManager;
 
 import cf.bautroixa.maptest.R;
 
@@ -35,11 +35,12 @@ public class OnePromptDialog extends OneDialog {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setEnableNegativeButton(true);
+        final OnePromptDialog finalThis = this;
         setButtonClickListener(new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (onDialogResult != null)
-                    onDialogResult.onDialogResult(getDialog(), which == DialogInterface.BUTTON_NEGATIVE, editPrompt.getText().toString());
+                    onDialogResult.onDialogResult(finalThis, which == DialogInterface.BUTTON_NEGATIVE, editPrompt.getText().toString());
             }
         });
     }
@@ -52,6 +53,10 @@ public class OnePromptDialog extends OneDialog {
         editPrompt.setVisibility(View.VISIBLE);
         tvMessage.setVisibility(View.GONE);
         return v;
+    }
+
+    public interface OnDialogResult {
+        void onDialogResult(OnePromptDialog dialog, boolean isCanceled, String value);
     }
 
     public static class Builder {
@@ -94,9 +99,9 @@ public class OnePromptDialog extends OneDialog {
         public OnePromptDialog build() {
             return instance;
         }
-    }
 
-    public interface OnDialogResult {
-        void onDialogResult(Dialog dialog, boolean isCanceled, String value);
+        public void show(FragmentManager fm, String tag) {
+            instance.show(fm, tag);
+        }
     }
 }

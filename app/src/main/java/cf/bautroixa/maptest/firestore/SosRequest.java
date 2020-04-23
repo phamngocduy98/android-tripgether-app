@@ -3,6 +3,7 @@ package cf.bautroixa.maptest.firestore;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.ServerTimestamp;
 
 import cf.bautroixa.maptest.data.NotificationItem;
 
@@ -18,6 +19,7 @@ public class SosRequest extends Data {
     int lever;
     String description;
     boolean resolved;
+    @ServerTimestamp
     Timestamp time;
 
     @Exclude
@@ -81,8 +83,6 @@ public class SosRequest extends Data {
         return notificationItem;
     }
 
-    ;
-
     @Exclude
     @Override
     public void onDocumentSnapshot(DocumentSnapshot documentSnapshot) {
@@ -96,5 +96,11 @@ public class SosRequest extends Data {
     public void update(SosRequest sosRequest) {
         this.lever = sosRequest.lever;
         this.description = sosRequest.description;
+    }
+
+    public interface SosLever {
+        int HIGH = 1;
+        int MEDIUM = 2;
+        int LOW = 3;
     }
 }

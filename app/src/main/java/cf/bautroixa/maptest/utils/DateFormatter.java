@@ -8,6 +8,11 @@ import java.util.Date;
 import java.util.Locale;
 
 public class DateFormatter {
+    public static String format(Date date, String format) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.getDefault());
+        return simpleDateFormat.format(date);
+    }
+
     public static String format(Timestamp timestamp){
         return format(timestamp.toDate());
     }
@@ -23,19 +28,45 @@ public class DateFormatter {
         if (deltaMinus < -5){
             return format(date,"HH:mm dd/MM/yyyy");
         }
-        if (deltaDay <= 1 && deltaMinus < 24*60){
-            return format(date,"HH:mm");
+        if (deltaDay * deltaDay <= 1) {
+            return format(date, "HH:mm ") + formatDate(date);
         }
         if (deltaDay < 7){
-            return format(date,"HH:mm E");
+            return format(date, "HH:mm ") + formatDate(date);
         }
         if (now.get(Calendar.YEAR) == then.get(Calendar.YEAR)){
             return format(date,"HH:mm dd MMM");
         }
         return format(date,"HH:mm dd/MM/yyyy");
     }
-    public static String format(Date date, String format){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.getDefault());
-        return simpleDateFormat.format(date);
+
+    public static String formatDateTime(Timestamp timestamp) {
+        return formatTime(timestamp) + " " + formatDate(timestamp);
+    }
+
+    public static String formatTime(Date date) {
+        return format(date, "HH:mm");
+    }
+
+    public static String formatTime(Timestamp timestamp) {
+        return formatTime(timestamp.toDate());
+    }
+
+    public static String formatDate(Timestamp timestamp) {
+        return formatDate(timestamp.toDate());
+    }
+
+    public static String formatDate(Date date) {
+        Calendar then = Calendar.getInstance();
+        then.setTime(date);
+        Calendar now = Calendar.getInstance();
+        long deltaMinus = (then.getTimeInMillis() - now.getTimeInMillis()) / 1000 / 60;
+        int deltaDay = then.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR);
+        // TODO: English-sub for today, yesterday, ...
+        if (deltaDay < -1) return String.format("%d ngày trước", -deltaDay);
+        if (deltaDay == -1) return "Hôm qua";
+        if (deltaDay == 0) return "Hôm nay";
+        if (deltaDay == 1) return "Ngày mai";
+        return String.format("%d ngày sau", deltaDay);
     }
 }

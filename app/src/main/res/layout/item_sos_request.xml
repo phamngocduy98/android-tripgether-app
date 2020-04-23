@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <cf.bautroixa.maptest.theme.RoundedImageView
+        android:id="@+id/img_user_avatar_item_sos"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/user" />
+
+    <TextView
+        android:id="@+id/tv_user_name_item_sos"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-light"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:text="AdminBautroixa"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/tv_lever_item_sos"
+        app:layout_constraintStart_toEndOf="@+id/img_user_avatar_item_sos"
+        app:layout_constraintTop_toTopOf="@+id/img_user_avatar_item_sos" />
+
+    <TextView
+        android:id="@+id/tv_description_item_sos"
+        android:layout_width="0dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="24dp"
+        android:maxLines="3"
+        android:text="Điện thoại hết pin"
+        android:textColor="@color/colorTextSecondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/tv_user_name_item_sos"
+        app:layout_constraintTop_toBottomOf="@+id/tv_user_name_item_sos" />
+
+    <TextView
+        android:id="@+id/tv_lever_item_sos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="Khẩn cấp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_user_name_item_sos" />
+</androidx.constraintlayout.widget.ConstraintLayout>

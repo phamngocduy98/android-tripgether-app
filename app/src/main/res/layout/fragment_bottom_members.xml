@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".BottomMembersFragment">
+
+    <TextView
+        android:id="@+id/tv_count_frag_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_radius_full_white_with_border"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="4dp"
+        android:text="1/1"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="30dp"
+        android:background="@color/colorBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/btns_container_frag_bottom_members"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/rv_friends" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_friends"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_count_frag_friend" />
+
+    <HorizontalScrollView
+        android:id="@+id/btns_container_frag_bottom_members"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scrollIndicators="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_friends">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btn_direction_frag_friend"
+                style="@style/Button.FlatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chỉ đường" />
+
+            <Button
+                android:id="@+id/btn_view_sos_frag_friend"
+                style="@style/Button.FlatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xem SOS" />
+
+            <Button
+                android:id="@+id/btn_call_frag_friend"
+                style="@style/Button.FlatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gọi điện" />
+
+            <Button
+                android:id="@+id/btn_message_frag_friend"
+                style="@style/Button.FlatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="Nhắn tin" />
+        </LinearLayout>
+    </HorizontalScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_radius_top_white_with_border"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:text="Gửi cảnh báo SOS"
+        android:textSize="24sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:text="Mức độ nghiêm trọng" />
+
+    <RadioGroup
+        android:id="@+id/rg_lever"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/divider"
+        android:orientation="horizontal"
+        android:paddingVertical="16dp"
+        android:showDividers="middle">
+
+        <RadioButton
+            android:id="@+id/radio_low"
+            style="@style/OneUI.RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="THẤP" />
+
+        <RadioButton
+            android:id="@+id/radio_medium"
+            style="@style/OneUI.RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TRUNG BÌNH" />
+
+        <RadioButton
+            android:id="@+id/radio_high"
+            style="@style/OneUI.RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="CAO" />
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:text="Mô tả về vấn đề của bạn" />
+
+    <EditText
+        android:id="@+id/edit_desc_frag_send_sos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:lines="3"
+        android:minLines="2" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_cancel_frag_send_sos"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hủy bỏ" />
+
+        <Button
+            android:id="@+id/btn_send_frag_send_sos"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Gửi" />
+    </LinearLayout>
+
+</LinearLayout>

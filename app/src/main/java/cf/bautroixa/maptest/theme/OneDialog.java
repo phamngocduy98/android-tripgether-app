@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 
 import cf.bautroixa.maptest.R;
 
@@ -27,51 +28,32 @@ import cf.bautroixa.maptest.R;
  */
 public class OneDialog extends DialogFragment {
 
-    public static class Builder {
-        OneDialog instance;
-        public Builder() {
-            instance = new OneDialog();
-        }
-        public Builder title(@StringRes int titleRes){
-            instance.setTitleRes(titleRes);
-            return this;
-        }
-        public Builder message(@StringRes int messageRes){
-            instance.setMessageRes(messageRes);
-            return this;
-        }
-        public Builder posBtnText(@StringRes int posBtnRes){
-            instance.setPosBtnRes(posBtnRes);
-            return this;
-        }
-        public Builder negBtnText(@StringRes int negBtnRes){
-            instance.setNegBtnRes(negBtnRes);
-            return this;
-        }
-        public Builder body(View body){
-            instance.setCustomBody(body);
-            return this;
-        }
-        public Builder enableNegativeButton(boolean enable){
-            instance.setEnableNegativeButton(enable);
-            return this;
-        }
-        public Builder buttonClickListener(DialogInterface.OnClickListener buttonClickListener) {
-            instance.setButtonClickListener(buttonClickListener);
-            return this;
-        }
-        public OneDialog build(){
-            return instance;
-        }
-    }
+    TextView tvTitle, tvMessage;
 
     DialogInterface.OnClickListener btnClickListener;
-    TextView tvTitle, tvMessage, tvBtnDivider;
+    int titleRes = R.string.dialog_title, messageRes = R.string.dialog_messsage, posBtnRes = R.string.btn_ok, negBtnRes = R.string.btn_cancel;
     LinearLayout containerBody;
     View customBody;
     Button btnPos, btnNeg;
     boolean isEnableNegativeButton = false, isProcessing = false;
-    int titleRes = R.string.dialog_title, messageRes = R.string.dialog_messsage, posBtnRes = R.string.btn_got_it, negBtnRes = R.string.btn_cancel;
+
+    public void toggleProgressBar(boolean onOff) {
+        isProcessing = onOff;
+        if (onOff) {
+            // ON
+            btnNeg.setVisibility(View.GONE);
+            btnPos.setText("Loading...");
+            btnPos.setEnabled(false);
+        } else {
+            // OFF
+            if (isEnableNegativeButton) {
+                btnNeg.setVisibility(View.VISIBLE);
+            }
+            btnPos.setText(posBtnRes);
+            btnPos.setEnabled(true);
+        }
+
+    }
 
     public OneDialog() {
     }
@@ -110,7 +92,6 @@ public class OneDialog extends DialogFragment {
         containerBody = v.findViewById(R.id.container_body_one_dialog);
         tvMessage = v.findViewById(R.id.tv_message_one_dialog);
         btnPos = v.findViewById(R.id.btn_positive_one_dialog);
-        tvBtnDivider = v.findViewById(R.id.tv_buttions_divider);
         btnNeg = v.findViewById(R.id.btn_negative_one_dialog);
 
         tvTitle.setText(titleRes);
@@ -139,27 +120,59 @@ public class OneDialog extends DialogFragment {
             });
         } else {
             btnNeg.setVisibility(View.GONE);
-            tvBtnDivider.setVisibility(View.GONE);
         }
         return v;
     }
 
-    public void toggleProgressBar(boolean onOff) {
-        isProcessing = onOff;
-        if (onOff) {
-            // ON
-            btnNeg.setVisibility(View.GONE);
-            tvBtnDivider.setVisibility(View.GONE);
-            btnPos.setText("Loading...");
-        } else {
-            // OFF
-            if (isEnableNegativeButton) {
-                btnNeg.setVisibility(View.VISIBLE);
-                tvBtnDivider.setVisibility(View.GONE);
-            }
-            btnPos.setText(posBtnRes);
+    public static class Builder {
+        OneDialog instance;
+
+        public Builder() {
+            instance = new OneDialog();
         }
 
+        public Builder title(@StringRes int titleRes) {
+            instance.setTitleRes(titleRes);
+            return this;
+        }
+
+        public Builder message(@StringRes int messageRes) {
+            instance.setMessageRes(messageRes);
+            return this;
+        }
+
+        public Builder posBtnText(@StringRes int posBtnRes) {
+            instance.setPosBtnRes(posBtnRes);
+            return this;
+        }
+
+        public Builder negBtnText(@StringRes int negBtnRes) {
+            instance.setNegBtnRes(negBtnRes);
+            return this;
+        }
+
+        public Builder body(View body) {
+            instance.setCustomBody(body);
+            return this;
+        }
+
+        public Builder enableNegativeButton(boolean enable) {
+            instance.setEnableNegativeButton(enable);
+            return this;
+        }
+
+        public Builder buttonClickListener(DialogInterface.OnClickListener buttonClickListener) {
+            instance.setButtonClickListener(buttonClickListener);
+            return this;
+        }
+
+        public OneDialog build() {
+            return instance;
+        }
+
+        public void show(FragmentManager manager, String tag) {
+            instance.show(manager, tag);
+        }
     }
 
     public void setEnableNegativeButton(boolean enableNegativeButton) {

@@ -1,14 +1,9 @@
 package cf.bautroixa.maptest;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,9 +15,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -30,7 +30,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,15 +39,13 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.UUID;
 
-import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.User;
 
 
 public class DetailProfileActivity extends AppCompatActivity {
-    private Button mChooseImgButton;
+    private ImageButton mChooseImgButton;
     private ImageView mAvartar;
     private Button mUpdateButton;
     private EditText mNameEditText;
@@ -180,7 +177,7 @@ public class DetailProfileActivity extends AppCompatActivity {
                             public void onSuccess(Void aVoid) {
                                 Toast.makeText(DetailProfileActivity.this,
                                         "Cập nhật thông tin cá nhân thành công",Toast.LENGTH_SHORT).show();
-                                Intent intent=new Intent(DetailProfileActivity.this,ProfileActivity.class);
+                                Intent intent = new Intent(DetailProfileActivity.this, TabProfileFragment.class);
                                 startActivity(intent);
                                 Log.d("TAG","Success");
                             }

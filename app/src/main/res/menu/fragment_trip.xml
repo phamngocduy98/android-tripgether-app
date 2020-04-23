@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_add_frag_trip"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="Thêm địa điểm"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_send_sos_frag_trip"
+        android:title="Gửi yêu cầu hỗ trợ SOS" />
+    <item
+        android:id="@+id/menu_request_check_in_frag_trip"
+        android:icon="@drawable/ic_assistant_photo_black_24dp"
+        android:title="Gửi yêu cầu tập hợp"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_share_frag_trip"
+        android:title="Chia sẻ chuyến đi"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_leave_trip_frag_trip"
+        android:title="Rời chuyến đi"
+        app:showAsAction="never" />
+</menu>

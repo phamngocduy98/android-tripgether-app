@@ -21,7 +21,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".SplashScreenActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">>
+            android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -43,12 +43,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".NotifyActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:name=".AlertActivity"
+            android:theme="@style/NoActionBar" />
         <activity android:name=".ChangePasswordActivity" />
         <activity android:name=".ForgotPasswordActivity" />
-        <activity android:name=".ProfileActivity" />
-        <activity android:name=".DetailProfileActivity" />
+        <activity android:name=".TabProfileFragment" />
+        <activity
+            android:name=".DetailProfileActivity"
+            android:theme="@style/NoActionBar" />
         <activity android:name=".RegisterActivity" />
 
         <service
@@ -71,7 +73,7 @@
         <activity android:name=".TripInvitationActivity" />
         <activity
             android:name=".CreateTripActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/NoActionBar"
             android:windowSoftInputMode="adjustResize" />
 
         <meta-data

@@ -21,7 +21,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Iterator;
 import java.util.Map;
 
-import cf.bautroixa.maptest.NotifyActivity;
+import cf.bautroixa.maptest.AlertActivity;
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.SplashScreenActivity;
 import cf.bautroixa.maptest.data.FcmMessage;
@@ -149,7 +149,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * TODO: Undeleted note from Google: Handle time allotted to BroadcastReceivers.
      */
     private void handleNowIntentToNotificationActivity(Map<String, String> data) {
-        Intent intent = new Intent(this, NotifyActivity.class);
+        Intent intent = new Intent(this, AlertActivity.class);
         Iterator<Map.Entry<String, String>> it = data.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, String> pair = it.next();

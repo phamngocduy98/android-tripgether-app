@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_radius_top_white_with_border"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:text="Cảnh báo SOS"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/tv_user_name_dialog_sos_request_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:text="AdminBautroixa" />
+
+    <TextView
+        android:id="@+id/tv_user_location_dialog_sos_request_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Vị trí hiện tại" />
+
+    <TextView
+        android:id="@+id/tv_desc_dialog_sos_request_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:text="Điện thoại hết pin rồi" />
+
+    <TextView
+        android:id="@+id/tv_lever_dialog_sos_request_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:text="Mức độ nghiêm trọng: CAO" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_get_direction_dialog_sos_request_view"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Chỉ đường" />
+
+        <Button
+            android:id="@+id/btn_close_dialog_sos_request_view"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Đóng" />
+    </LinearLayout>
+
+</LinearLayout>

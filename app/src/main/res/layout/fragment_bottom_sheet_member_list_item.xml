@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/bg_item_room">
+
+    <cf.bautroixa.maptest.theme.RoundedImageView
+        android:id="@+id/img_avatar_status_item_friend"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:padding="8dp"
+        android:src="@drawable/user"
+        app:borderRadius="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.mikhaellopez.circularprogressbar.CircularProgressBar
+        android:id="@+id/progress_battery_item_friend"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cpb_background_progressbar_color="#b6bbd8"
+        app:cpb_background_progressbar_width="2dp"
+        app:cpb_progress_direction="to_right"
+        app:cpb_progressbar_color="#3f51b5"
+        app:cpb_progressbar_width="2dp"
+        app:cpb_round_border="false"
+        app:layout_constraintBottom_toBottomOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintEnd_toEndOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintStart_toStartOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintTop_toTopOf="@+id/img_avatar_status_item_friend" />
+    <TextView
+        android:id="@+id/tv_name_status_item_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Phạm Ngọc Duy"
+        android:textColor="@color/colorText"
+        android:textSize="18sp"
+        app:layout_constraintStart_toEndOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_location_status_item_friend"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="16dp"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:maxLines="1"
+        android:textColor="@color/colorTextSecondary"
+        android:singleLine="true"
+        android:text="Gần Ngõ 16 Phan Văn Trường, Dịch Vọng Hậu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintTop_toBottomOf="@+id/tv_name_status_item_friend"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/tv_count_status_item_friend"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        style="@style/TextView.LongBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Leader"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_battery_status_item_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="50%"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_count_status_item_friend"
+        app:layout_constraintEnd_toStartOf="@+id/tv_count_status_item_friend"
+        app:layout_constraintTop_toTopOf="@+id/tv_count_status_item_friend"
+        app:layout_constraintVertical_bias="0.0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

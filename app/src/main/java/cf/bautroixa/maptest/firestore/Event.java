@@ -24,6 +24,7 @@ public class Event extends Data {
     @ServerTimestamp
     private Timestamp time;
     private DocumentReference sosRef, userRef, checkpointRef;
+    private String priority;
 
     @Exclude
     private NotificationItem notificationItem;
@@ -76,6 +77,14 @@ public class Event extends Data {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 
     @Exclude

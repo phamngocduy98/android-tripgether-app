@@ -4,7 +4,7 @@
 
     <string name="config_gg_map_api_key">AIzaSyB0L5w8Q390UmPQBlZwAi1kcMF8KvwvsLE</string>
     <string name="config_mapbox_map_api_key">pk.eyJ1IjoicGhhbW5nb2NkdXk5OCIsImEiOiJjazZhN2N2bWQwMmxrM29wOXFjamRrZnB1In0.XB_MxPGB-795mTHp94pvgw</string>
-    <string name="btn_got_it">Got it</string>
+    <string name="btn_ok">OK</string>
     <string name="config_server_ip">http://192.168.1.108:8181</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -38,5 +38,26 @@
     <string name="dialog_title_enter_checkpoint_name">Nhập tên địa điểm</string>
     <string name="dialog_title_leave_trip">Rời chuyến đi</string>
     <string name="default_notification_channel_id">9999</string>
+    <string name="dialog_title_join_trip">Tham gia chuyến đi</string>
+    <string name="btn_qr_scan">Quét mã QR</string>
+    <string name="btn_enter_trip_code">Nhập mã chuyến đi</string>
+    <string name="dialog_message_join_trip">Để tham gia chuyến đi, bạn cần quét mã QR hoặc nhập mã chuyến đi dưới đây</string>
+    <string name="dialog_title_enter_trip_code">Nhập mã chuyến đi</string>
+    <string name="btn_update">Cập nhật</string>
+    <string name="dialog_title_confirm_set_active_checkpoint">Xác nhận</string>
+    <string name="dialog_message_confirm_set_active_checkpoint">Bạn có chắc chắn chọn địa điểm này là điểm tập hợp?</string>
+    <string name="date_today">Hôm nay</string>
+    <string name="btn_delete">Xóa</string>
+    <string name="dialog_title_confirm_delete_checkpoint">Xác nhận xóa</string>
+    <string name="dialog_message_confirm_delete_checkpoint">Bạn có chắc chắn muốn xóa địa điểm này không?</string>
+    <string name="dialog_title_confirm_logout">Đăng xuất?</string>
+    <string name="dialog_message_logout">Bạn có thật sự chắc chắn muốn đăng xuất</string>
+    <string name="switch_toggle_service_on">Bật chia sẻ vị trí</string>
+    <string name="switch_toggle_service_off">Tắt chia sẻ vị trí</string>
+    <string name="tv_user_not_checked_in">Chưa có mặt</string>
+    <string name="tv_user_need_support">Cần hỗ trợ</string>
+    <string name="tv_user_checked_in">Đã có mặt</string>
+    <string name="dialog_title_confirm_remove_active_checkpoint">Ngừng tập hợp?</string>
+    <string name="dialog_message_confirm_remove_active_checkpoint">Bạn có chắc chắn dừng tập hợp mọi người tại địa điểm này?</string>
 
 </resources>

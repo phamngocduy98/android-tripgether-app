@@ -33,12 +33,6 @@ public class SplashScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        // TODO: Start and manage UpdateLocationService
-//        Intent serviceIntent = new Intent(getApplicationContext(), UpdateLocationService.class);
-//        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 12345, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-//        AlarmManager am = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-//        am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, pendingIntent);
-
         if (!checkAllPermissions()) {
             requestPermissions(permissions, RequestCodes.ALL_PERMISSIONS);
         } else {
