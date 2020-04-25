@@ -22,6 +22,7 @@
             android:layout_height="wrap_content"
             android:textOff="Tắt chia sẻ vị trí"
             android:textOn="Bật chia sẻ vị trí"
+            android:textColor="@color/colorText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -57,6 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Thông tin cá nhân"
+                    android:textColor="@color/colorText"
                     android:textSize="18sp" />
             </LinearLayout>
 
@@ -80,6 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đổi mật khẩu"
+                    android:textColor="@color/colorText"
                     android:textSize="18sp" />
             </LinearLayout>
 
@@ -103,6 +106,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đăng xuất"
+                    android:textColor="@color/colorText"
                     android:textSize="18sp" />
             </LinearLayout>
 

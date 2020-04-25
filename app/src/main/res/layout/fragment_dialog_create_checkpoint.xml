@@ -10,7 +10,7 @@
         android:id="@+id/toolbar_dialog_create_checkpoint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#F2F2F2"
+        android:background="@color/colorBackground"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
@@ -60,6 +60,7 @@
         android:inputType="textPersonName"
         android:paddingLeft="50dp"
         android:paddingRight="50dp"
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toBottomOf="@+id/toolbar_dialog_create_checkpoint"
         app:layout_constraintEnd_toStartOf="@+id/btn_my_location_dialog_create_checkpoint"
         app:layout_constraintStart_toStartOf="parent"
@@ -75,7 +76,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/edit_search_location_checkpoint"
         app:layout_constraintStart_toStartOf="@+id/edit_search_location_checkpoint"
         app:layout_constraintTop_toTopOf="@+id/edit_search_location_checkpoint"
-        app:srcCompat="@drawable/ic_keyboard_arrow_left_black_24dp" />
+        app:srcCompat="@drawable/ic_back" />
 
     <ImageButton
         android:id="@+id/btn_clear_edit_search"
@@ -126,6 +127,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toTopOf="@+id/textView8"
         app:layout_constraintEnd_toEndOf="@+id/btn_add_checkpoint"
         app:layout_constraintStart_toStartOf="@+id/btn_cancel_checkpoint" />
@@ -151,6 +153,7 @@
         android:focusable="false"
         android:hint="00:00"
         android:inputType="textPersonName"
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toTopOf="@+id/btn_cancel_checkpoint"
         app:layout_constraintEnd_toEndOf="@+id/btn_add_checkpoint"
         app:layout_constraintStart_toStartOf="@+id/btn_cancel_checkpoint" />

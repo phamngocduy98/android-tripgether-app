@@ -146,8 +146,10 @@ public class TabTripFragmentSos extends Fragment implements HasOnGoToMainActivit
             } else {
                 tvLever.setText("Mức độ " + sosRequest.getLever());
             }
-            ImageHelper.loadImage(user.getAvatar(), imgAvatar);
-            tvName.setText(user.getName());
+            if (user != null) {
+                ImageHelper.loadImage(user.getAvatar(), imgAvatar);
+                tvName.setText(user.getName());
+            }
             tvDes.setText(sosRequest.getDescription());
         }
     }

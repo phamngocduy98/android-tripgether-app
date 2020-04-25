@@ -78,6 +78,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:drawableTint="@color/colorText"
+            android:textColor="@color/colorText"
             android:drawableStart="@drawable/ic_assistant_photo_black_24dp"
             android:text="12:11" />
 
@@ -86,6 +88,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:drawableTint="@color/colorText"
+            android:textColor="@color/colorText"
             android:drawableStart="@drawable/ic_directions_bike_black_24dp"
             android:text="4 km/s" />
 
@@ -94,6 +98,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:drawableTint="@color/colorText"
+            android:textColor="@color/colorText"
             android:drawableStart="@drawable/ic_battery_50_black_24dp"
             android:text="51%" />
 

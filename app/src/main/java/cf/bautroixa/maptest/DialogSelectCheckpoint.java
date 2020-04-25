@@ -96,7 +96,7 @@ public class DialogSelectCheckpoint extends OneDialog {
         @NonNull
         @Override
         public CheckPointViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new CheckPointViewHolder(getLayoutInflater().inflate(R.layout.activity_create_trip_item_checkpoint, parent, false));
+            return new CheckPointViewHolder(getLayoutInflater().inflate(R.layout.item_checkpoint, parent, false));
         }
 
         @Override

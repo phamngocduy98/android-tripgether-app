@@ -5,17 +5,17 @@
     <color name="colorAccent">#3e91ff</color>
 
     <!-- STYLE -->
-    <color name="colorText">#4C4C4C</color>
-    <color name="colorTextSecondary">#979797</color>
+    <color name="colorText">#fafafa</color>
+    <color name="colorTextSecondary">#EAEAEA</color>
     <color name="colorButtonBg">#0381fe</color>
     <color name="colorButtonBgSelected">#3e91ff</color>
     <color name="colorTextButton">#0381fe</color>
-    <color name="colorBackground">#F2F2F2</color>
-    <color name="colorEditTextBg">#E6E6E6</color>
+    <color name="colorBackground">#000</color>
+    <color name="colorEditTextBg">#191919</color>
     <color name="colorBgNavigationBar">#F0F0F5</color>
 
-    <color name="borderRadiusBg">#fff</color>
-    <color name="colorRipple">#66000000</color>
+    <color name="borderRadiusBg">#202020</color>
+    <color name="colorRipple">#66FFFFFF</color>
 
     <color name="disableColorPrimary">#78008CFF</color>
     <color name="colorControlActivate">#4297ff</color>
@@ -25,5 +25,5 @@
 
     <color name="colorItemOutcomingMessage">#0099ff</color>
     <color name="colorItemIncomingMessage">#f1f0f0</color>
-    <color name="colorBorder">#D0D1D1</color>
+    <color name="colorBorder">#222222</color>
 </resources>

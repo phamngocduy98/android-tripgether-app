@@ -13,7 +13,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:text="Dialog"
-        android:textSize="22sp" />
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/colorText"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:id="@+id/container_body_one_dialog"
@@ -25,7 +27,8 @@
             android:id="@+id/tv_message_one_dialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18dp"
+            android:textColor="@color/colorText"
+            android:textSize="16dp"
             android:text="What to do for love?" />
 
         <EditText

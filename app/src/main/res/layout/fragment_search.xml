@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:alpha="0.0"
-        android:background="#F2F2F2"
+        android:background="@color/colorBackground"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         android:translationY="-1000dp"
@@ -23,7 +23,7 @@
         android:id="@+id/rv_search_results"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#F2F2F2"
+        android:background="@color/colorBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,7 +59,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/edit_search_location_frag_search"
         app:layout_constraintStart_toStartOf="@+id/edit_search_location_frag_search"
         app:layout_constraintTop_toTopOf="@+id/edit_search_location_frag_search"
-        app:srcCompat="@drawable/ic_keyboard_arrow_left_black_24dp" />
+        app:srcCompat="@drawable/ic_back" />
 
     <ImageButton
         android:id="@+id/btn_clear_frag_search"

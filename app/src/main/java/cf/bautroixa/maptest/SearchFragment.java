@@ -294,7 +294,7 @@ public class SearchFragment extends Fragment {
         @NonNull
         @Override
         public SearchResultViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new SearchResultViewHolder(getLayoutInflater().inflate(R.layout.activity_create_trip_item_checkpoint, parent, false), viewType);
+            return new SearchResultViewHolder(getLayoutInflater().inflate(R.layout.item_checkpoint, parent, false), viewType);
         }
 
         @Override

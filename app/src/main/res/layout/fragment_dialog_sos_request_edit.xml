@@ -13,11 +13,14 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:text="Gửi cảnh báo SOS"
+        android:paddingTop="8dp"
+        android:textColor="@color/colorText"
         android:textSize="24sp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/colorText"
         android:paddingVertical="8dp"
         android:text="Mức độ nghiêm trọng" />
 
@@ -59,6 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingVertical="8dp"
+        android:textColor="@color/colorText"
         android:text="Mô tả về vấn đề của bạn" />
 
     <EditText
@@ -67,6 +71,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textMultiLine"
+        android:textColor="@color/colorText"
         android:lines="3"
         android:minLines="2" />
 

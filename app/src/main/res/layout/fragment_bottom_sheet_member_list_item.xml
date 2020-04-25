@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    android:background="@drawable/bg_item_room">
+    android:background="@drawable/bg_radius_none_white">
 
     <cf.bautroixa.maptest.theme.RoundedImageView
         android:id="@+id/img_avatar_status_item_friend"
@@ -81,6 +81,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:text="50%"
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toBottomOf="@+id/tv_count_status_item_friend"
         app:layout_constraintEnd_toStartOf="@+id/tv_count_status_item_friend"
         app:layout_constraintTop_toTopOf="@+id/tv_count_status_item_friend"

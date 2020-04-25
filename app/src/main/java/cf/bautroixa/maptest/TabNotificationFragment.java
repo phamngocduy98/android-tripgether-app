@@ -1,45 +1,60 @@
 package cf.bautroixa.maptest;
 
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
+import java.util.ArrayList;
 
+import cf.bautroixa.maptest.data.NotificationItem;
+import cf.bautroixa.maptest.firestore.DatasManager;
+import cf.bautroixa.maptest.firestore.Event;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
+import cf.bautroixa.maptest.theme.OneRecyclerView;
+import cf.bautroixa.maptest.theme.RoundedImageView;
+import cf.bautroixa.maptest.utils.ImageHelper;
 
 public class TabNotificationFragment extends OneAppbarFragment {
+    RecyclerView rvNotifications;
+    OnNotificationItemClickedListener mListener;
+    DatasManager.OnItemInsertedListener<Event> onItemInsertedListener;
     MainAppManager manager;
-
-    TabNotificationFragmentNotifications notificationFragmentNotifications;
-
-    ViewPager2 pager;
-    TabLayout tabLayout;
-    Adapter adapter;
-
-    String[] tabNames = {"Notifications"};
+    NotificationAdapter adapter;
 
     public TabNotificationFragment() {
         manager = MainAppManager.getInstance();
+        adapter = new NotificationAdapter();
+        onItemInsertedListener = new DatasManager.OnItemInsertedListener<Event>() {
+            @Override
+            public void onItemInserted(int position, Event data) {
+                adapter.notifyItemChanged(position);
+            }
+        };
+    }
+
+    public void setOnItemInsertedListener(OnNotificationItemClickedListener mListener) {
+        this.mListener = mListener;
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        notificationFragmentNotifications = new TabNotificationFragmentNotifications();
+    public void onResume() {
+        super.onResume();
+        manager.getEventsManager().addOnItemInsertedListener(onItemInsertedListener);
     }
 
-    public void setListener(OnNotificationItemClickedListener mListener) {
-        this.notificationFragmentNotifications.setListener(mListener);
+    @Override
+    public void onPause() {
+        super.onPause();
+        manager.getEventsManager().removeOnItemInsertedListener(onItemInsertedListener);
     }
 
     @Override
@@ -47,10 +62,9 @@ public class TabNotificationFragment extends OneAppbarFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_tab_notification, container, false);
-
-        pager = v.findViewById(R.id.pager_frag_nav_noti);
-        tabLayout = v.findViewById(R.id.tab_layout_frag_nav_noti);
-
+        rvNotifications = v.findViewById(R.id.rv_notifications);
+        rvNotifications.setAdapter(adapter);
+        rvNotifications.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         return v;
     }
 
@@ -59,42 +73,78 @@ public class TabNotificationFragment extends OneAppbarFragment {
         super.onViewCreated(view, savedInstanceState);
         setTitle("Thông báo");
         setSubtitle(String.format("%d thông báo chưa đọc", manager.getEventsManager().getData().size()));
-
-        adapter = new Adapter(this);
-        pager.setAdapter(adapter);
-        pager.setSaveEnabled(false);
-        new TabLayoutMediator(tabLayout, pager, new TabLayoutMediator.TabConfigurationStrategy() {
-            @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                tab.setText(tabNames[position]);
-            }
-        }).attach();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        mListener = null;
     }
 
     public interface OnNotificationItemClickedListener {
         void onNotificationClick(int eventType, String id);
     }
 
-    class Adapter extends FragmentStateAdapter {
+    public class NotificationVH extends OneRecyclerView.ViewHolder {
+        View view;
+        RoundedImageView imgAvatar, imgType;
+        TextView tvContent, tvTime;
 
-        public Adapter(@NonNull Fragment fragment) {
-            super(fragment);
+        public NotificationVH(@NonNull View itemView, int viewType) {
+            super(itemView, viewType);
+            view = itemView;
+            imgAvatar = itemView.findViewById(R.id.img_avatar_item_noti);
+            imgType = itemView.findViewById(R.id.img_type_item_noti);
+            tvContent = itemView.findViewById(R.id.tv_content_item_noti);
+            tvTime = itemView.findViewById(R.id.tv_time_item_noti);
+        }
+
+        public void bind(Event event) {
+            NotificationItem notificationItem = event.getNotificationItem(manager);
+            tvContent.setText(Html.fromHtml(notificationItem.getContent()));
+            tvTime.setText(notificationItem.getTime());
+            if (notificationItem.getEventType() == Event.Type.USER_SOS_ADDED || notificationItem.getEventType() == Event.Type.USER_SOS_RESOLVED) {
+                imgType.setImageResource(R.drawable.ic_sos_red_24dp);
+            } else {
+                imgType.setImageResource(R.drawable.ic_assistant_photo_black_24dp);
+            }
+            ImageHelper.loadImage(notificationItem.getAvatar(), imgAvatar);
+        }
+    }
+
+    public class NotificationAdapter extends OneRecyclerView.Adapter<NotificationVH> {
+        ArrayList<Event> events;
+
+        public NotificationAdapter() {
+            events = manager.getEventsManager().getData();
         }
 
         @NonNull
         @Override
-        public Fragment createFragment(int position) {
-            return notificationFragmentNotifications;
+        public NotificationVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = getLayoutInflater().inflate(R.layout.fragment_tab_notification_item, parent, false);
+            return new NotificationVH(v, viewType);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull NotificationVH holder, int position) {
+            final Event event = events.get(position);
+            holder.bind(event);
+            holder.view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null)
+                        mListener.onNotificationClick(event.getType(), event.getId());
+                }
+            });
         }
 
         @Override
         public int getItemCount() {
-            return 1;
+            return events.size();
         }
     }
 }
+
+
+

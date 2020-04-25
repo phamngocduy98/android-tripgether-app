@@ -26,6 +26,7 @@
         android:paddingVertical="4dp"
         android:text="12/10/1998 - Now - 12/10/2020"
         android:textSize="14sp"
+        android:textColor="@color/colorText"
         app:layout_constraintBottom_toTopOf="@+id/rv_checkpoints_frag_trip_overview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

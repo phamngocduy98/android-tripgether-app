@@ -73,7 +73,8 @@ public class DatasManager<T extends Data> {
     }
 
     public int indexOf(String id) {
-        return mapIdWithIndex.get(id);
+        Integer index = mapIdWithIndex.get(id);
+        return index != null ? index : -1;
     }
 
     public ArrayList<T> getData() {

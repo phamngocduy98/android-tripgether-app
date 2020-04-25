@@ -16,7 +16,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="Cầu Thê Húc"
-        android:textColor="@android:color/black"
+        android:textColor="@color/colorText"
         android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/tv_time_item_checkpoint"
         app:layout_constraintStart_toStartOf="parent"

@@ -3,6 +3,8 @@ package cf.bautroixa.maptest;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +34,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -93,7 +96,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     // GG map component
     private GoogleMap mMap;
     private Marker myLocationMarker = null, myLocationRotationMarker = null, flagMarker = null;
-    private LatLng currentLocation = new LatLng(21.0245, 105.84117);
+    private LatLng currentLocation = new LatLng(0, 0);
     private Polyline routeLine = null;
 
     private boolean isMapLoaded = false, isMarkerLoaded = false, isCheckpointLoaded = false, focusMyLocation = true;
@@ -165,13 +168,15 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     void initLocationAndCompass() {
-        currentLocation = new LatLng(0,0);
+        currentLocation = new LatLng(0, 0);
         fusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
-                if (task.isSuccessful() && task.getResult() != null){
+                if (task.isSuccessful() && task.getResult() != null) {
                     Location res = task.getResult();
                     currentLocation = new LatLng(res.getLatitude(), res.getLongitude());
+                    if (isMapLoaded)
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 12));
                 }
             }
         });
@@ -179,7 +184,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
         locationRequest.setInterval(10000);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        fusedLocationClient.requestLocationUpdates(locationRequest,new LocationCallback(){
+        fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 Location lastLocation = locationResult.getLastLocation();
@@ -216,6 +221,16 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
         uiSetting.setMapToolbarEnabled(false);
 //        uiSetting.setZoomControlsEnabled(false);
 //        mMap.setMyLocationEnabled(true);
+        try {
+            int nightModeFlags = getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+                if (!googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.maps_night))) {
+                    Log.e(TAG, "Style parsing failed.");
+                }
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "Can't find style. Error: ", e);
+        }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 14));
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
@@ -248,7 +263,8 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
                         onMapClicked.onMapClicked(mMap.getCameraPosition().target);
                     return true;
                 }
-                if (onMarkerClickedListener != null) onMarkerClickedListener.onMarkerClick(marker.getSnippet(), marker.getTitle());
+                if (onMarkerClickedListener != null)
+                    onMarkerClickedListener.onMarkerClick(marker.getSnippet(), marker.getTitle());
                 return true;
             }
         });
@@ -295,7 +311,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
 
     void initCheckpointMarker() {
         if (!isMapLoaded) return;
-        for (Checkpoint checkpoint: checkpoints) {
+        for (Checkpoint checkpoint : checkpoints) {
             if (checkpoint.getMarker() != null) {
                 checkpoint.getMarker().remove();
             }
@@ -306,7 +322,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     @Nullable
     private Marker createFriendMarker(final User user) {
         if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
-        if (user.getMarker() == null){
+        if (user.getMarker() == null) {
             user.setMarker(mMap.addMarker(new MarkerOptions().position(user.getLatLng())
                     .title(user.getId())
                     .snippet(Collections.USERS)
@@ -332,7 +348,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     void targetCamera(boolean includeMyLocation, GoogleMap.CancelableCallback cancelableCallback, LatLng... latLngs) {
-        if (isMapLoaded){
+        if (isMapLoaded) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (LatLng point : latLngs) {
                 builder.include(point);
@@ -346,17 +362,17 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     void targetCamera(LatLngBounds bounds, GoogleMap.CancelableCallback cancelableCallback) {
         if (isMapLoaded) {
 //            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100), cancelableCallback); // padding 100
-            final int toolbarStatusbarHeight = (int)PixelDPConverter.convertDpToPixel(61+25, getContext());
+            final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, getContext());
             // TODO: calculate real bottomSpace height
-            final int bottomSpaceHeight = (int)PixelDPConverter.convertDpToPixel(200, getContext());
+            final int bottomSpaceHeight = (int) PixelDPConverter.convertDpToPixel(200, getContext());
             final int boundHeight = screenHeight - toolbarStatusbarHeight - bottomSpaceHeight;
-            Log.d(TAG, "tbheight = "+toolbarStatusbarHeight);
-            Log.d(TAG, "boundHei="+boundHeight);
-            Log.d(TAG, "screenHe="+screenHeight);
+            Log.d(TAG, "tbheight = " + toolbarStatusbarHeight);
+            Log.d(TAG, "boundHei=" + boundHeight);
+            Log.d(TAG, "screenHe=" + screenHeight);
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, screenWidth, boundHeight, 100), new GoogleMap.CancelableCallback() {
                 @Override
                 public void onFinish() {
-                    mMap.animateCamera(CameraUpdateFactory.scrollBy(0, (screenHeight-boundHeight)/2f - toolbarStatusbarHeight));
+                    mMap.animateCamera(CameraUpdateFactory.scrollBy(0, (screenHeight - boundHeight) / 2f - toolbarStatusbarHeight));
                 }
 
                 @Override
@@ -381,13 +397,14 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
             if (activeMarker != null) activeMarker.setIcon(null);
             activeMarker = checkpoint.getMarker();
             // TODO: ( java.lang.IllegalArgumentException: Unmanaged descriptor ) bellow this line
-            if (activeMarker != null) activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
-                @Override
-                public void edit(View view) {
-                    TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
-                    tvName.setText(String.valueOf(checkpointIndex));
-                }
-            }))));
+            if (activeMarker != null)
+                activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
+                    @Override
+                    public void edit(View view) {
+                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
+                        tvName.setText(String.valueOf(checkpointIndex));
+                    }
+                }))));
         }
     }
 
@@ -399,7 +416,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    void drawRoute(List<LatLng> latLngs){
+    void drawRoute(List<LatLng> latLngs) {
         final LatLngBounds.Builder bounds = new LatLngBounds.Builder();
         PolylineOptions line = new PolylineOptions().clickable(true).addAll(latLngs);
         clearRoute();
@@ -467,7 +484,8 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     public void onPause() {
         super.onPause();
         compass.stop();
-        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener).removeOnItemRemovedListener(onUserRemovedListener);;
+        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener).removeOnItemRemovedListener(onUserRemovedListener);
+        ;
         manager.getCheckpointsManager().removeOnItemInsertedListener(onCheckpointInsertedListener).removeOnItemRemovedListener(onCheckpointRemovedListener);
     }
 
@@ -487,7 +505,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
-    private void initScreenSize(){
+    private void initScreenSize() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenHeight = displayMetrics.heightPixels;

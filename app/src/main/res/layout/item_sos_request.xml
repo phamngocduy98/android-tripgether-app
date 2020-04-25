@@ -27,6 +27,7 @@
         android:singleLine="true"
         android:text="AdminBautroixa"
         android:textSize="18sp"
+        android:textColor="@color/colorText"
         app:layout_constraintEnd_toStartOf="@+id/tv_lever_item_sos"
         app:layout_constraintStart_toEndOf="@+id/img_user_avatar_item_sos"
         app:layout_constraintTop_toTopOf="@+id/img_user_avatar_item_sos" />
@@ -49,6 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:text="Khẩn cấp"
+        android:textColor="@color/colorText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tv_user_name_item_sos" />
 </androidx.constraintlayout.widget.ConstraintLayout>

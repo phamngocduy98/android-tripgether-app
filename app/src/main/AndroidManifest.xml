@@ -44,7 +44,8 @@
         </activity>
         <activity
             android:name=".AlertActivity"
-            android:theme="@style/NoActionBar" />
+            android:showOnLockScreen="true"
+            android:theme="@style/NoActionBar.NoStatusBar" />
         <activity android:name=".ChangePasswordActivity" />
         <activity android:name=".ForgotPasswordActivity" />
         <activity android:name=".TabProfileFragment" />
@@ -70,11 +71,12 @@
             android:exported="true" />
 
         <activity android:name=".LoginActivity" />
-        <activity android:name=".TripInvitationActivity" />
+        <activity
+            android:name=".TripInvitationActivity"
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".CreateTripActivity"
-            android:theme="@style/NoActionBar"
-            android:windowSoftInputMode="adjustResize" />
+            android:theme="@style/NoActionBar" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
