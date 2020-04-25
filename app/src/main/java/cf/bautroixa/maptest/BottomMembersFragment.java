@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.SnapHelper;
 
 import java.util.ArrayList;
 
+import cf.bautroixa.maptest.dialogs.SosRequestViewDialogFragment;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;

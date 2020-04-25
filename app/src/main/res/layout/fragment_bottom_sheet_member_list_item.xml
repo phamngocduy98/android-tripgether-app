@@ -7,12 +7,26 @@
     android:focusable="true"
     android:background="@drawable/bg_radius_none_white">
 
+    <TextView
+        android:id="@+id/tv_name_item_friend"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_radius_full_color"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="TV"
+        android:textColor="@color/white"
+        android:textSize="26dp"
+        app:layout_constraintBottom_toBottomOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintEnd_toEndOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintStart_toStartOf="@+id/img_avatar_status_item_friend"
+        app:layout_constraintTop_toTopOf="@+id/img_avatar_status_item_friend" />
+
     <cf.bautroixa.maptest.theme.RoundedImageView
         android:id="@+id/img_avatar_status_item_friend"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="16dp"
-        android:padding="8dp"
         android:src="@drawable/user"
         app:borderRadius="40dp"
         app:layout_constraintBottom_toBottomOf="parent"

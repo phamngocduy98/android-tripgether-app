@@ -33,7 +33,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:clickable="true"
-            style="@style/Widget.MaterialComponents.FloatingActionButton"
+            style="@style/Theme.MaterialComponents.DayNight"
             app:layout_anchor="@+id/bottom_sheet"
             app:layout_anchorGravity="top|end"
             app:srcCompat="@drawable/ic_my_location_black_24dp" />

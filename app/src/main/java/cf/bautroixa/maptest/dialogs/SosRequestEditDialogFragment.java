@@ -1,4 +1,4 @@
-package cf.bautroixa.maptest;
+package cf.bautroixa.maptest.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
+import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.theme.OneBottomSheetDialog;

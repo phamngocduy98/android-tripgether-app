@@ -96,7 +96,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 // low priority event => show small notification
                 Event event = manager.getEventsManager().get(fcmMessage.getEventRefId());
                 NotificationItem notificationItem = event.getNotificationItem(manager);
-                sendNotification(notificationItem.getIntroContent(), notificationItem.getShortContent());
+                sendNotification(event.getType(), notificationItem.getIntroContent(), notificationItem.getShortContent());
             }
 
         }
@@ -162,9 +162,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     /**
-     * Create and show a simple notification containing the received FCM message.
+     * Send notification
+     * @param notificationId unique id for each notification, 2 notification with the same id is replaced
+     * @param title
+     * @param messageBody
      */
-    private void sendNotification(String title, String messageBody) {
+    private void sendNotification(int notificationId, String title, String messageBody) {
         Intent intent = new Intent(this, SplashScreenActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
@@ -192,6 +195,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(notificationId, notificationBuilder.build());
     }
 }

@@ -205,7 +205,7 @@ public class BottomSheetMemberListFragment extends Fragment {
     }
 
     public class FriendStatusViewHolder extends RecyclerView.ViewHolder {
-        protected TextView tvName, tvLocation, tvCount, tvBattery;
+        protected TextView tvName, tvLocation, tvCount, tvBattery, tvNameInAvatar;
         protected RoundedImageView imgAvatar;
         protected View view;
         protected User currentUser;
@@ -219,6 +219,7 @@ public class BottomSheetMemberListFragment extends Fragment {
 
         public void findView() {
             progressBattery = itemView.findViewById(R.id.progress_battery_item_friend);
+            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend);
             imgAvatar = itemView.findViewById(R.id.img_avatar_status_item_friend);
             tvName = itemView.findViewById(R.id.tv_name_status_item_friend);
             tvBattery = itemView.findViewById(R.id.tv_battery_status_item_friend);
@@ -258,6 +259,10 @@ public class BottomSheetMemberListFragment extends Fragment {
         public void bind(User user) {
             currentUser = user;
             tvName.setText(user.getName());
+            if (user.getAvatar() == null || user.getAvatar() == User.DEFAULT_AVATAR) {
+                imgAvatar.setVisibility(View.INVISIBLE);
+                tvNameInAvatar.setText(user.getShortName());
+            }
             ImageHelper.loadImage(user.getAvatar(), imgAvatar);
             this.update(user);
         }
@@ -270,6 +275,7 @@ public class BottomSheetMemberListFragment extends Fragment {
 
         @Override
         public void findView() {
+            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend_status_lite);
             imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend_status_lite);
             tvCount = itemView.findViewById(R.id.tv_messages_count_item_friend_status_lite);
         }

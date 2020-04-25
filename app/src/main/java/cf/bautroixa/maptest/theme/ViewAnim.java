@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest.theme;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.Button;
 
@@ -19,8 +20,8 @@ public class ViewAnim {
         }
     }
 
-    public static void toggleLoading(Button button, boolean isLoading, String buttonText) {
+    public static void toggleLoading(Context context, Button button, boolean isLoading, String buttonText) {
         button.setEnabled(!isLoading);
-        button.setText(isLoading ? "Loading..." : buttonText);
+        button.setText(isLoading ? "Loading" : buttonText);
     }
 }

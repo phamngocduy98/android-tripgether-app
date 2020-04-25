@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
+import cf.bautroixa.maptest.dialogs.DialogCheckpointEditFragment;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;
@@ -279,9 +280,9 @@ public class TabTripFragmentCheckpoints extends Fragment {
 
         public void setActiveCheckpoint(boolean active) {
             if (active) {
-                mTimelineView.setMarker(getResources().getDrawable(R.drawable.bg_badge_red));
+                mTimelineView.setMarker(getResources().getDrawable(R.drawable.ic_ticker));
             } else {
-                mTimelineView.setMarker(getResources().getDrawable(R.drawable.bg_item_message_outcoming));
+                mTimelineView.setMarker(getResources().getDrawable(R.drawable.btn_flat_with_border));
             }
         }
     }

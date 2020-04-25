@@ -272,13 +272,13 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                     @Override
                     public void onClick(View v) {
                         Log.d(TAG, "diem danh");
-                        ViewAnim.toggleLoading(btnCheckIn, true, "");
+                        ViewAnim.toggleLoading(getContext(), btnCheckIn, true, "");
                         checkpoint.getVisitsManager().addVisit(manager.getCurrentUser()).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     Log.d(TAG, "diem danh thanh cong!");
-                                    ViewAnim.toggleLoading(btnCheckIn, false, "Đã điểm danh!");
+                                    ViewAnim.toggleLoading(getContext(), btnCheckIn, false, "Đã điểm danh!");
                                     setRollUpButton(btnCheckIn, checkpoint);
                                 }
                             }
@@ -318,6 +318,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                 public void onClick(View v) {
                     final GeoPoint from = manager.getCurrentUser().getCurrentCoord();
                     final GeoPoint to = checkpoint.getCoordinate();
+                    ViewAnim.toggleLoading(getContext(), btnRoute, true, getString(R.string.btn_route));
                     NavigationRoute.builder(getContext())
                             .accessToken(getString(R.string.config_mapbox_map_api_key))
                             .origin(Point.fromLngLat(from.getLongitude(), from.getLatitude()))
@@ -326,6 +327,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                             .getRoute(new Callback<DirectionsResponse>() {
                                 @Override
                                 public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                                    ViewAnim.toggleLoading(getContext(), btnRoute, false, getString(R.string.btn_route));
                                     if (response.isSuccessful() && response.body() != null)
                                         for (DirectionsRoute route : response.body().routes()) {
                                             List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
@@ -343,6 +345,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                                 @Override
                                 public void onFailure(Call<DirectionsResponse> call, Throwable t) {
                                     Log.d(TAG, "get route failed");
+                                    ViewAnim.toggleLoading(getContext(), btnRoute, false, getString(R.string.btn_route));
                                 }
                             });
                 }

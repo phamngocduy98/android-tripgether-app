@@ -1,4 +1,4 @@
-package cf.bautroixa.maptest;
+package cf.bautroixa.maptest.dialogs;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;

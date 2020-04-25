@@ -21,6 +21,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import cf.bautroixa.maptest.dialogs.DialogCheckpointEditFragment;
+import cf.bautroixa.maptest.dialogs.DialogQRScanFragment;
+import cf.bautroixa.maptest.dialogs.DialogSelectCheckpoint;
+import cf.bautroixa.maptest.dialogs.SosRequestEditDialogFragment;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.MainAppManager;

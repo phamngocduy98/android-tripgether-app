@@ -1,4 +1,4 @@
-package cf.bautroixa.maptest;
+package cf.bautroixa.maptest.dialogs;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.network_io.AppRequest;

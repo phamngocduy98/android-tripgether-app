@@ -1,4 +1,4 @@
-package cf.bautroixa.maptest;
+package cf.bautroixa.maptest.dialogs;
 
 import android.Manifest;
 import android.content.DialogInterface;

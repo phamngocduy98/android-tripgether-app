@@ -5,6 +5,21 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/tv_name_item_friend_status_lite"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_radius_full_color"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="TV"
+        android:textColor="@color/white"
+        android:textSize="26dp"
+        app:layout_constraintBottom_toBottomOf="@+id/img_avatar_item_friend_status_lite"
+        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_friend_status_lite"
+        app:layout_constraintStart_toStartOf="@+id/img_avatar_item_friend_status_lite"
+        app:layout_constraintTop_toTopOf="@+id/img_avatar_item_friend_status_lite" />
+
     <cf.bautroixa.maptest.theme.RoundedImageView
         android:id="@+id/img_avatar_item_friend_status_lite"
         android:layout_width="60dp"

@@ -47,12 +47,17 @@
             android:showOnLockScreen="true"
             android:theme="@style/NoActionBar.NoStatusBar" />
         <activity android:name=".ChangePasswordActivity" />
-        <activity android:name=".ForgotPasswordActivity" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:theme="@style/NoActionBar" />
         <activity android:name=".TabProfileFragment" />
         <activity
             android:name=".DetailProfileActivity"
             android:theme="@style/NoActionBar" />
-        <activity android:name=".RegisterActivity" />
+        <activity
+            android:name=".RegisterActivity"
+            android:theme="@style/NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".services.MyFirebaseMessagingService"
@@ -70,7 +75,9 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".LoginActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".TripInvitationActivity"
             android:theme="@style/NoActionBar" />

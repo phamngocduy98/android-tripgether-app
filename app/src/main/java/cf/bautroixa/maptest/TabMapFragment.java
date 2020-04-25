@@ -330,7 +330,13 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
                         @Override
                         public void edit(View view) {
                             ImageView markerImage = (ImageView) view.findViewById(R.id.img_avatar_map_marker_user);
-                            ImageHelper.loadImage(user.getAvatar(), markerImage);
+                            TextView tvName = view.findViewById(R.id.tv_name_map_marker_user);
+                            if (user.getAvatar() == null || user.getAvatar().equals(User.DEFAULT_AVATAR)) {
+                                markerImage.setVisibility(View.INVISIBLE);
+                                tvName.setText(user.getShortName());
+                            } else {
+                                ImageHelper.loadImage(user.getAvatar(), markerImage);
+                            }
                         }
                     })))));
         }

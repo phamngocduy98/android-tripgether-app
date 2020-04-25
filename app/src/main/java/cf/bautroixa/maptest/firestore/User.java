@@ -9,6 +9,8 @@ import com.google.firebase.firestore.GeoPoint;
 
 public class User extends Data {
     @Exclude
+    public static final String DEFAULT_AVATAR = "https://sites.google.com/site/masoibot/user/user.png";
+    @Exclude
     public static final String NO_USER = "notLoggedIn";
     @Exclude
     public static final String FCM_TOKEN = "fcmToken";
@@ -157,6 +159,16 @@ public class User extends Data {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    @Exclude
+    public String getShortName() {
+        String[] names = getName().split(" ");
+        if (names.length >= 2) {
+            return "" + names[0].charAt(0) + names[names.length - 1].charAt(0);
+        } else {
+            return getName().substring(0, 2);
+        }
     }
 
     @Exclude

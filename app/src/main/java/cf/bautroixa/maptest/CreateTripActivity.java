@@ -30,6 +30,7 @@ import net.glxn.qrgen.android.QRCode;
 
 import java.util.ArrayList;
 
+import cf.bautroixa.maptest.dialogs.DialogCheckpointEditFragment;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.theme.OneAppbarActivity;

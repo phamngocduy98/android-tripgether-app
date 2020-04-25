@@ -56,6 +56,12 @@ public class OneDialog extends DialogFragment {
     }
 
     public OneDialog() {
+        btnClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        };
     }
 
     @Override
