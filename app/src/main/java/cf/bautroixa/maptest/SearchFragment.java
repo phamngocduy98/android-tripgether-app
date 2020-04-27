@@ -23,6 +23,8 @@ import com.mapbox.api.geocoding.v5.MapboxGeocoding;
 import com.mapbox.api.geocoding.v5.models.CarmenFeature;
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,7 +138,7 @@ public class SearchFragment extends Fragment {
                             .build();
                     mapboxGeocoding.enqueueCall(new Callback<GeocodingResponse>() {
                         @Override
-                        public void onResponse(Call<GeocodingResponse> call, Response<GeocodingResponse> response) {
+                        public void onResponse(@NotNull Call<GeocodingResponse> call, @NotNull Response<GeocodingResponse> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 List<CarmenFeature> results = response.body().features();
                                 if (results.size() > 0) {
@@ -156,7 +158,7 @@ public class SearchFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFailure(Call<GeocodingResponse> call, Throwable throwable) {
+                        public void onFailure(@NotNull Call<GeocodingResponse> call, @NotNull Throwable throwable) {
                             throwable.printStackTrace();
                         }
                     });

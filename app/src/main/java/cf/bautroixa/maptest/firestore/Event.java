@@ -21,6 +21,7 @@ public class Event extends Data {
     public static final String TYPE = "type";
 
     private int type;
+    // TODO: server timestamp may null due to internet connection
     @ServerTimestamp
     private Timestamp time;
     private DocumentReference sosRef, userRef, checkpointRef;
@@ -98,8 +99,6 @@ public class Event extends Data {
         }
         return notificationItem;
     }
-
-    ;
 
     @Exclude
     @Override

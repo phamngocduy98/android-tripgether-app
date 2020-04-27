@@ -46,16 +46,16 @@
             android:name=".AlertActivity"
             android:showOnLockScreen="true"
             android:theme="@style/NoActionBar.NoStatusBar" />
-        <activity android:name=".ChangePasswordActivity" />
+        <activity android:name=".auth.ChangePasswordActivity" />
         <activity
-            android:name=".ForgotPasswordActivity"
+            android:name=".auth.ForgotPasswordActivity"
             android:theme="@style/NoActionBar" />
         <activity android:name=".TabProfileFragment" />
         <activity
-            android:name=".DetailProfileActivity"
+            android:name=".auth.DetailProfileActivity"
             android:theme="@style/NoActionBar" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".auth.RegisterActivity"
             android:theme="@style/NoActionBar"
             android:windowSoftInputMode="adjustResize" />
 
@@ -67,16 +67,12 @@
             </intent-filter>
         </service>
         <service
-            android:name=".services.ScheduleService"
-            android:enabled="true"
-            android:exported="true" />
-        <service
             android:name=".services.UpdateLocationService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".auth.LoginActivity"
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".TripInvitationActivity"

@@ -16,6 +16,7 @@ import cf.bautroixa.maptest.types.APILocation;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 
 public class AppRequest {
@@ -26,7 +27,7 @@ public class AppRequest {
     }
 
     public static void getGeocodingAddress(Context context, LatLng latLng, final HttpRequest.Callback<String> callback) {
-        String URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + latLng.longitude+","+latLng.latitude+".json?access_token="+context.getString(R.string.config_mapbox_map_api_key);
+        String URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + latLng.longitude + "," + latLng.latitude + ".json?access_token=" + context.getString(R.string.config_mapbox_map_api_key);
         HttpRequest.getInstance().sendGetRequest(URL, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -36,8 +37,10 @@ public class AppRequest {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                String resStr =response.body().string();
-                Log.d(TAG, "res = "+resStr);
+                ResponseBody resBody = response.body();
+                if (resBody == null) return;
+                String resStr = resBody.string();
+                Log.d(TAG, "res = " + resStr);
                 try {
                     String address = JSONParser.parseGeocodingAddressString(resStr);
                     callback.onResponse(address);
@@ -49,7 +52,7 @@ public class AppRequest {
     }
 
     public static void getGeocodingLatLng(Context context, String location, final HttpRequest.Callback<APILocation> callback) {
-        String URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + location+".json?access_token="+context.getString(R.string.config_mapbox_map_api_key);
+        String URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + location + ".json?access_token=" + context.getString(R.string.config_mapbox_map_api_key);
         HttpRequest.getInstance().sendGetRequest(URL, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -59,8 +62,10 @@ public class AppRequest {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                String resStr =response.body().string();
-                Log.d(TAG, "res = "+resStr);
+                ResponseBody resBody = response.body();
+                if (resBody == null) return;
+                String resStr = resBody.string();
+                Log.d(TAG, "res = " + resStr);
                 try {
                     APILocation location = JSONParser.parseGeocodingLatlngString(resStr);
                     callback.onResponse(location);

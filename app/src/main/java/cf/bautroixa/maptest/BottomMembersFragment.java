@@ -57,8 +57,6 @@ public class BottomMembersFragment extends Fragment {
     // View
     private RecyclerView rv;
     private TextView tvCount;
-    private SnapHelper snapHelper;
-    private Button btnCall, btnDirection, btnMessage, btnShowSos;
 
     // adapter
     private FriendsAdapter adapter;
@@ -169,10 +167,10 @@ public class BottomMembersFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_bottom_members, container, false);
 
         tvCount = v.findViewById(R.id.tv_count_frag_friend);
-        btnCall = v.findViewById(R.id.btn_call_frag_friend);
-        btnDirection = v.findViewById(R.id.btn_direction_frag_friend);
-        btnMessage = v.findViewById(R.id.btn_message_frag_friend);
-        btnShowSos = v.findViewById(R.id.btn_view_sos_frag_friend);
+        Button btnCall = v.findViewById(R.id.btn_call_frag_friend);
+        Button btnDirection = v.findViewById(R.id.btn_direction_frag_friend);
+        Button btnMessage = v.findViewById(R.id.btn_message_frag_friend);
+        Button btnShowSos = v.findViewById(R.id.btn_view_sos_frag_friend);
 
         tvCount.setText(String.format("%d/%d", 1, members.size()));
         final User activeUser = members.get(activePos);
@@ -204,7 +202,7 @@ public class BottomMembersFragment extends Fragment {
         });
 
         adapter = new FriendsAdapter();
-        snapHelper = new PagerSnapHelper();
+        SnapHelper snapHelper = new PagerSnapHelper();
         rv = v.findViewById(R.id.rv_friends);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));

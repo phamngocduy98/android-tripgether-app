@@ -43,12 +43,11 @@ public class DialogSelectCheckpoint extends OneDialog {
         View body = inflater.inflate(R.layout.dialog_body_select_checkpoint, container, false);
         rv = body.findViewById(R.id.rv_dialog_body_select_checkpoint);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
-        rv.setAdapter(new CheckPointAdapter(new ArrayList<Checkpoint>(manager.getCheckpoints())));
+        rv.setAdapter(new CheckPointAdapter(new ArrayList<>(manager.getCheckpoints())));
         setCustomBody(body);
         setTitleRes(R.string.dialog_title_select_checkpoint);
         setPosBtnRes(R.string.btn_cancel);
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        return view;
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     public void setOnCheckpointSelectedListener(OnCheckpointSelectedListener onCheckpointSelectedListener) {
@@ -61,7 +60,7 @@ public class DialogSelectCheckpoint extends OneDialog {
         onCheckpointSelectedListener = null;
     }
 
-    public class CheckPointViewHolder extends RecyclerView.ViewHolder {
+    public static class CheckPointViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvTime, tvLocation;
         View view;
 

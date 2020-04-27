@@ -55,7 +55,7 @@ public class DatasManager<T extends Data> {
     public void remove(String id) {
         Integer index = mapIdWithIndex.get(id);
         if (index != null) {
-            Data data = list.get(index);
+            T data = list.get(index);
             data.onRemove();
             list.remove(index.intValue());
             mapIdWithIndex.remove(id);
@@ -63,7 +63,7 @@ public class DatasManager<T extends Data> {
                 mapIdWithIndex.put(list.get(i).getId(), i);
             }
             for (OnItemRemovedListener<T> onItemRemovedListener : onItemRemovedListeners) {
-                onItemRemovedListener.onItemRemoved(index, (T) data);
+                onItemRemovedListener.onItemRemoved(index, data);
             }
         }
     }

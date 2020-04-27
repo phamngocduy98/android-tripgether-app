@@ -6,6 +6,7 @@ public class Collections {
     public static final String TRIPS = "trips";
     public static final String SOS = "sos";
     public static final String EVENTS = "events";
+    public static final String MESSAGES = "messages";
     public static final String VISITORS = "visitors";
     public static String checkpoints(String tripId){
         return String.format("%s/%s/%s", TRIPS, tripId, CHECKPOINTS);
@@ -17,6 +18,10 @@ public class Collections {
 
     public static String events(String tripId) {
         return String.format("%s/%s/%s", TRIPS, tripId, EVENTS);
+    }
+
+    public static String messages(String tripId) {
+        return String.format("%s/%s/%s", TRIPS, tripId, MESSAGES);
     }
 
     public static String visitors(String tripId, String checkpointId) {

@@ -37,6 +37,7 @@ import cf.bautroixa.maptest.theme.OneAppbarActivity;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.DateFormatter;
+import cf.bautroixa.maptest.utils.KeyboardHelper;
 
 public class CreateTripActivity extends OneAppbarActivity {
 
@@ -135,6 +136,7 @@ public class CreateTripActivity extends OneAppbarActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             renderScreen(1);
+                            KeyboardHelper.hideSoftKeyboard(CreateTripActivity.this);
                         }
                     }
                 });

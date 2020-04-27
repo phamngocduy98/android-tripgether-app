@@ -1,15 +1,14 @@
-package cf.bautroixa.maptest;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+package cf.bautroixa.maptest.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -18,11 +17,12 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import cf.bautroixa.maptest.R;
+
 public class ChangePasswordActivity extends AppCompatActivity {
     private EditText mOldPasswordField;
     private EditText mNewPasswordField;
     private EditText mConfirmNewPasswordField;
-    private Button mChangePasswordButton;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
@@ -32,7 +32,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         mOldPasswordField = findViewById(R.id.et_old_password);
         mNewPasswordField = findViewById(R.id.et_new_password);
         mConfirmNewPasswordField = findViewById(R.id.et_confirm_new_password);
-        mChangePasswordButton = findViewById(R.id.btn_change_password);
+        Button mChangePasswordButton = findViewById(R.id.btn_change_password);
         mChangePasswordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

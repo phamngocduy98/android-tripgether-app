@@ -20,8 +20,7 @@ public class OneBottomSheetDialog extends BottomSheetDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-//        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
+        //        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        return super.onCreateDialog(savedInstanceState);
     }
 }

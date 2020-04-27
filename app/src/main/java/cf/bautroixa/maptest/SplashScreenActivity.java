@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import cf.bautroixa.maptest.auth.LoginActivity;
 import cf.bautroixa.maptest.data.RequestCodes;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.theme.OneDialog;
@@ -79,7 +80,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                 OneDialog permissionDialog = new OneDialog.Builder().buttonClickListener(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        requestPermissions(neededPermissions.toArray(new String[neededPermissions.size()]), RequestCodes.ESSENTIAL_PERMISSION);
+                        requestPermissions(neededPermissions.toArray(new String[0]), RequestCodes.ESSENTIAL_PERMISSION);
                         dialog.dismiss();
                     }
                 }).build();

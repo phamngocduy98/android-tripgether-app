@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
     android:gravity="center_horizontal"
-    tools:context=".RegisterActivity">
+    tools:context=".auth.RegisterActivity">
 
     <TextView
         android:id="@+id/textView5"

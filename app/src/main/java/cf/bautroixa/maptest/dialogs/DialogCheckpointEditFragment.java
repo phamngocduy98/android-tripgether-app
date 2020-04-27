@@ -45,6 +45,8 @@ import com.mapbox.api.geocoding.v5.models.CarmenFeature;
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
 import com.mapbox.geojson.Point;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -72,27 +74,25 @@ public class DialogCheckpointEditFragment extends FullScreenDialogFragment imple
     private static final String ARG_CHECKPOINT_LATITUDE = "checkpointLatitude";
     private static final String ARG_CHECKPOINT_LONGITUDE = "checkpointLongitude";
     boolean isMapLoaded = false;
-    private MainAppManager manager;
-    private String checkpointId = "";
     private Checkpoint checkpoint;
     private LatLng selectedLatLng = new LatLng(21.0245, 105.84117);
     private Calendar selectedTime = Calendar.getInstance();
-    private OnCheckpointSetListener onCheckpointSetListener = null;
-    private OnDeleteCheckpointListener onDeleteCheckpointListener = null;
+    private OnCheckpointSetListener onCheckpointSetListener;
+    private OnDeleteCheckpointListener onDeleteCheckpointListener;
 
     private GoogleMap mMap;
     private EditText editTime, editName;
     private AutoCompleteTextView editLocation;
     private Button btnCancel, btnOk;
     private MapView mapView;
-    private ImageButton btnBack, btnMyLocation, btnClearLocation;
+    private ImageButton btnClearLocation;
 
     public interface OnCheckpointSetListener {
         void onCheckpointSet(Checkpoint checkpoint);
     }
 
     public DialogCheckpointEditFragment(OnCheckpointSetListener onCheckpointSetListener, @Nullable OnDeleteCheckpointListener onDeleteCheckpointListener) {
-        manager = MainAppManager.getInstance();
+        MainAppManager manager = MainAppManager.getInstance();
         this.onCheckpointSetListener = onCheckpointSetListener;
         this.onDeleteCheckpointListener = onDeleteCheckpointListener;
     }
@@ -122,7 +122,7 @@ public class DialogCheckpointEditFragment extends FullScreenDialogFragment imple
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         if (getArguments() != null) {
-            checkpointId = getArguments().getString(ARG_CHECKPOINT_ID, "");
+            String checkpointId = getArguments().getString(ARG_CHECKPOINT_ID, "");
             if (checkpointId.length() > 0) {
                 btnOk.setText(R.string.btn_update);
                 btnCancel.setText(R.string.btn_delete);
@@ -170,8 +170,8 @@ public class DialogCheckpointEditFragment extends FullScreenDialogFragment imple
 
         editLocation = view.findViewById(R.id.edit_search_location_checkpoint);
         btnClearLocation = view.findViewById(R.id.btn_clear_edit_search);
-        btnBack = view.findViewById(R.id.btn_back_dialog_create_checkpoint);
-        btnMyLocation = view.findViewById(R.id.btn_my_location_dialog_create_checkpoint);
+        ImageButton btnBack = view.findViewById(R.id.btn_back_dialog_create_checkpoint);
+        ImageButton btnMyLocation = view.findViewById(R.id.btn_my_location_dialog_create_checkpoint);
         editName = view.findViewById(R.id.edit_name_dialog_checkpoint_trip_create);
         editTime = view.findViewById(R.id.edit_time_checkpoint);
         btnCancel = view.findViewById(R.id.btn_cancel_checkpoint);
@@ -193,6 +193,7 @@ public class DialogCheckpointEditFragment extends FullScreenDialogFragment imple
                     public void onComplete(@NonNull Task<Location> task) {
                         if (!task.isSuccessful()) return;
                         Location location = task.getResult();
+                        if (location == null) return;
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18));
                     }
                 });
@@ -254,7 +255,8 @@ public class DialogCheckpointEditFragment extends FullScreenDialogFragment imple
                         .build();
                 mapboxGeocoding.enqueueCall(new Callback<GeocodingResponse>() {
                     @Override
-                    public void onResponse(Call<GeocodingResponse> call, Response<GeocodingResponse> response) {
+                    public void onResponse(@NotNull Call<GeocodingResponse> call, @NotNull Response<GeocodingResponse> response) {
+                        if (response.body() == null) return;
                         List<CarmenFeature> results = response.body().features();
                         if (results.size() > 0) {
                             // Log the first results Point.
@@ -269,7 +271,7 @@ public class DialogCheckpointEditFragment extends FullScreenDialogFragment imple
                     }
 
                     @Override
-                    public void onFailure(Call<GeocodingResponse> call, Throwable throwable) {
+                    public void onFailure(@NotNull Call<GeocodingResponse> call, @NotNull Throwable throwable) {
                         throwable.printStackTrace();
                     }
                 });

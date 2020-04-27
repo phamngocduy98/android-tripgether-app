@@ -15,7 +15,6 @@ public class ShakePhoneHelper implements SensorEventListener {
     Context context;
     SensorManager sensorMgr;
     private final Sensor mAccelerometer;
-    private final Sensor mDelay;
 
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
@@ -28,7 +27,7 @@ public class ShakePhoneHelper implements SensorEventListener {
         this.onShakeListener = onShakeListener;
         sensorMgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = sensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mDelay = sensorMgr.getDefaultSensor(SensorManager.SENSOR_DELAY_GAME);
+        Sensor mDelay = sensorMgr.getDefaultSensor(SensorManager.SENSOR_DELAY_GAME);
     }
 
     public void start(){

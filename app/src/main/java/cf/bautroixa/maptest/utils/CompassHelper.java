@@ -30,7 +30,6 @@ public class CompassHelper implements SensorEventListener {
     private float[] R = new float[9];
     private float[] I = new float[9];
 
-    private float azimuth;
     private float azimuthFix;
 
     public CompassHelper(Context context) {
@@ -104,10 +103,10 @@ public class CompassHelper implements SensorEventListener {
             boolean success = SensorManager.getRotationMatrix(R, I, mGravity,
                     mGeomagnetic);
             if (success) {
-                float orientation[] = new float[3];
+                float[] orientation = new float[3];
                 SensorManager.getOrientation(R, orientation);
                 // Log.d(TAG, "azimuth (rad): " + azimuth);
-                azimuth = (float) Math.toDegrees(orientation[0]); // orientation
+                float azimuth = (float) Math.toDegrees(orientation[0]); // orientation
                 azimuth = (azimuth + azimuthFix + 360) % 360;
 //                 Log.d(TAG, "azimuth (deg): " + azimuth);
                 if (listener != null) {

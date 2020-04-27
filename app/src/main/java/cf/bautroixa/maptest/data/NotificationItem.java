@@ -95,7 +95,7 @@ public class NotificationItem {
     public static class Factory {
         @Nullable
         public static NotificationItem factory(MainAppManager manager, Event event) {
-            String message, introMessage, shortMessage;
+            String message, introMessage, shortMessage, avatar;
             String userId, checkpointId;
             User user, leader;
             Checkpoint checkpoint;
@@ -112,7 +112,7 @@ public class NotificationItem {
                         message = String.format("<b>%s</b> đã %s nhóm!", user.getName(), actionName);
                         return new NotificationItem(event.getType(), user.getAvatar(), message, introMessage, shortMessage, event.getTime(), userId);
                     } else {
-                        shortMessage = String.format("User Not fetched");
+                        shortMessage = "User Not fetched";
                         message = String.format("<b>User Not fetched</b> đã %s nhóm!", actionName);
                         return new NotificationItem(event.getType(), "", message, introMessage, shortMessage, event.getTime(), userId);
                     }
@@ -135,7 +135,8 @@ public class NotificationItem {
                         shortMessage = "";
                         message = "Trưởng nhóm đã thêm địa điểm mới";
                     }
-                    return new NotificationItem(event.getType(), leader.getAvatar(), message, introMessage, shortMessage, event.getTime(), checkpointId);
+                    avatar = leader == null ? User.DEFAULT_AVATAR : leader.getAvatar();
+                    return new NotificationItem(event.getType(), avatar, message, introMessage, shortMessage, event.getTime(), checkpointId);
                 case Event.Type.CHECKPOINT_ROLL_UP_ADDED:
                     checkpointId = event.getCheckpointRef().getId();
                     leader = manager.getMembersManager().get(manager.getCurrentTrip().getLeader().getId());
@@ -149,8 +150,8 @@ public class NotificationItem {
                         message = "Trưởng nhóm yêu cầu tập hợp";
                     }
                     introMessage = "Yêu cầu tập hợp";
-
-                    return new NotificationItem(event.getType(), leader.getAvatar(), message, introMessage, shortMessage, event.getTime(), checkpointId);
+                    avatar = leader == null ? User.DEFAULT_AVATAR : leader.getAvatar();
+                    return new NotificationItem(event.getType(), avatar, message, introMessage, shortMessage, event.getTime(), checkpointId);
                 default:
                     return null;
             }
@@ -166,11 +167,17 @@ public class NotificationItem {
             String userId = sosRequest.getId(); // sosRequestId is equal to userId
             User user = manager.getMembersManager().get(userId);
 
-            String introMessage = String.format("%s yêu cầu hỗ trợ", user.getName());
+            String userName = "Ai đó đã";
+            String avatar = User.DEFAULT_AVATAR;
+            if (user != null) {
+                userName = user.getName();
+                avatar = user.getAvatar();
+            }
+            String introMessage = String.format("%s yêu cầu hỗ trợ", userName);
             String shortMessage = String.format("%s", sosRequest.getDescription());
-            String message = String.format("<b>%s</b> đang cầu cứu sự trợ giúp: %s", user.getName(), sosRequest.getDescription());
+            String message = String.format("<b>%s</b> đang cầu cứu sự trợ giúp: %s", userName, sosRequest.getDescription());
 
-            return new NotificationItem(sosRequest.isResolved() ? Event.Type.USER_SOS_RESOLVED : Event.Type.USER_SOS_ADDED, user.getAvatar(), message, introMessage, shortMessage, sosRequest.getTime(), userId);
+            return new NotificationItem(sosRequest.isResolved() ? Event.Type.USER_SOS_RESOLVED : Event.Type.USER_SOS_ADDED, avatar, message, introMessage, shortMessage, sosRequest.getTime(), userId);
         }
     }
 }

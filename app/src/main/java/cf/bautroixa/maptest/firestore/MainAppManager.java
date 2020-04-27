@@ -19,6 +19,8 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,6 +45,7 @@ public class MainAppManager {
     private CheckpointsManager checkpointsManager;
     private SosRequestsManager sosRequestsManager;
     private EventsManager eventsManager;
+    private MessagesManager messagesManager;
 
     private EventListener<DocumentSnapshot> userListeners;
 
@@ -55,6 +58,7 @@ public class MainAppManager {
         checkpointsManager = new CheckpointsManager();
         sosRequestsManager = new SosRequestsManager();
         eventsManager = new EventsManager();
+        messagesManager = new MessagesManager();
         stepCompleteCount = new AtomicInteger(0);
         this.onInitCompleted = onInitCompleted;
         if (mAuth.getCurrentUser() != null) {
@@ -96,7 +100,7 @@ public class MainAppManager {
     }
 
     public void login(FirebaseAuth mAuth) {
-        if (mAuth.getCurrentUser() != null && (currentUserRef == null || currentUser == null)) {
+        if (mAuth.getCurrentUser() != null && mAuth.getUid() != null && (currentUserRef == null || currentUser == null)) {
             // is logged in
             User recentUser = currentUser;
             currentUserRef = db.collection(Collections.USERS).document(mAuth.getUid());
@@ -135,7 +139,7 @@ public class MainAppManager {
             FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                 @Override
                 public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                    if (!task.isSuccessful()) {
+                    if (!task.isSuccessful() || task.getResult() == null) {
                         Log.w(TAG, "get FCM token failed failed", task.getException());
                         return;
                     }
@@ -167,6 +171,7 @@ public class MainAppManager {
         checkpointsManager.setCollectionListener(db.collection(Collections.checkpoints(tripId)), tripId);
         sosRequestsManager.setCollectionListener(db.collection(Collections.sos(tripId)), tripId);
         eventsManager.setCollectionListener(db.collection(Collections.events(tripId)), tripId);
+        messagesManager.setCollectionListener(db.collection(Collections.messages(tripId)), tripId);
         increaseInitProgress(false, 3, "init trip managers", "");
     }
 
@@ -209,8 +214,8 @@ public class MainAppManager {
 //        sendJoinTrip(null, db.collection(Collections.TRIPS).document(tripRefId), onCompleteListener);
         HttpRequest.getInstance().getTripService().joinTrip("omMSekFQ9cc45qljkrZpGXXZncg1", "lNDdjhIGvpWsjUdewVNn").enqueue(new Callback<HttpRequest.APIResponse>() {
             @Override
-            public void onResponse(Call<HttpRequest.APIResponse> call, Response<HttpRequest.APIResponse> response) {
-                if (response.isSuccessful()) {
+            public void onResponse(@NotNull Call<HttpRequest.APIResponse> call, @NotNull Response<HttpRequest.APIResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
                     HttpRequest.APIResponse res = response.body();
                     onComplete.onComplete(res.success);
                 }
@@ -218,7 +223,7 @@ public class MainAppManager {
             }
 
             @Override
-            public void onFailure(Call<HttpRequest.APIResponse> call, Throwable t) {
+            public void onFailure(@NotNull Call<HttpRequest.APIResponse> call, @NotNull Throwable t) {
                 Log.d(TAG, "sendJoinTrip failed: " + t.getMessage());
                 onComplete.onComplete(false);
             }
@@ -309,6 +314,10 @@ public class MainAppManager {
 
     public EventsManager getEventsManager() {
         return eventsManager;
+    }
+
+    public MessagesManager getMessagesManager() {
+        return messagesManager;
     }
 
     public ArrayList<Checkpoint> getCheckpoints() {

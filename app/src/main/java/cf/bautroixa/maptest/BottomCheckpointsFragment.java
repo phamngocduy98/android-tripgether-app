@@ -30,6 +30,8 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
 
     private MainAppManager manager;
 
-    TextView tvLocation, tvTime, tvTimeLine;
+    private TextView tvLocation, tvTime, tvTimeLine;
     private DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
     private DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
     private DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
@@ -69,9 +71,8 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
     private Button btnCreateTrip, btnJoinTrip;
     private int activePos = 0;
     Button btnRoute;
-    RecyclerView rv;
-    Adapter adapter;
-    SnapHelper snapHelper;
+    private RecyclerView rv;
+    private Adapter adapter;
 
 
     public BottomCheckpointsFragment() {
@@ -195,7 +196,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
         rv = v.findViewById(R.id.rv_checkpoints_frag_trip_overview);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        snapHelper = new PagerSnapHelper();
+        SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rv);
 
         setTimeLineString(0);
@@ -218,7 +219,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         Log.d(TAG, "onAttach");
     }
@@ -232,7 +233,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
     }
 
     enum ActionButton {
-        BTN_ROLL_UP, BTN_ROUTE;
+        BTN_ROLL_UP, BTN_ROUTE
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -308,7 +309,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                     Uri gmmIntentUri = Uri.parse("google.navigation:q=" + checkpoint.getLatLng().latitude + "," + checkpoint.getLatLng().longitude);
                     Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                     mapIntent.setPackage("com.google.android.apps.maps");
-                    if (mapIntent.resolveActivity(getContext().getPackageManager()) != null) {
+                    if (getContext() != null && mapIntent.resolveActivity(getContext().getPackageManager()) != null) {
                         startActivity(mapIntent);
                     }
                 }
@@ -326,24 +327,29 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                             .build()
                             .getRoute(new Callback<DirectionsResponse>() {
                                 @Override
-                                public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                                public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
                                     ViewAnim.toggleLoading(getContext(), btnRoute, false, getString(R.string.btn_route));
                                     if (response.isSuccessful() && response.body() != null)
                                         for (DirectionsRoute route : response.body().routes()) {
-                                            List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
+                                            String routeGeometry = route.geometry();
+                                            Double routeDistance = route.distance();
+                                            Double routeDuration = route.duration();
+                                            if (routeGeometry == null || routeDistance == null || routeDuration == null)
+                                                continue;
+                                            List<Point> coords = LineString.fromPolyline(routeGeometry, Constants.PRECISION_6).coordinates();
                                             ArrayList<LatLng> latLngs = new ArrayList<>();
                                             latLngs.add(new LatLng(from.getLatitude(), from.getLongitude()));
                                             for (Point coord : coords) {
                                                 latLngs.add(new LatLng(coord.latitude(), coord.longitude()));
                                             }
                                             latLngs.add(new LatLng(to.getLatitude(), to.getLongitude()));
-                                            btnRoute.setText(String.format("%s/%s", Formater.formatDistance(route.distance()), Formater.formatTime(route.duration())));
+                                            btnRoute.setText(String.format("%s/%s", Formater.formatDistance(routeDistance), Formater.formatTime(routeDuration)));
                                             onDrawRouteRequest.drawRoute(latLngs);
                                         }
                                 }
 
                                 @Override
-                                public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                                public void onFailure(@NotNull Call<DirectionsResponse> call, @NotNull Throwable t) {
                                     Log.d(TAG, "get route failed");
                                     ViewAnim.toggleLoading(getContext(), btnRoute, false, getString(R.string.btn_route));
                                 }

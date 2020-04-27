@@ -26,9 +26,8 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
     Data.OnNewValueListener<SosRequest> onSosRequestNewValueListener;
     OnDrawRouteRequest onDrawRouteRequest;
     private MainAppManager manager;
-    private View view;
     private TextView tvUserName, tvUserLocation, tvLever, tvDesc;
-    private Button btnGetDirection, btnClose;
+    private Button btnGetDirection;
 
     public SosRequestViewDialogFragment(OnDrawRouteRequest onDrawRouteRequest) {
         manager = MainAppManager.getInstance();
@@ -73,24 +72,25 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
     void updateView(SosRequest sosRequest) {
         // sosId == userId
         final User user = manager.getMembersManager().get(sosRequest.getId());
-        tvUserName.setText(user.getName());
-        tvUserLocation.setText(user.getCurrentLocation());
+        if (user != null) {
+            tvUserName.setText(user.getName());
+            tvUserLocation.setText(user.getCurrentLocation());
+            btnGetDirection.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO: get direction heree
+                    onDrawRouteRequest.drawRouteTo(user.getLatLng());
+                }
+            });
+        }
         tvLever.setText("Mức độ: " + sosRequest.getLever());
         tvDesc.setText(sosRequest.getDescription());
-
-        btnGetDirection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: get direction heree
-                onDrawRouteRequest.drawRouteTo(user.getLatLng());
-            }
-        });
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_dialog_sos_request_view, container, false);
+        View view = inflater.inflate(R.layout.fragment_dialog_sos_request_view, container, false);
 
         tvUserName = view.findViewById(R.id.tv_user_name_dialog_sos_request_view);
         tvUserLocation = view.findViewById(R.id.tv_user_location_dialog_sos_request_view);
@@ -98,7 +98,7 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
         tvDesc = view.findViewById(R.id.tv_desc_dialog_sos_request_view);
 
         btnGetDirection = view.findViewById(R.id.btn_get_direction_dialog_sos_request_view);
-        btnClose = view.findViewById(R.id.btn_close_dialog_sos_request_view);
+        Button btnClose = view.findViewById(R.id.btn_close_dialog_sos_request_view);
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override

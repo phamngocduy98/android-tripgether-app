@@ -19,7 +19,7 @@ public class NoFilterArrayAdapter extends ArrayAdapter {
         return new NoFilter();
     }
 
-    private class NoFilter extends Filter {
+    private static class NoFilter extends Filter {
 
         @Override
         protected FilterResults performFiltering(CharSequence arg0) {

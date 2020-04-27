@@ -23,6 +23,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Objects;
+
+import cf.bautroixa.maptest.auth.ChangePasswordActivity;
+import cf.bautroixa.maptest.auth.DetailProfileActivity;
+import cf.bautroixa.maptest.auth.LoginActivity;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneDialog;
@@ -31,18 +36,13 @@ import cf.bautroixa.maptest.utils.ImageHelper;
 
 public class TabProfileFragment extends OneAppbarFragment {
     GoogleSignInClient mGoogleSignInClient;
-    private String googleClientId = "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com";
     private MainAppManager manager;
     private SharedPreferences sharedPref;
-    private String avatarUrl = "";
 
     private TextView tvUserName;
     private ImageView imgAvatar;
 
     private Switch switchService;
-    private LinearLayout mPersonalInformationLinear;
-    private LinearLayout mChangePasswordLinear;
-    private LinearLayout mLogoutLinear;
 
     public TabProfileFragment() {
         manager = MainAppManager.getInstance();
@@ -54,9 +54,9 @@ public class TabProfileFragment extends OneAppbarFragment {
         View view = inflater.inflate(R.layout.fragment_tab_profile, container, false);
         imgAvatar = view.findViewById(R.id.appbar_img_avatar);
         switchService = view.findViewById(R.id.switch_toggle_service);
-        mPersonalInformationLinear = view.findViewById(R.id.ln_personal_information);
-        mChangePasswordLinear = view.findViewById(R.id.ln_change_password);
-        mLogoutLinear = view.findViewById(R.id.ln_logout);
+        LinearLayout mPersonalInformationLinear = view.findViewById(R.id.ln_personal_information);
+        LinearLayout mChangePasswordLinear = view.findViewById(R.id.ln_change_password);
+        LinearLayout mLogoutLinear = view.findViewById(R.id.ln_logout);
 
         imgAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,15 +110,16 @@ public class TabProfileFragment extends OneAppbarFragment {
             public void onClick(View v) {
                 sharedPref.edit().putBoolean("SERVICE_ON", switchService.isChecked()).commit();
                 if (switchService.isChecked()) {
-                    AlarmHelper.turnOn(getActivity());
+                    AlarmHelper.turnOn(Objects.requireNonNull(getActivity()));
                     switchService.setText(R.string.switch_toggle_service_on);
                 } else {
-                    AlarmHelper.turnOff(getActivity());
+                    AlarmHelper.turnOff(Objects.requireNonNull(getActivity()));
                     switchService.setText(R.string.switch_toggle_service_off);
                 }
             }
         });
 
+        String googleClientId = "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com";
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(googleClientId)
                 .requestEmail()
@@ -129,6 +130,7 @@ public class TabProfileFragment extends OneAppbarFragment {
     @Override
     public void onResume() {
         super.onResume();
+        String avatarUrl = "";
         if (manager.isLoggedIn() && !avatarUrl.equals(manager.getCurrentUser().getAvatar())) {
             ImageHelper.loadImage(manager.getCurrentUser().getAvatar(), imgAvatar, 100, 100);
             setTitle(manager.getCurrentUser().getName());
@@ -143,7 +145,7 @@ public class TabProfileFragment extends OneAppbarFragment {
 //        FirebaseUser users=FirebaseAuth.getInstance().getCurrentUser();
 
         mGoogleSignInClient.signOut()
-                .addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
+                .addOnCompleteListener(Objects.requireNonNull(getActivity()), new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Intent intent = new Intent(getContext(), LoginActivity.class);

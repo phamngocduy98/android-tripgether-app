@@ -74,8 +74,11 @@ public class OneDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.getWindow().setGravity(Gravity.BOTTOM);
-        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setGravity(Gravity.BOTTOM);
+            window.requestFeature(Window.FEATURE_NO_TITLE);
+        }
         return dialog;
     }
 
@@ -83,7 +86,7 @@ public class OneDialog extends DialogFragment {
     public void onStart() {
         super.onStart();
         Dialog dialog = getDialog();
-        if (dialog != null) {
+        if (dialog != null && dialog.getWindow() != null) {
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.getWindow().setBackgroundDrawable(null);
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -109,13 +112,13 @@ public class OneDialog extends DialogFragment {
                     btnClickListener.onClick(getDialog(), DialogInterface.BUTTON_POSITIVE);
             }
         });
-        if (customBody != null){
+        if (customBody != null) {
             containerBody.removeAllViews();
             containerBody.addView(customBody);
         } else {
             tvMessage.setText(messageRes);
         }
-        if (isEnableNegativeButton){
+        if (isEnableNegativeButton) {
             btnNeg.setText(negBtnRes);
             btnNeg.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -49,8 +49,10 @@ public class OnePromptDialog extends OneDialog {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
-        editPrompt = v.findViewById(R.id.edit_prompt_one_dialog);
-        editPrompt.setVisibility(View.VISIBLE);
+        if (v != null) {
+            editPrompt = v.findViewById(R.id.edit_prompt_one_dialog);
+            editPrompt.setVisibility(View.VISIBLE);
+        }
         tvMessage.setVisibility(View.GONE);
         return v;
     }

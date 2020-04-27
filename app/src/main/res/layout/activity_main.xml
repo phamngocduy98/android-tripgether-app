@@ -64,7 +64,7 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="@+id/coordinatorLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"></LinearLayout>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:id="@+id/center_space"
@@ -74,7 +74,7 @@
         app:layout_constraintBottom_toTopOf="@id/frag_bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view_status_bar_activity_main"></LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/view_status_bar_activity_main" />
 
     <fragment
         android:id="@+id/frag_search"

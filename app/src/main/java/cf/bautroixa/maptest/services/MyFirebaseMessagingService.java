@@ -18,6 +18,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -95,8 +97,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } else {
                 // low priority event => show small notification
                 Event event = manager.getEventsManager().get(fcmMessage.getEventRefId());
-                NotificationItem notificationItem = event.getNotificationItem(manager);
-                sendNotification(event.getType(), notificationItem.getIntroContent(), notificationItem.getShortContent());
+                if (event != null) {
+                    NotificationItem notificationItem = event.getNotificationItem(manager);
+                    sendNotification(event.getType(), notificationItem.getIntroContent(), notificationItem.getShortContent());
+                }
             }
 
         }
@@ -120,15 +124,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * is initially generated so this is where you would retrieve the token.
      */
     @Override
-    public void onNewToken(final String token) {
+    public void onNewToken(@NotNull final String token) {
         Log.d(TAG, "Refreshed token: " + token);
         if (manager.isLoggedIn()) {
-            manager.getCurrentUser().sendUpdate(null, User.FCM_TOKEN, token).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    Log.d(TAG, "Update token to firestore: " + token);
-                }
-            });
+            Task<Void> updateTask = manager.getCurrentUser().sendUpdate(null, User.FCM_TOKEN, token);
+            if (updateTask != null)
+                updateTask.addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.d(TAG, "Update token to firestore: " + token);
+                    }
+                });
         }
     }
     // [END on_new_token]
@@ -163,6 +169,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     /**
      * Send notification
+     *
      * @param notificationId unique id for each notification, 2 notification with the same id is replaced
      * @param title
      * @param messageBody

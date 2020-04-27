@@ -102,7 +102,6 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         }
         if (currentState != STATE_NO_TRIP && manager.getCurrentTripRef() == null) {
             handleState(STATE_NO_TRIP);
-            return;
         }
     }
 

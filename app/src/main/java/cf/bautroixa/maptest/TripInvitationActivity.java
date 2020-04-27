@@ -26,6 +26,10 @@ public class TripInvitationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_trip_screen_2_invitation);
 
         Bundle bundle = getIntent().getExtras();
+        if (bundle == null) {
+            finish();
+            return;
+        }
         String tripId = bundle.getString(Trip.ID, "Error: No trip");
 
         tvCode = findViewById(R.id.tv_code_activity_create_trip);

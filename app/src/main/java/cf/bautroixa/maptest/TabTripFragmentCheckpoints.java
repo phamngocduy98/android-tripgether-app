@@ -45,7 +45,6 @@ public class TabTripFragmentCheckpoints extends Fragment {
     private Data.OnNewValueListener<Trip> onTripChanged;
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected;
 
-    private RecyclerView rv;
     private Button btnAddCheckpoint;
     private CheckpointsAdapter adapter;
 
@@ -69,20 +68,19 @@ public class TabTripFragmentCheckpoints extends Fragment {
             @Override
             public void onItemInserted(int position, Checkpoint data) {
                 adapter.notifyItemInserted(position);
-                if (isLeader && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
-                    btnAddCheckpoint.setVisibility(View.VISIBLE);
-                else btnAddCheckpoint.setVisibility(View.INVISIBLE);
+                if (btnAddCheckpoint != null) {
+                    if (isLeader && manager.getCheckpoints().size() == 0) {
+                        btnAddCheckpoint.setVisibility(View.VISIBLE);
+                    } else {
+                        btnAddCheckpoint.setVisibility(View.INVISIBLE);
+                    }
+                }
             }
         };
         onCheckpointChangedListener = new DatasManager.OnItemChangedListener<Checkpoint>() {
             @Override
             public void onItemChanged(final int position, Checkpoint data) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyItemChanged(position);
-                    }
-                });
+                adapter.notifyItemChanged(position);
             }
         };
         onCheckpointRemovedListener = new DatasManager.OnItemRemovedListener<Checkpoint>() {
@@ -136,7 +134,7 @@ public class TabTripFragmentCheckpoints extends Fragment {
         View view = inflater.inflate(R.layout.fragment_tab_trip_subtab_checkpoints, container, false);
         btnAddCheckpoint = view.findViewById(R.id.btn_add_checkpoint_frag_tab_trip_subtab_checkpoints);
         adapter = new CheckpointsAdapter();
-        rv = view.findViewById(R.id.rv_checkpoints_frag_trip);
+        RecyclerView rv = view.findViewById(R.id.rv_checkpoints_frag_trip);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
 
@@ -213,13 +211,15 @@ public class TabTripFragmentCheckpoints extends Fragment {
                                 public void onClick(final DialogInterface dialog, int which) {
                                     if (which == DialogInterface.BUTTON_POSITIVE) {
                                         confirmationDialog.toggleProgressBar(true);
-                                        manager.getCurrentTrip().sendUpdate(null, Trip.ACTIVE_CHECKPOINT, null).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                confirmationDialog.toggleProgressBar(false);
-                                                dialog.dismiss();
-                                            }
-                                        });
+                                        Task<Void> updateTask = manager.getCurrentTrip().sendUpdate(null, Trip.ACTIVE_CHECKPOINT, null);
+                                        if (updateTask != null)
+                                            updateTask.addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    confirmationDialog.toggleProgressBar(false);
+                                                    dialog.dismiss();
+                                                }
+                                            });
                                     }
                                 }
                             });

@@ -16,6 +16,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import cf.bautroixa.maptest.data.SearchResult;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     // OTHER TAB
     public static final int STATE_TAB_NOTIFICATION = 30;
     public static final int STATE_TAB_ME = 40;
+    public static final int STATE_TAB_CHAT = 50;
 
     // SPACE
     public static final int SPACE_NONE = -1;
@@ -81,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     TabTripFragment tabTripFragment;
     TabNotificationFragment tabNotificationFragment;
     TabProfileFragment tabProfileFragment;
+    TabChatFragment tabChatFragment;
 
     // Views
     View statusBar;
@@ -130,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
         tabNotificationFragment = new TabNotificationFragment();
         tabTripFragment = new TabTripFragment();
         tabProfileFragment = new TabProfileFragment();
+        tabChatFragment = new TabChatFragment();
 
         bottomSheet();
 
@@ -207,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
+    public void onAttachFragment(@NotNull Fragment fragment) {
         super.onAttachFragment(fragment);
 
         if (fragment instanceof OneAppbarFragment) {
@@ -352,6 +357,10 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
                 selectActiveViewSpace(SPACE_CENTER);
                 replaceCenterSpace(tabProfileFragment);
                 break;
+            case STATE_TAB_CHAT:
+                selectActiveViewSpace(SPACE_CENTER);
+                replaceCenterSpace(tabChatFragment);
+                break;
         }
         Log.d(TAG, "new state= " + state);
     }
@@ -441,6 +450,9 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
                 break;
             case BottomNavigationFragment.TAB_ME:
                 handleState(STATE_TAB_ME);
+                break;
+            case BottomNavigationFragment.TAB_NOTES:
+                handleState(STATE_TAB_CHAT);
                 break;
             default:
                 break;

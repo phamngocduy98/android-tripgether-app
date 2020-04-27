@@ -22,7 +22,7 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 public class DialogQRScanFragment extends FullScreenDialogFragment implements ZXingScannerView.ResultHandler {
     private static final String TAG = "QRScanDialogFragment";
     private ZXingScannerView mScannerView;
-    private OnQrResultListener onResult = null;
+    private OnQrResultListener onResult;
 
     public interface OnQrResultListener {
         void onResult(String result);
@@ -54,7 +54,7 @@ public class DialogQRScanFragment extends FullScreenDialogFragment implements ZX
                             dialog.dismiss();
                         } else {
                             dialog.dismiss();
-                            getDialog().dismiss();
+                            dismiss();
                         }
                     }
                 }).build();

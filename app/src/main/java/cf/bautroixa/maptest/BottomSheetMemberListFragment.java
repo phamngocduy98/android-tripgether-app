@@ -19,6 +19,7 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.DatasManager;
@@ -48,7 +49,6 @@ public class BottomSheetMemberListFragment extends Fragment {
 
     // view
     private TextView dragMark;
-    private SnapHelper snapHelper;
     private RecyclerView rvFriendList, rvFriendListLite;
 
     // adapter
@@ -180,7 +180,7 @@ public class BottomSheetMemberListFragment extends Fragment {
         rvFriendList.setLayoutManager(new LinearLayoutManager(getContext()));
         rvFriendListLite.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
 
-        snapHelper = new PagerSnapHelper();
+        SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rvFriendListLite);
 
         ViewAnim.toggleHideShow(dragMark, true, ViewAnim.DIRECTION_UP);
@@ -259,7 +259,7 @@ public class BottomSheetMemberListFragment extends Fragment {
         public void bind(User user) {
             currentUser = user;
             tvName.setText(user.getName());
-            if (user.getAvatar() == null || user.getAvatar() == User.DEFAULT_AVATAR) {
+            if (user.getAvatar() == null || Objects.equals(user.getAvatar(), User.DEFAULT_AVATAR)) {
                 imgAvatar.setVisibility(View.INVISIBLE);
                 tvNameInAvatar.setText(user.getShortName());
             }

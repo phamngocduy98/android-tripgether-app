@@ -1,4 +1,4 @@
-package cf.bautroixa.maptest;
+package cf.bautroixa.maptest.auth;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -41,13 +41,13 @@ import com.squareup.picasso.Picasso;
 import java.io.ByteArrayOutputStream;
 import java.util.UUID;
 
+import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.TabProfileFragment;
 import cf.bautroixa.maptest.firestore.User;
 
 
 public class DetailProfileActivity extends AppCompatActivity {
-    private ImageButton mChooseImgButton;
     private ImageView mAvartar;
-    private Button mUpdateButton;
     private EditText mNameEditText;
     private EditText mPhoneNumberEditText;
     private TextView mEmailText;
@@ -69,9 +69,9 @@ public class DetailProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_profile);
-        mChooseImgButton = findViewById(R.id.btn_choose_image);
+        ImageButton mChooseImgButton = findViewById(R.id.btn_choose_image);
         mAvartar = findViewById(R.id.iv_avatar);
-        mUpdateButton = findViewById(R.id.btn_update);
+        Button mUpdateButton = findViewById(R.id.btn_update);
         mNameEditText = findViewById(R.id.et_name);
         mPhoneNumberEditText = findViewById(R.id.et_phone_number);
         mEmailText = findViewById(R.id.tv_email);
@@ -345,7 +345,7 @@ public class DetailProfileActivity extends AppCompatActivity {
         if (resultCode != RESULT_CANCELED) {
             switch (requestCode) {
                 case 0:
-                    if (resultCode == RESULT_OK && data != null) {
+                    if (resultCode == RESULT_OK && data != null && data.getExtras() != null) {
                         Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
                         mAvartar.setImageBitmap(selectedImage);
                     }

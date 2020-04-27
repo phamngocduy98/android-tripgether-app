@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -14,7 +13,7 @@
         android:layout_marginHorizontal="8dp"
         android:layout_marginVertical="8dp">
 
-        <cf.bautroixa.masoibot.theme.RoundedImageView
+        <cf.bautroixa.maptest.theme.RoundedImageView
             android:id="@+id/img_message_item_avatar"
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -28,7 +27,7 @@
             android:layout_marginStart="8dp"
             android:paddingVertical="4dp"
             android:paddingHorizontal="8dp"
-            android:background="@drawable/bg_item_message_incoming"
+            android:background="@drawable/bg_radius_full_white"
             android:orientation="vertical">
 
             <TextView

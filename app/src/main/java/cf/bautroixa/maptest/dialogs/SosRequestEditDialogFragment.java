@@ -25,7 +25,6 @@ import cf.bautroixa.maptest.theme.OneBottomSheetDialog;
 public class SosRequestEditDialogFragment extends OneBottomSheetDialog {
 
     private static final String TAG = "SosRequestEditDialogFragment";
-    private View view;
     private Button btnOK, btnCancel;
     private EditText editDesc;
     private RadioGroup rgLever;
@@ -58,7 +57,7 @@ public class SosRequestEditDialogFragment extends OneBottomSheetDialog {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_dialog_sos_request_edit, container, false);
+        View view = inflater.inflate(R.layout.fragment_dialog_sos_request_edit, container, false);
 
         editDesc = view.findViewById(R.id.edit_desc_frag_send_sos);
         btnOK = view.findViewById(R.id.btn_send_frag_send_sos);

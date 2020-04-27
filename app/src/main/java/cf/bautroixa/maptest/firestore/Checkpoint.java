@@ -52,8 +52,10 @@ public class Checkpoint extends Data {
     @Exclude
     public void onDocumentSnapshot(DocumentSnapshot documentSnapshot) {
         Checkpoint checkpoint = documentSnapshot.toObject(Checkpoint.class);
-        checkpoint.withId(documentSnapshot.getId()).withRef(documentSnapshot.getReference());
-        update(checkpoint);
+        if (checkpoint != null) {
+            checkpoint.withId(documentSnapshot.getId()).withRef(documentSnapshot.getReference());
+            update(checkpoint);
+        }
     }
 
     @Exclude

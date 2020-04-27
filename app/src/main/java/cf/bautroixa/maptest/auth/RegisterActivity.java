@@ -1,9 +1,8 @@
-package cf.bautroixa.maptest;
+package cf.bautroixa.maptest.auth;
 
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,11 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.ViewAnim;
 
@@ -91,12 +90,6 @@ public class RegisterActivity extends AppCompatActivity {
                     new OneDialog.Builder().message(R.string.dialog_message_register_failed)
                             .show(getSupportFragmentManager(), "register_failed");
                 }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, e);
-                ViewAnim.toggleLoading(RegisterActivity.this, mRegisterButton, false, getString(R.string.btn_create_account));
             }
         });
     }

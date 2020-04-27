@@ -1,4 +1,4 @@
-package cf.bautroixa.maptest;
+package cf.bautroixa.maptest.auth;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,10 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
+import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.dialogs.FailedDialog;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.ViewAnim;
@@ -63,14 +63,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                                             finish();
                                         }
                                     }).show(getSupportFragmentManager(), "reset pass ok");
+                        } else {
+                            new FailedDialog().show(getSupportFragmentManager(), "no internet");
                         }
-                    }
-                })
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        ViewAnim.toggleLoading(ForgotPasswordActivity.this, mResetPasswordButton, false, getString(R.string.btn_reset_password));
-                        new FailedDialog().show(getSupportFragmentManager(), "no internet");
                     }
                 });
 

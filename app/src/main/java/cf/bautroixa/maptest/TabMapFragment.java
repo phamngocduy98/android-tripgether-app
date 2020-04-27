@@ -49,8 +49,11 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
@@ -124,7 +127,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
 
         initScreenSize();
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getContext()));
         manager = MainAppManager.getInstance();
 
         members = manager.getMembers();
@@ -159,11 +162,11 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        compass = new CompassHelper(getContext());
+        compass = new CompassHelper(Objects.requireNonNull(getContext()));
         View view = inflater.inflate(R.layout.fragment_tab_map, container, false);
         // GG map fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_main);
-        mapFragment.getMapAsync(this);
+        Objects.requireNonNull(mapFragment).getMapAsync(this);
         return view;
     }
 
@@ -222,7 +225,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
 //        uiSetting.setZoomControlsEnabled(false);
 //        mMap.setMyLocationEnabled(true);
         try {
-            int nightModeFlags = getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            int nightModeFlags = Objects.requireNonNull(getContext()).getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
             if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
                 if (!googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.maps_night))) {
                     Log.e(TAG, "Style parsing failed.");
@@ -296,7 +299,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_direction)));
         myLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation)
                 .anchor(0.5f, 0.5f)
-                .icon(BitmapDescriptorFactory.fromBitmap(createMarker(getContext(), R.drawable.marker_my_location, 120, 120))));
+                .icon(BitmapDescriptorFactory.fromBitmap(createMarker(Objects.requireNonNull(getContext()), R.drawable.marker_my_location, 120, 120))));
     }
 
     void initFriendMarkers() {
@@ -326,10 +329,10 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
             user.setMarker(mMap.addMarker(new MarkerOptions().position(user.getLatLng())
                     .title(user.getId())
                     .snippet(Collections.USERS)
-                    .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
+                    .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(Objects.requireNonNull(getContext()), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
                         @Override
                         public void edit(View view) {
-                            ImageView markerImage = (ImageView) view.findViewById(R.id.img_avatar_map_marker_user);
+                            ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
                             TextView tvName = view.findViewById(R.id.tv_name_map_marker_user);
                             if (user.getAvatar() == null || user.getAvatar().equals(User.DEFAULT_AVATAR)) {
                                 markerImage.setVisibility(View.INVISIBLE);
@@ -368,7 +371,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     void targetCamera(LatLngBounds bounds, GoogleMap.CancelableCallback cancelableCallback) {
         if (isMapLoaded) {
 //            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100), cancelableCallback); // padding 100
-            final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, getContext());
+            final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, Objects.requireNonNull(getContext()));
             // TODO: calculate real bottomSpace height
             final int bottomSpaceHeight = (int) PixelDPConverter.convertDpToPixel(200, getContext());
             final int boundHeight = screenHeight - toolbarStatusbarHeight - bottomSpaceHeight;
@@ -450,7 +453,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
                 .build()
                 .getRoute(new Callback<DirectionsResponse>() {
                     @Override
-                    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                    public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
                         if (response.body() != null) {
                             for (DirectionsRoute route : response.body().routes()) {
                                 if (route.geometry() != null) {
@@ -466,7 +469,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
                     }
 
                     @Override
-                    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                    public void onFailure(@NotNull Call<DirectionsResponse> call, @NotNull Throwable t) {
                         Log.d(TAG, "Draw route failed");
                     }
                 });
@@ -476,7 +479,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     public void onResume() {
         super.onResume();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (getContext().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && getContext().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Objects.requireNonNull(getContext()).checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && getContext().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions();
                 return;
             }
@@ -491,7 +494,6 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
         super.onPause();
         compass.stop();
         manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener).removeOnItemRemovedListener(onUserRemovedListener);
-        ;
         manager.getCheckpointsManager().removeOnItemInsertedListener(onCheckpointInsertedListener).removeOnItemRemovedListener(onCheckpointRemovedListener);
     }
 
@@ -513,7 +515,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
 
     private void initScreenSize() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        Objects.requireNonNull(getActivity()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenHeight = displayMetrics.heightPixels;
         screenWidth = displayMetrics.widthPixels;
     }

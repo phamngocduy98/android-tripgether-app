@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import java.util.List;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.firestore.Trip;
@@ -15,7 +16,7 @@ public class UrlParser {
     public static String parseTripCode(Context context, String url){
         Uri uri = Uri.parse(url);
         Log.d(TAG, "host="+uri.getHost());
-        if (uri.getHost().equals(context.getString(R.string.server_host))){
+        if (Objects.equals(uri.getHost(), context.getString(R.string.server_host))) {
             List<String> paths = uri.getPathSegments();
             for (String path: paths){
                 Log.d(TAG, "path="+path);
@@ -25,5 +26,5 @@ public class UrlParser {
             }
         }
         return Trip.NO_TRIP;
-    };
+    }
 }

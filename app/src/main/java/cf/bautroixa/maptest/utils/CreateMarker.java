@@ -41,7 +41,7 @@ public class CreateMarker {
         return createBitmapFromLayout(context, layoutResId, new ILayoutEditor() {
             @Override
             public void edit(View view) {
-                ImageView markerImage = (ImageView) view.findViewById(R.id.img_avatar_map_marker_user);
+                ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
                 markerImage.setImageResource(avatarRes);
             }
         });
@@ -50,7 +50,6 @@ public class CreateMarker {
     public static Bitmap createMarker(Context context, @DrawableRes final int iconRes, int width, int height){
         BitmapDrawable bitmapdraw = (BitmapDrawable)context.getResources().getDrawable(iconRes);
         Bitmap b = bitmapdraw.getBitmap();
-        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-        return smallMarker;
+        return Bitmap.createScaledBitmap(b, width, height, false);
     }
 }
