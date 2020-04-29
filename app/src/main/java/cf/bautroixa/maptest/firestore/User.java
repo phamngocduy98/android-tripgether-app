@@ -1,5 +1,7 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.Nullable;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.firestore.DocumentReference;
@@ -51,6 +53,7 @@ public class User extends Data {
 
     Long speed;
     int battery;
+    @Nullable
     DocumentReference activeTrip;
     String fcmToken;
 
@@ -137,6 +140,7 @@ public class User extends Data {
         this.battery = battery;
     }
 
+    @Nullable
     public DocumentReference getActiveTrip() {
         return activeTrip;
     }
@@ -184,6 +188,7 @@ public class User extends Data {
     }
 
     @Exclude
+    @Nullable
     public Marker getMarker() {
         return marker;
     }

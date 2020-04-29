@@ -21,7 +21,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Objects;
 
@@ -131,19 +130,16 @@ public class TabProfileFragment extends OneAppbarFragment {
     public void onResume() {
         super.onResume();
         String avatarUrl = "";
-        if (manager.isLoggedIn() && !avatarUrl.equals(manager.getCurrentUser().getAvatar())) {
-            ImageHelper.loadImage(manager.getCurrentUser().getAvatar(), imgAvatar, 100, 100);
+        if (manager.isLoggedIn()) {
+            if (!avatarUrl.equals(manager.getCurrentUser().getAvatar())) {
+                ImageHelper.loadImage(manager.getCurrentUser().getAvatar(), imgAvatar, 100, 100);
+            }
             setTitle(manager.getCurrentUser().getName());
         }
     }
 
     private void logout() {
-//        FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
-//        String email=user.getEmail();
-//        Toast.makeText(ProfileActivity.this,email,Toast.LENGTH_LONG).show();
-        FirebaseAuth.getInstance().signOut();
-//        FirebaseUser users=FirebaseAuth.getInstance().getCurrentUser();
-
+        manager.logout();
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(Objects.requireNonNull(getActivity()), new OnCompleteListener<Void>() {
                     @Override

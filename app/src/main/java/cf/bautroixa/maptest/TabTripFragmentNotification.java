@@ -18,19 +18,27 @@ import cf.bautroixa.maptest.data.NotificationItem;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.Event;
 import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
+import cf.bautroixa.maptest.interfaces.NavigableToState;
+import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
+import cf.bautroixa.maptest.interfaces.OnNavigationToState;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class TabNotificationFragment extends OneAppbarFragment {
-    RecyclerView rvNotifications;
-    OnNotificationItemClickedListener mListener;
-    DatasManager.OnItemInsertedListener<Event> onItemInsertedListener;
-    MainAppManager manager;
-    NotificationAdapter adapter;
+public class TabTripFragmentNotification extends OneAppbarFragment implements NavigableToState, DataItemsSelectable<Event> {
+    private MainAppManager manager;
 
-    public TabNotificationFragment() {
+    private RecyclerView rvNotifications;
+    private NotificationAdapter adapter;
+
+    private DatasManager.OnItemInsertedListener<Event> onItemInsertedListener;
+    private DatasManager.OnDataSetChangedListener<Event> onDataSetChangedListener;
+    private OnNavigationToState onNavigationToState;
+    private OnDataItemSelected<Event> onEventItemSelected;
+
+    public TabTripFragmentNotification() {
         manager = MainAppManager.getInstance();
         adapter = new NotificationAdapter();
         onItemInsertedListener = new DatasManager.OnItemInsertedListener<Event>() {
@@ -39,22 +47,22 @@ public class TabNotificationFragment extends OneAppbarFragment {
                 adapter.notifyItemChanged(position);
             }
         };
-    }
-
-    public void setOnItemInsertedListener(OnNotificationItemClickedListener mListener) {
-        this.mListener = mListener;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        manager.getEventsManager().addOnItemInsertedListener(onItemInsertedListener);
+        onDataSetChangedListener = new DatasManager.OnDataSetChangedListener<Event>() {
+            @Override
+            public void onDataSetChanged(ArrayList<Event> datas) {
+                adapter.notifyDataSetChanged();
+            }
+        };
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        manager.getEventsManager().removeOnItemInsertedListener(onItemInsertedListener);
+    public void setOnNavigationToState(OnNavigationToState onNavigationToState) {
+        this.onNavigationToState = onNavigationToState;
+    }
+
+    @Override
+    public void setOnDataItemSelected(OnDataItemSelected<Event> onEventItemSelected) {
+        this.onEventItemSelected = onEventItemSelected;
     }
 
     @Override
@@ -73,16 +81,32 @@ public class TabNotificationFragment extends OneAppbarFragment {
         super.onViewCreated(view, savedInstanceState);
         setTitle("Thông báo");
         setSubtitle(String.format("%d thông báo chưa đọc", manager.getEventsManager().getData().size()));
+        setBackButtonOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onNavigationToState != null)
+                    onNavigationToState.newState(MainActivity.STATE_TAB_TRIP);
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        manager.getEventsManager().addOnItemInsertedListener(onItemInsertedListener).addOnDataSetChangedListener(onDataSetChangedListener);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        manager.getEventsManager().removeOnItemInsertedListener(onItemInsertedListener).removeOnDataSetChangedListener(onDataSetChangedListener);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnNotificationItemClickedListener {
-        void onNotificationClick(int eventType, String id);
+        onEventItemSelected = null;
+        onNavigationToState = null;
     }
 
     public class NotificationVH extends OneRecyclerView.ViewHolder {
@@ -133,8 +157,8 @@ public class TabNotificationFragment extends OneAppbarFragment {
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mListener != null)
-                        mListener.onNotificationClick(event.getType(), event.getId());
+                    if (onEventItemSelected != null)
+                        onEventItemSelected.selectItem(event);
                 }
             });
         }

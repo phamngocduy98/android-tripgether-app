@@ -12,11 +12,10 @@ import com.google.android.material.tabs.TabLayout;
 import cf.bautroixa.maptest.theme.ViewAnim;
 
 public class BottomNavigationFragment extends Fragment {
-    public static final int TAB_MAP = 0;
-    public static final int TAB_TRIP = 1;
-    public static final int TAB_NOTES = 4;
-    public static final int TAB_NOTIFICATIONS = 2;
-    public static final int TAB_ME = 3;
+    public static final int TAB_HOME = 0;
+    public static final int TAB_MAP = 1;
+    public static final int TAB_TRIP = 2;
+    public static final int TAB_CHAT = 3;
 
     OnTabChangedListener onTabChangedListener;
 

@@ -50,7 +50,6 @@ public class UpdateLocationService extends Service implements NotificationIds {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        currentUserRef = db.collection(Collections.USERS).document(userName);
     }
 
     @Override
@@ -62,6 +61,7 @@ public class UpdateLocationService extends Service implements NotificationIds {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (mAuth.getCurrentUser() == null) return START_NOT_STICKY;
         userName = mAuth.getUid();
+        currentUserRef = db.collection(Collections.USERS).document(userName);
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             onStartForeground();
         }

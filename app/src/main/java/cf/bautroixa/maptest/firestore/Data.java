@@ -118,6 +118,7 @@ public abstract class Data {
     @Exclude
     public void onRemove() {
         cancelListenerRegistration();
+//        this.onNewValueListeners.remove(0); // TODO: remove initListener
     }
 
     @Exclude

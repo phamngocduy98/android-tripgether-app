@@ -74,5 +74,7 @@
     <string name="btn_create_account">Tạo tài khoản</string>
     <string name="dialog_message_register_failed">Đăng kí thất bại! Địa chỉ email không hợp lệ hoặc địa chỉ email đã được đăng kí cho tài khoản khác</string>
     <string name="btn_route">Chỉ đường</string>
+    <string name="toast_back_again_to_exit">Bấm back lần nữa để thoát ứng dụng</string>
+    <string name="config_open_weather_map_api_appid">394f7005c878515564cf23304d568c26</string>
 
 </resources>

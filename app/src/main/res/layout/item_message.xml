@@ -6,46 +6,59 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/box_message_item"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginHorizontal="8dp"
-        android:layout_marginVertical="8dp">
+        android:id="@+id/linear_container_message_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginVertical="16dp"
+        android:orientation="vertical">
 
-        <cf.bautroixa.maptest.theme.RoundedImageView
-            android:id="@+id/img_message_item_avatar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            app:borderRadius="15dp"
-            app:srcCompat="@drawable/avatar_item_room" />
-
-        <LinearLayout
-            android:id="@+id/box_message_item_text"
+        <TextView
+            android:id="@+id/tv_sender_item_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:paddingVertical="4dp"
-            android:paddingHorizontal="8dp"
-            android:background="@drawable/bg_radius_full_white"
-            android:orientation="vertical">
+            android:layout_marginBottom="4dp"
+            android:paddingStart="64dp"
+            android:text="Sender"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:id="@+id/linear_main_message_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginEnd="16dp">
+
+            <cf.bautroixa.maptest.theme.RoundedImageView
+                android:id="@+id/img_avatar_item_message"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                app:borderRadius="15dp"
+                app:srcCompat="@drawable/avatar_item_room" />
 
             <TextView
-                android:id="@+id/tv_message_item_sender"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="TextView" />
-
-            <TextView
-                android:id="@+id/tv_message_item_content"
+                android:id="@+id/tv_content_item_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="a\n\a\na" />
+                android:background="@drawable/bg_radius_full_white"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="Hi, Iam back"
+                android:textColor="@color/colorTextSecondary"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tv_time_item_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:text="12:12"
+                android:textColor="@color/colorTextSecondary"
+                android:textSize="12sp" />
+
 
         </LinearLayout>
-
     </LinearLayout>
 
 </LinearLayout>

@@ -1,10 +1,12 @@
 package cf.bautroixa.maptest;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,13 +32,14 @@ import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
+import cf.bautroixa.maptest.interfaces.NavigableToState;
 import cf.bautroixa.maptest.interfaces.OnAppbarStateChanged;
 import cf.bautroixa.maptest.interfaces.OnButtonClickedListener;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToState;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     public static final int STATE_CHECKPOINT = 21;
 
     // OTHER TAB
+    public static final int STATE_TAB_HOME = 60;
     public static final int STATE_TAB_NOTIFICATION = 30;
     public static final int STATE_TAB_ME = 40;
     public static final int STATE_TAB_CHAT = 50;
@@ -71,6 +75,11 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
 
     User selectedUser = null;
 
+    // back
+    Handler backHandler;
+    Runnable backCallback;
+    boolean isBackPressed = false;
+
     // listener
     Data.OnNewValueListener<User> userOnNewValueListener;
 
@@ -82,9 +91,10 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     BottomNavigationFragment bottomNavigationFragment;
     TabMapFragment tabMapFragment;
     TabTripFragment tabTripFragment;
-    TabNotificationFragment tabNotificationFragment;
+    TabTripFragmentNotification tabTripFragmentNotification;
     TabProfileFragment tabProfileFragment;
     TabChatFragment tabChatFragment;
+    TabHomeFragment tabHomeFragment;
 
     // Views
     View statusBar;
@@ -131,10 +141,11 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
         bottomNavigationFragment = (BottomNavigationFragment) getSupportFragmentManager().findFragmentById(R.id.frag_bottom_navigation);
         bottomMembersFragment = new BottomMembersFragment();
         bottomCheckpointsFragment = new BottomCheckpointsFragment();
-        tabNotificationFragment = new TabNotificationFragment();
+        tabTripFragmentNotification = new TabTripFragmentNotification();
         tabTripFragment = new TabTripFragment();
         tabProfileFragment = new TabProfileFragment();
         tabChatFragment = new TabChatFragment();
+        tabHomeFragment = new TabHomeFragment();
 
         bottomSheet();
 
@@ -207,7 +218,21 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
             handleState(this.lastState);
             this.lastState = STATE_HIDE;
         } else {
-            super.onBackPressed();
+            if (!isBackPressed) {
+                isBackPressed = true;
+                Toast.makeText(MainActivity.this, R.string.toast_back_again_to_exit, Toast.LENGTH_SHORT).show();
+                backHandler = new Handler();
+                backCallback = new Runnable() {
+                    @Override
+                    public void run() {
+                        isBackPressed = false;
+                    }
+                };
+                backHandler.postDelayed(backCallback, 3000);
+            } else {
+                if (backHandler != null) backHandler.removeCallbacks(backCallback);
+                super.onBackPressed();
+            }
         }
     }
 
@@ -225,8 +250,8 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
             });
         }
 
-        if (fragment instanceof HasOnGoToMainActivityState) {
-            ((HasOnGoToMainActivityState) fragment).setOnGoToMainActivityState(new OnGoToMainActivityState() {
+        if (fragment instanceof NavigableToState) {
+            ((NavigableToState) fragment).setOnNavigationToState(new OnNavigationToState() {
                 @Override
                 public void newState(int state, Data[] data) {
                     if (data.length > 0) {
@@ -241,6 +266,25 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
             });
         }
 
+        if (fragment instanceof DataItemsSelectable) {
+            ((DataItemsSelectable) fragment).setOnDataItemSelected(new OnDataItemSelected() {
+                @Override
+                public void selectItem(Data data) {
+                    if (data instanceof Event) {
+                        int type = ((Event) data).getType();
+                        if (type == Event.Type.CHECKPOINT_ADDED && ((Event) data).getCheckpointRef() != null) {
+                            handleState(STATE_CHECKPOINT);
+                            bottomCheckpointsFragment.selectCheckpoint(((Event) data).getCheckpointRef().getId());
+                        }
+                        if ((type == Event.Type.USER_ADDED || type == Event.Type.USER_SOS_ADDED) && ((Event) data).getUserRef() != null) {
+                            handleState(STATE_MEMBER_STATUS);
+                            bottomMembersFragment.selectUser(((Event) data).getUserRef().getId());
+                        }
+                    }
+                }
+            });
+        }
+
         if (fragment instanceof SearchFragment) {
             ((SearchFragment) fragment).setOnSearchItemClickedListener(new SearchFragment.OnSearchItemClickedListener() {
                 @Override
@@ -251,7 +295,6 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
             ((SearchFragment) fragment).setOnAvatarClickedListener(new OnButtonClickedListener() {
                 @Override
                 public void onClick(View source) {
-                    bottomNavigationFragment.selectTab(BottomNavigationFragment.TAB_ME);
                     handleState(STATE_TAB_ME);
                 }
             });
@@ -345,13 +388,17 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
                 selectActiveViewSpace(SPACE_BOTTOM);
                 replaceBottomSpace(bottomCheckpointsFragment);
                 break;
+            case STATE_TAB_HOME:
+                selectActiveViewSpace(SPACE_CENTER);
+                replaceCenterSpace(tabHomeFragment);
+                break;
             case STATE_TAB_TRIP:
                 selectActiveViewSpace(SPACE_CENTER);
                 replaceCenterSpace(tabTripFragment);
                 break;
             case STATE_TAB_NOTIFICATION:
                 selectActiveViewSpace(SPACE_CENTER);
-                replaceCenterSpace(tabNotificationFragment);
+                replaceCenterSpace(tabTripFragmentNotification);
                 break;
             case STATE_TAB_ME:
                 selectActiveViewSpace(SPACE_CENTER);
@@ -439,19 +486,16 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     @Override
     public void onTabChanged(int tabId) {
         switch (tabId) {
+            case BottomNavigationFragment.TAB_HOME:
+                handleState(STATE_TAB_HOME);
+                break;
             case BottomNavigationFragment.TAB_MAP:
                 handleState(STATE_FRIEND_LIST);
                 break;
             case BottomNavigationFragment.TAB_TRIP:
                 handleState(STATE_TAB_TRIP);
                 break;
-            case BottomNavigationFragment.TAB_NOTIFICATIONS:
-                handleState(STATE_TAB_NOTIFICATION);
-                break;
-            case BottomNavigationFragment.TAB_ME:
-                handleState(STATE_TAB_ME);
-                break;
-            case BottomNavigationFragment.TAB_NOTES:
+            case BottomNavigationFragment.TAB_CHAT:
                 handleState(STATE_TAB_CHAT);
                 break;
             default:

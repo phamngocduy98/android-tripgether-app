@@ -1,5 +1,7 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -59,6 +61,7 @@ public class Message extends Data {
         this.attachment = attachment;
     }
 
+    @Nullable
     public Timestamp getTime() {
         return time;
     }

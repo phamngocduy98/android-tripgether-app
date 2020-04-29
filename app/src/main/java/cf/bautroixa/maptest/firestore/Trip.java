@@ -1,5 +1,7 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
@@ -17,6 +19,7 @@ public class Trip extends Data {
     private String name;
     private DocumentReference leader;
     private List<DocumentReference> members;
+    @Nullable
     private DocumentReference activeCheckpoint;
 
     public Trip() {
@@ -73,11 +76,12 @@ public class Trip extends Data {
         this.members = members;
     }
 
+    @Nullable
     public DocumentReference getActiveCheckpoint() {
         return activeCheckpoint;
     }
 
-    public void setActiveCheckpoint(DocumentReference activeCheckpoint) {
+    public void setActiveCheckpoint(@Nullable DocumentReference activeCheckpoint) {
         this.activeCheckpoint = activeCheckpoint;
     }
 }

@@ -10,14 +10,14 @@
         android:id="@+id/timeline"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        app:endLineColor="@color/colorTextSecondary"
+        app:endLineColor="@color/colorBorder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:marker="@drawable/bg_radius_full_color"
+        app:marker="@drawable/btn_flat_with_border"
         app:lineWidth="1dp"
         app:markerSize="20dp"
-        app:startLineColor="@color/colorTextSecondary" />
+        app:startLineColor="@color/colorBorder" />
 
     <View
         android:id="@+id/bg_item_checkpoint_timeline"

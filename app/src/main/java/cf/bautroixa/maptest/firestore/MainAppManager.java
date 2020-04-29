@@ -129,6 +129,7 @@ public class MainAppManager {
     }
 
     public void logout() {
+        FirebaseAuth.getInstance().signOut();
         leaveTrip();
         currentUserRef = null;
         if (currentUser != null) currentUser.onRemove();

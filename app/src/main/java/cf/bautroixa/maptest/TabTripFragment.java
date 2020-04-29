@@ -31,17 +31,17 @@ import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.NavigableToState;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
-import cf.bautroixa.maptest.interfaces.OnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToState;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.OnePromptDialog;
 import cf.bautroixa.maptest.utils.UrlParser;
 
 
-public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, HasOnGoToMainActivityState<SosRequest> {
+public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, NavigableToState<SosRequest> {
     public static final int STATE_NONE = 0;
     public static final int STATE_NO_TRIP = 1;
     public static final int STATE_TRIP = 2;
@@ -57,7 +57,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     private Data.OnNewValueListener<User> userOnNewValue;
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected;
     private OnDrawRouteRequest onDrawRouteToSosUser;
-    private OnGoToMainActivityState<SosRequest> onGoToMainActivityState = null;
+    private OnNavigationToState<SosRequest> onNavigationToState = null;
 
     public TabTripFragment() {
         manager = MainAppManager.getInstance();
@@ -118,7 +118,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
             tabLayout.setVisibility(View.GONE);
             pager.setVisibility(View.GONE);
 
-            setTitle("Chuyến đi của bạn");
+            setTitle("Chuyến đi");
             setSubtitle("Bạn chưa tham gia chuyến đi nào");
 
             btnCreateTrip.setVisibility(View.VISIBLE);
@@ -235,6 +235,9 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                     new SosRequestEditDialogFragment().show(getChildFragmentManager(), "add edit sos");
                 }
                 return true;
+            case R.id.menu_notification_frag_trip:
+                onNavigationToState.newState(MainActivity.STATE_TAB_NOTIFICATION);
+                return true;
             case R.id.menu_send_sos_frag_trip:
                 SosRequestEditDialogFragment sosDialogFragment = new SosRequestEditDialogFragment();
                 sosDialogFragment.show(getChildFragmentManager(), "send SOS");
@@ -334,8 +337,8 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     }
 
     @Override
-    public void setOnGoToMainActivityState(OnGoToMainActivityState<SosRequest> onGoToMainActivityState) {
-        this.onGoToMainActivityState = onGoToMainActivityState;
+    public void setOnNavigationToState(OnNavigationToState<SosRequest> onNavigationToState) {
+        this.onNavigationToState = onNavigationToState;
     }
 
     class TabAdapter extends FragmentStateAdapter {
@@ -355,7 +358,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
             } else {
                 fragment = new TabTripFragmentSos();
                 ((TabTripFragmentSos) fragment).setOnDrawRouteRequest(onDrawRouteToSosUser);
-                ((TabTripFragmentSos) fragment).setOnGoToMainActivityState(onGoToMainActivityState);
+                ((TabTripFragmentSos) fragment).setOnNavigationToState(onNavigationToState);
                 return fragment;
             }
         }

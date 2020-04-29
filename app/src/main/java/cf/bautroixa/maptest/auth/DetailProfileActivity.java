@@ -42,7 +42,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.UUID;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.TabProfileFragment;
 import cf.bautroixa.maptest.firestore.User;
 
 
@@ -177,8 +176,7 @@ public class DetailProfileActivity extends AppCompatActivity {
                             public void onSuccess(Void aVoid) {
                                 Toast.makeText(DetailProfileActivity.this,
                                         "Cập nhật thông tin cá nhân thành công",Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(DetailProfileActivity.this, TabProfileFragment.class);
-                                startActivity(intent);
+                                finish();
                                 Log.d("TAG","Success");
                             }
                         })

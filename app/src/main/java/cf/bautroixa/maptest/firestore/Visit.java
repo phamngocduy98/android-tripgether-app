@@ -1,5 +1,7 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
@@ -18,6 +20,7 @@ public class Visit extends Data {
         this.time = time;
     }
 
+    @Nullable
     public Timestamp getTime() {
         return time;
     }

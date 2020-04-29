@@ -43,17 +43,6 @@ public class HttpRequest {
         return tripService;
     }
 
-    public void sendPostJsonRequest(String url, String json, okhttp3.Callback callback){
-        RequestBody body = RequestBody.create(JSON, json);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        client.newCall(request).enqueue(callback);
-//        return response.body().string();
-
-    }
-
     public interface TripService {
         @FormUrlEncoded
         @POST("/joinTrip")
@@ -65,6 +54,16 @@ public class HttpRequest {
         public String reason;
     }
 
+    public void sendPostJsonRequest(String url, String json, okhttp3.Callback callback){
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+        client.newCall(request).enqueue(callback);
+//        return response.body().string();
+
+    }
     public void sendPostFormRequest(String url, RequestBody formBody, okhttp3.Callback callback){
         Request request = new Request.Builder().url(url).post(formBody).build();
         client.newCall(request).enqueue(callback);

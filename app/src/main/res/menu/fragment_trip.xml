@@ -6,7 +6,13 @@
         android:id="@+id/menu_add_frag_trip"
         android:icon="@drawable/ic_add_black_24dp"
         android:title="Thêm địa điểm"
-        android:iconTint="@color/colorText"
+        app:iconTint="@color/colorText"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_notification_frag_trip"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="Thông báo"
+        app:iconTint="@color/colorText"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_send_sos_frag_trip"

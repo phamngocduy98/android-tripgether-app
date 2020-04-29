@@ -1,5 +1,7 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -21,9 +23,9 @@ public class Event extends Data {
     public static final String TYPE = "type";
 
     private int type;
-    // TODO: server timestamp may null due to internet connection
     @ServerTimestamp
     private Timestamp time;
+    @Nullable
     private DocumentReference sosRef, userRef, checkpointRef;
     private String priority;
 
@@ -64,6 +66,7 @@ public class Event extends Data {
         this.checkpointRef = checkpointRef;
     }
 
+    @Nullable
     public Timestamp getTime() {
         return time;
     }

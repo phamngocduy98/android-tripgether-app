@@ -17,12 +17,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Message;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.theme.RoundedImageView;
+import cf.bautroixa.maptest.utils.DateFormatter;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
 public class TabChatFragment extends Fragment {
@@ -88,40 +91,70 @@ public class TabChatFragment extends Fragment {
                 .removeOnDataSetChangedListener(onResetMessages);
     }
 
+    public interface MessageViewType {
+        int NORMAL = 0;
+        int CONTINUOUS = 1;
+    }
+
     /**
      * Message List Recycler View: ViewHolder
      */
     public class MessagesViewHolder extends RecyclerView.ViewHolder {
-        TextView txtMessageContent, txtMessageSender;
-        LinearLayout boxMessageItem, boxMessageItemText;
+        TextView tvMessageContent, tvMessageSender, tvMessageTime;
+        LinearLayout linearContainerMessageItem, linearMainMessageItem;
         RoundedImageView imgMessageItemAvatar;
         View view;
 
-        public MessagesViewHolder(@NonNull View itemView) {
+        public MessagesViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);
             view = itemView;
-            txtMessageContent = itemView.findViewById(R.id.tv_message_item_content);
-            txtMessageSender = itemView.findViewById(R.id.tv_message_item_sender);
-            boxMessageItem = itemView.findViewById(R.id.box_message_item);
-            imgMessageItemAvatar = itemView.findViewById(R.id.img_message_item_avatar);
-            boxMessageItemText = itemView.findViewById(R.id.box_message_item_text);
+            linearContainerMessageItem = itemView.findViewById(R.id.linear_container_message_item);
+            tvMessageContent = itemView.findViewById(R.id.tv_content_item_message);
+            tvMessageSender = itemView.findViewById(R.id.tv_sender_item_message);
+            linearMainMessageItem = itemView.findViewById(R.id.linear_main_message_item);
+            imgMessageItemAvatar = itemView.findViewById(R.id.img_avatar_item_message);
+            tvMessageTime = itemView.findViewById(R.id.tv_time_item_message);
+
+            if (viewType == MessageViewType.CONTINUOUS) {
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) linearContainerMessageItem.getLayoutParams();
+                layoutParams.topMargin = 0;
+                layoutParams.bottomMargin = 0;
+                linearContainerMessageItem.setLayoutParams(layoutParams);
+                tvMessageSender.setVisibility(View.GONE);
+                imgMessageItemAvatar.setVisibility(View.INVISIBLE);
+            }
         }
 
         public void bind(Message message) {
-            txtMessageContent.setText(message.getText());
+            tvMessageContent.setText(message.getText());
             User sender = manager.getMembersManager().get(message.getFromUser().getId());
+            Calendar calendar = Calendar.getInstance();
+            if (message.getTime() != null && calendar.getTimeInMillis() - message.getTime().toDate().getTime() > 15 * 60 * 1000) { // 15 minutes
+                tvMessageTime.setText(DateFormatter.formatDateTime(message.getTime()));
+            } else {
+                tvMessageTime.setText("");
+            }
             if (sender != null) {
-                txtMessageSender.setText(sender.getName());
+                tvMessageSender.setText(sender.getName());
                 ImageHelper.loadImage(sender.getAvatar(), imgMessageItemAvatar);
             }
             if (message.getFromUser().getId().equals(manager.getCurrentUser().getId())) {
-                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) boxMessageItem.getLayoutParams();
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) linearMainMessageItem.getLayoutParams();
                 layoutParams.gravity = Gravity.RIGHT;
-                boxMessageItem.setLayoutParams(layoutParams);
-                txtMessageContent.setTextColor(Color.WHITE);
-                txtMessageSender.setVisibility(View.GONE);
+                linearMainMessageItem.setLayoutParams(layoutParams);
+                tvMessageSender.setVisibility(View.GONE);
                 imgMessageItemAvatar.setVisibility(View.GONE);
-                boxMessageItemText.setBackground(getResources().getDrawable(R.drawable.bg_item_message_outcoming));
+                tvMessageContent.setTextColor(Color.WHITE);
+                tvMessageContent.setBackground(getResources().getDrawable(R.drawable.bg_radius_full_color));
+
+                ArrayList<View> views = new ArrayList<View>();
+                for (int x = 0; x < linearMainMessageItem.getChildCount(); x++) {
+                    views.add(linearMainMessageItem.getChildAt(x));
+                }
+                linearMainMessageItem.removeAllViews();
+                for (int x = views.size() - 1; x >= 0; x--) {
+                    linearMainMessageItem.addView(views.get(x));
+                }
             }
         }
     }
@@ -137,7 +170,7 @@ public class TabChatFragment extends Fragment {
         @Override
         public MessagesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = getLayoutInflater().inflate(R.layout.item_message, parent, false);
-            return new MessagesViewHolder(view);
+            return new MessagesViewHolder(view, viewType);
         }
 
         @Override
@@ -149,6 +182,14 @@ public class TabChatFragment extends Fragment {
         @Override
         public int getItemCount() {
             return messages.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position > 0 && Objects.equals(messages.get(position - 1).getFromUser().getId(), messages.get(position).getFromUser().getId())) {
+                return MessageViewType.CONTINUOUS;
+            }
+            return MessageViewType.NORMAL;
         }
     }
 }
