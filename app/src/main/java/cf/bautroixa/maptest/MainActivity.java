@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     //TRIP TAB
     public static final int STATE_TAB_TRIP = 20;
     public static final int STATE_CHECKPOINT = 21;
+    public static final int STATE_SEARCH_RESULT = 22;
 
     // OTHER TAB
     public static final int STATE_TAB_NOTIFICATION = 30;
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     int appbarState = OnAppbarStateChanged.State.EXTENDED;
 
     User selectedUser = null;
+    SearchResult selectedSearchResult = null;
 
     // listener
     Data.OnNewValueListener<User> userOnNewValueListener;
@@ -245,7 +247,9 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
             ((SearchFragment) fragment).setOnSearchItemClickedListener(new SearchFragment.OnSearchItemClickedListener() {
                 @Override
                 public void onSearchItemClicked(SearchResult searchResult) {
-                    tabMapFragment.targetCamera(false, searchResult.getCoordinate());
+                    selectedSearchResult = searchResult;
+                    handleState(STATE_SEARCH_RESULT);
+                    tabMapFragment.targetSearchResult(searchResult);
                 }
             });
             ((SearchFragment) fragment).setOnAvatarClickedListener(new OnButtonClickedListener() {
@@ -324,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     private void handleState(int newState) {
         state = newState;
         tabMapFragment.clearRoute();
+        tabMapFragment.clearTempMarker();
         switch (state) {
             case STATE_FRIEND_LIST:
             case STATE_FRIEND_LIST_EXPANDED:
@@ -344,6 +349,10 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
             case STATE_CHECKPOINT:
                 selectActiveViewSpace(SPACE_BOTTOM);
                 replaceBottomSpace(bottomCheckpointsFragment);
+                break;
+            case STATE_SEARCH_RESULT:
+                selectActiveViewSpace(SPACE_BOTTOM);
+                replaceBottomSpace(BottomSearchPlaceFragment.newInstance(selectedSearchResult));
                 break;
             case STATE_TAB_TRIP:
                 selectActiveViewSpace(SPACE_CENTER);

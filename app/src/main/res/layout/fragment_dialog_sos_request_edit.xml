@@ -35,7 +35,7 @@
 
         <RadioButton
             android:id="@+id/radio_low"
-            style="@style/OneUI.RadioButton"
+            style="@style/OneUI.VerticalRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -43,7 +43,7 @@
 
         <RadioButton
             android:id="@+id/radio_medium"
-            style="@style/OneUI.RadioButton"
+            style="@style/OneUI.VerticalRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -51,7 +51,7 @@
 
         <RadioButton
             android:id="@+id/radio_high"
-            style="@style/OneUI.RadioButton"
+            style="@style/OneUI.VerticalRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

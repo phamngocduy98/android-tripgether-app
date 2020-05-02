@@ -219,11 +219,12 @@ public class SearchFragment extends Fragment {
 
     public void handleState(int state) {
         this.currentState = state;
+        int _50dp = (int) PixelDPConverter.convertDpToPixel(50, getContext());
         switch (state) {
             case STATE_COLLAPSED:
                 showHideToolbar(showToolbar);
                 btnBack.setVisibility(View.GONE);
-                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(24, getContext()), 0, 50, 0);
+                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(24, getContext()), 0, _50dp, 0);
                 ViewAnim.toggleHideShow(rvSearchResult, false, ViewAnim.DIRECTION_UP);
                 editSearch.clearFocus();
                 KeyboardHelper.hideSoftKeyboard(editSearch);
@@ -231,7 +232,7 @@ public class SearchFragment extends Fragment {
             case STATE_SEARCH:
                 ViewAnim.toggleHideShow(toolbar, true, ViewAnim.DIRECTION_UP);
                 btnBack.setVisibility(View.VISIBLE);
-                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(50, getContext()), 0, 50, 0);
+                editSearch.setPadding(_50dp, 0, _50dp, 0);
                 ViewAnim.toggleHideShow(rvSearchResult, true, ViewAnim.DIRECTION_UP);
                 break;
         }

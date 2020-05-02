@@ -53,7 +53,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     ViewPager2 pager;
     TabLayout tabLayout;
     TabAdapter adapter;
-    String[] tabNames = {"Điểm đến", "Yêu cầu hỗ trợ"};
+    String[] tabNames = {"Chuyến đi", "Điểm đến"};
     private Data.OnNewValueListener<User> userOnNewValue;
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected;
     private OnDrawRouteRequest onDrawRouteToSosUser;
@@ -118,7 +118,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
             tabLayout.setVisibility(View.GONE);
             pager.setVisibility(View.GONE);
 
-            setTitle("Chuyến đi của bạn");
+            setTitle("Chuyến đi");
             setSubtitle("Bạn chưa tham gia chuyến đi nào");
 
             btnCreateTrip.setVisibility(View.VISIBLE);
@@ -348,14 +348,14 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         @Override
         public Fragment createFragment(int position) {
             Fragment fragment;
-            if (position == 0) {
+            if (position == 1) {
                 fragment = new TabTripFragmentCheckpoints();
                 ((TabTripFragmentCheckpoints) fragment).setOnCheckpointItemSelected(onCheckpointItemSelected);
                 return fragment;
             } else {
-                fragment = new TabTripFragmentSos();
-                ((TabTripFragmentSos) fragment).setOnDrawRouteRequest(onDrawRouteToSosUser);
-                ((TabTripFragmentSos) fragment).setOnGoToMainActivityState(onGoToMainActivityState);
+                fragment = new TabTripFragmentTrip();
+                ((TabTripFragmentTrip) fragment).setOnDrawRouteRequest(onDrawRouteToSosUser);
+                ((TabTripFragmentTrip) fragment).setOnGoToMainActivityState(onGoToMainActivityState);
                 return fragment;
             }
         }

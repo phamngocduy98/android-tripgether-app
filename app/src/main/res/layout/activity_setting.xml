@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".settings.SettingActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <LinearLayout
+            android:id="@+id/linear_dark_mode_activity_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_radius_top_white"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="16dp">
+
+            <TextView
+                style="@style/ListItem.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chê độ tối" />
+
+            <TextView
+                android:id="@+id/tv_dark_mode_activity_setting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tự động" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_show_noti_activity_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_radius_none_white"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="16dp">
+
+            <TextView
+                style="@style/ListItem.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hiển thị thông báo" />
+
+            <TextView
+                android:id="@+id/tv_show_noti_activity_setting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bật" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_vibrate_activity_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_radius_none_white"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="16dp">
+
+            <TextView
+                style="@style/ListItem.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rung khi hiện thông báo" />
+
+            <TextView
+                android:id="@+id/tv_vibrate_activity_setting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bật" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_unit_activity_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_radius_none_white"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="16dp">
+
+            <TextView
+                style="@style/ListItem.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đơn vị đo lường" />
+
+            <TextView
+                android:id="@+id/tv_unit_activity_setting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Censius, meters" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_map_style_activity_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_radius_bot_white"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="16dp">
+
+            <TextView
+                style="@style/ListItem.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Loại bản đồ" />
+
+            <TextView
+                android:id="@+id/tv_map_style_activity_setting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mặc định, Vệ tinh" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_subsetting_space"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

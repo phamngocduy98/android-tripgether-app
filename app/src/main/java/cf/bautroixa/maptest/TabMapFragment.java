@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -55,6 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.DatasManager;
@@ -80,7 +82,7 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     private FusedLocationProviderClient fusedLocationClient;
     OnMapClicked onMapClicked;
     OnMarkerClickedListener onMarkerClickedListener;
-    Marker activeMarker;
+    Marker activeMarker, tempMarker;
 
     DatasManager.OnItemInsertedListener onUserInsertedListener;
     DatasManager.OnItemChangedListener onUserChangedListener;
@@ -194,7 +196,10 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
                 currentLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                 // TODO: if distance > currentUser.speed*10 (update every 10s) || distance > 50;
                 if (LatLngDistance.measureDistance(currentLocation, manager.getCurrentUser().getLatLng()) > 10) {
-                    manager.getCurrentUser().sendUpdate(null, User.COORD, new GeoPoint(currentLocation.latitude, currentLocation.longitude));
+                    manager.getCurrentUser().sendUpdate(null,
+                            User.COORD, new GeoPoint(currentLocation.latitude, currentLocation.longitude),
+                            User.LAST_UPDATE, FieldValue.serverTimestamp()
+                    );
                 }
                 myLocationMarker.setPosition(currentLocation);
                 if (focusMyLocation) {
@@ -397,6 +402,14 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
         targetCamera(includeMyLocation, null, latLngs);
     }
 
+    void targetSearchResult(SearchResult searchResult){
+        tempMarker = mMap.addMarker(new MarkerOptions().position(searchResult.getCoordinate())
+                .title(searchResult.getPlaceName())
+                .snippet(searchResult.getPlaceAddress())
+               );
+        targetCamera(false, searchResult.getCoordinate());
+    }
+
     void targetCheckpoint(String checkpointId) {
         Checkpoint checkpoint = manager.getCheckpointsManager().get(checkpointId);
         final int checkpointIndex = manager.getCheckpointsManager().indexOf(checkpointId);
@@ -439,6 +452,9 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
 
     public void clearRoute() {
         if (routeLine != null) routeLine.remove();
+    }
+    public void clearTempMarker() {
+        if (tempMarker != null) tempMarker.remove();
     }
 
     void drawRoute(@Nullable LatLng fromN, final LatLng to, final GoogleMap.CancelableCallback callback) {
