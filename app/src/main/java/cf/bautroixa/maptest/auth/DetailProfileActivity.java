@@ -1,6 +1,7 @@
 package cf.bautroixa.maptest.auth;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,7 +33,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -41,6 +44,7 @@ import com.squareup.picasso.Picasso;
 import java.io.ByteArrayOutputStream;
 import java.util.UUID;
 
+import cf.bautroixa.maptest.MainActivity;
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.TabProfileFragment;
 import cf.bautroixa.maptest.firestore.User;
@@ -51,19 +55,17 @@ public class DetailProfileActivity extends AppCompatActivity {
     private EditText mNameEditText;
     private EditText mPhoneNumberEditText;
     private TextView mEmailText;
-    FirebaseAuth mAuth=FirebaseAuth.getInstance();
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
     User currentUser;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     FirebaseUser user;
-//    String userName = "notLoggedIn";
+    //    String userName = "notLoggedIn";
 //    private SharedPreferences sharedPref;
     DocumentReference docRef;
     FirebaseStorage storage = FirebaseStorage.getInstance();
     String currentImageName;
     String uid;
-
-
-
+    ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,16 +84,16 @@ public class DetailProfileActivity extends AppCompatActivity {
                 chooseImage(v.getContext());
             }
         });
-        user= mAuth.getCurrentUser();
+        user = mAuth.getCurrentUser();
         assert user != null;
-        uid=user.getUid();
+        uid = user.getUid();
         docRef = db.collection("users").document(uid);
         docRef.get().addOnCompleteListener(this, new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
-                    if(document!=null){
+                    if (document != null) {
                         User user = document.toObject(User.class);
                         onUpdateInfoView(user);
                     }
@@ -100,6 +102,25 @@ public class DetailProfileActivity extends AppCompatActivity {
                 }
             }
         });
+
+        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("abc", "Listen failed.", e);
+                    return;
+                }
+
+                if (documentSnapshot != null && documentSnapshot.exists()) {
+                   User updatedUser=documentSnapshot.toObject(User.class);
+                   onUpdateInfoView(updatedUser);
+
+                } else {
+                    Log.d("abc", "Current data: null");
+                }
+            }
+        });
+
         mUpdateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,7 +151,7 @@ public class DetailProfileActivity extends AppCompatActivity {
 //    }
 
     private void onUpdateInfoView(User user) {
-        if(user!=null){
+        if (user != null) {
             if (user.getName() != null) {
                 mNameEditText.setText(user.getName());
             }
@@ -140,7 +161,7 @@ public class DetailProfileActivity extends AppCompatActivity {
             if (user.getEmail() != null) {
                 mEmailText.setText(user.getEmail());
             }
-            if(user.getAvatar()!=null){
+            if (user.getAvatar() != null) {
                 Picasso.get().load(user.getAvatar()).into(mAvartar);
             }
 
@@ -148,8 +169,14 @@ public class DetailProfileActivity extends AppCompatActivity {
     }
 
     private void updateInformation() {
-        final String imageName= UUID.randomUUID().toString();
-        final StorageReference storageRef = storage.getReference("images/"+imageName);
+        progress = new ProgressDialog(this);
+        progress.setTitle("Thông báo");
+        progress.setMessage("Đang tiến hành cập nhật");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
+        getCurrentImageName();
+        final String imageName = UUID.randomUUID().toString();
+        final StorageReference storageRef = storage.getReference("images/" + imageName);
         mAvartar.setDrawingCacheEnabled(true);
         mAvartar.buildDrawingCache();
         Bitmap bitmap = ((BitmapDrawable) mAvartar.getDrawable()).getBitmap();
@@ -166,31 +193,32 @@ public class DetailProfileActivity extends AppCompatActivity {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                final String name=mNameEditText.getText().toString();
-                final String phoneNumber=mPhoneNumberEditText.getText().toString();
+                final String name = mNameEditText.getText().toString();
+                final String phoneNumber = mPhoneNumberEditText.getText().toString();
                 docRef
                         .update("name", name,
-                                "phoneNumber",phoneNumber
-                                )
+                                "phoneNumber", phoneNumber
+                        )
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
+                                progress.dismiss();
                                 Toast.makeText(DetailProfileActivity.this,
-                                        "Cập nhật thông tin cá nhân thành công",Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(DetailProfileActivity.this, TabProfileFragment.class);
-                                startActivity(intent);
-                                Log.d("TAG","Success");
+                                        "Cập nhật thông tin cá nhân thành công", Toast.LENGTH_SHORT).show();
+//                                Intent intent = new Intent(DetailProfileActivity.this, MainActivity.class);
+//                                startActivity(intent);
+                                Log.d("TAG", "Success");
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                progress.dismiss();
                                 Toast.makeText(DetailProfileActivity.this,
-                                        "Cập nhật thông tin cá nhân thất bại",Toast.LENGTH_SHORT).show();
-                                Log.d("TAG","Failure");
+                                        "Cập nhật thông tin cá nhân thất bại", Toast.LENGTH_SHORT).show();
+                                Log.d("TAG", "Failure");
                             }
                         });
-
 
 
             }
@@ -200,27 +228,26 @@ public class DetailProfileActivity extends AppCompatActivity {
     }
 
     private void updateAvatar() {
-        user= mAuth.getCurrentUser();
+        user = mAuth.getCurrentUser();
         assert user != null;
-        String uid=user.getUid();
+        String uid = user.getUid();
         docRef = db.collection("users").document(uid);
         docRef.get().addOnCompleteListener(this, new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
-                    if(document!=null){
+                    if (document != null) {
                         User user = document.toObject(User.class);
-                        if(user!=null)
-                            currentImageName=user.getImageName();
-                        Log.d("Image",currentImageName);
+                        if (user != null)
+                            currentImageName = user.getImageName();
                     }
                 }
             }
         });
 
-        final String imageName= UUID.randomUUID().toString();
-        final StorageReference storageRef = storage.getReference("images/"+imageName);
+        final String imageName = UUID.randomUUID().toString();
+        final StorageReference storageRef = storage.getReference("images/" + imageName);
         mAvartar.setDrawingCacheEnabled(true);
         mAvartar.buildDrawingCache();
         Bitmap bitmap = ((BitmapDrawable) mAvartar.getDrawable()).getBitmap();
@@ -238,34 +265,29 @@ public class DetailProfileActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                storageRef.getDownloadUrl().addOnSuccessListener( new OnSuccessListener<Uri>() {
+                storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-                        String imageUrl=uri.toString();
+                        String imageUrl = uri.toString();
                         docRef
-                                .update("imageName",imageName,
-                                        "avatar",imageUrl
+                                .update("imageName", imageName,
+                                        "avatar", imageUrl
                                 )
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         deleteImageInStorage();
-                                        Toast.makeText(DetailProfileActivity.this,
-                                                "Cập nhật avatar thành công",Toast.LENGTH_SHORT).show();
-                                        Log.d("TAG","Success");
+                                        Log.d("TAG", "Success");
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Log.d("TAG","Failure");
-                                        Toast.makeText(DetailProfileActivity.this,
-                                                "Cập nhật avatar thất bại",Toast.LENGTH_SHORT).show();
+                                        Log.d("TAG", "Failure");
                                     }
                                 });
                     }
                 });
-
 
 
             }
@@ -275,7 +297,7 @@ public class DetailProfileActivity extends AppCompatActivity {
 
     private void deleteImageInStorage() {
 
-        StorageReference storageRef = storage.getReference("images/"+currentImageName);
+        StorageReference storageRef = storage.getReference("images/" + currentImageName);
         storageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -290,21 +312,21 @@ public class DetailProfileActivity extends AppCompatActivity {
     }
 
     private void getCurrentImageName() {
-        user= mAuth.getCurrentUser();
+        user = mAuth.getCurrentUser();
         assert user != null;
-        String uid=user.getUid();
+        String uid = user.getUid();
         docRef = db.collection("users").document(uid);
         docRef.get().addOnCompleteListener(this, new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
-                    if(document!=null){
+                    if (document != null) {
                         User user = document.toObject(User.class);
-                        if(user!=null)
-                        currentImageName=user.getImageName();
-                        Log.d("Image",currentImageName);
-                        updateAvatar();
+                        if (user != null) {
+                            currentImageName = user.getImageName();
+                            updateAvatar();
+                        }
                     }
                 }
             }
@@ -367,7 +389,7 @@ public class DetailProfileActivity extends AppCompatActivity {
                                 cursor.close();
                             }
                         }
-                        getCurrentImageName();
+
                     }
                     break;
             }
