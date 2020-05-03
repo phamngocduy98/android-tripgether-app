@@ -113,7 +113,7 @@ public class BottomMembersFragment extends Fragment {
         this.onDrawRouteRequest = onDrawRouteRequest;
     }
 
-    public void setOnUserChangedListener(OnDataItemSelected<User> onUserChangedListener) {
+    public void setOnChangeSelectedUserListener(OnDataItemSelected<User> onUserChangedListener) {
         this.onUserItemSelected = onUserChangedListener;
     }
 

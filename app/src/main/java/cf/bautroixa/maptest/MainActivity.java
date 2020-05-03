@@ -6,21 +6,27 @@ import android.view.View;
 import android.view.WindowInsets;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
+import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.Checkpoint;
+import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.Event;
@@ -29,6 +35,8 @@ import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.MapBackgroundCallbacks;
+import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
 import cf.bautroixa.maptest.interfaces.OnAppbarStateChanged;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.interfaces.OnGoToMainActivityState;
@@ -57,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     Data.OnNewValueListener<User> userOnNewValueListener;
 
     // fragment for tab
-
+    MapBackgroundFragment mapBackgroundFragment;
     TabMapFragment tabMapFragment;
     TabTripFragment tabTripFragment;
     TabNotificationFragment tabNotificationFragment;
@@ -85,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         manager = MainAppManager.getInstance();
 
         // bind view
+        mapBackgroundFragment = (MapBackgroundFragment) getSupportFragmentManager().findFragmentById(R.id.frag_map_background);
         initStatusBar();
         bottomNavPager = findViewById(R.id.bot_nav_pager);
         tabLayout = findViewById(R.id.bottom_navigation);
@@ -92,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
         adapter = new BotNavPagerAdapter(getSupportFragmentManager(), getLifecycle());
         bottomNavPager.setAdapter(adapter);
         bottomNavPager.setSaveEnabled(false);
+        bottomNavPager.setUserInputEnabled(false);
+        bottomNavPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         new TabLayoutMediator(tabLayout, bottomNavPager, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
             public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
@@ -125,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
             String checkpointId = bundle.getString("checkpointId", null);
             if (checkpointId != null) {
                 tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(checkpointId));
+                Objects.requireNonNull(tabLayout.getTabAt(0)).select();
             }
         }
     }
@@ -132,10 +144,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (manager.isLoggedIn()) {
-            userOnNewValueListener.onNewData(manager.getCurrentUser());
-        }
-        manager.getCurrentUser().addOnNewValueListener(userOnNewValueListener);
         manager.getCurrentTrip().addOnNewValueListener(tripOnNewValueListener);
         manager.getEventsManager().addOnItemInsertedListener(onEventInsertedListener);
         shakePhoneHelper.start();
@@ -144,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        manager.getCurrentUser().removeOnNewValueListener(userOnNewValueListener);
         manager.getCurrentTrip().removeOnNewValueListener(tripOnNewValueListener);
         manager.getEventsManager().removeOnItemInsertedListener(onEventInsertedListener);
         shakePhoneHelper.stop();
@@ -152,15 +159,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (bottomNavPager.getCurrentItem() == 0 && tabMapFragment.onBackPressed()) return;
         super.onBackPressed();
-        // this.lastState == STATE_HIDE means that no previous state, or can't back to hide state
-        // TODO: FIX here
-//        if (this.lastState != STATE_HIDE) {
-//            handleState(this.lastState);
-//            this.lastState = STATE_HIDE;
-//        } else {
-//            super.onBackPressed();
-//        }
     }
 
     @Override
@@ -185,18 +185,75 @@ public class MainActivity extends AppCompatActivity {
                         if (data[0] instanceof SosRequest) {
                             User user = manager.getMembersManager().get(data[0].getId()); // userId == sosId
                             tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, user);
+                            Objects.requireNonNull(tabLayout.getTabAt(0)).select();
                             return;
                         }
                     }
                     tabMapFragment.handleState(state, data[0]);
+                    Objects.requireNonNull(tabLayout.getTabAt(0)).select();
                 }
             });
-        } else if (fragment instanceof TabTripFragment) {
+        }
+        if (fragment instanceof TabTripFragment) {
             ((TabTripFragment) fragment).setOnCheckpointItemSelected(new OnDataItemSelected<Checkpoint>() {
                 @Override
                 public void selectItem(Checkpoint checkpoint) {
-                    tabMapFragment.clearRoute();
                     tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, checkpoint);
+                    Objects.requireNonNull(tabLayout.getTabAt(0)).select();
+                }
+            });
+        } else if (fragment instanceof TabMapFragment) {
+            ((TabMapFragment) fragment).setMapBackgroundInterfaces(new MapBackgroundInterfaces() {
+                @Override
+                public void targetMyLocation() {
+                    mapBackgroundFragment.targetMyLocation();
+                }
+
+                @Override
+                public void target(Object data) {
+                    if (data instanceof Checkpoint) {
+                        mapBackgroundFragment.targetCheckpoint((Checkpoint) data, manager.getCheckpointsManager().indexOf(((Checkpoint) data).getId()));
+                    } else if (data instanceof User) {
+                        mapBackgroundFragment.targetUser((User) data);
+                    } else if (data instanceof SearchResult) {
+                        mapBackgroundFragment.targetSearchResult((SearchResult) data);
+                    } else {
+                        Log.w(TAG, "target undefined Object type");
+                    }
+                }
+
+                @Override
+                public void cleanUpTempMarkerAndRoute() {
+                    mapBackgroundFragment.clearRoute();
+                    mapBackgroundFragment.clearTempMarker();
+                }
+
+                @Override
+                public void drawRoute(@Nullable LatLng fromN, LatLng to) {
+                    mapBackgroundFragment.drawRoute(fromN, to);
+                }
+            });
+        } else if (fragment instanceof MapBackgroundFragment) {
+            ((MapBackgroundFragment) fragment).setMapBackgroundCallback(new MapBackgroundCallbacks() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    String type = marker.getSnippet(), id = marker.getTitle();
+                    Log.d(TAG, "marker click" + type + "id=" + id);
+                    if (type.equals(Collections.CHECKPOINTS)) {
+                        tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(id));
+                        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
+                        return true;
+                    } else if (type.equals(Collections.USERS)) {
+                        tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(id));
+                        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
+                        return true;
+                    }
+                    return false; // return false to show marker title and snippet normally
+                }
+
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    tabMapFragment.onMapClick(latLng);
                 }
             });
         }
@@ -220,15 +277,24 @@ public class MainActivity extends AppCompatActivity {
             super(fragmentManager, lifecycle);
         }
 
+
         @NonNull
         @Override
         public Fragment createFragment(int position) {
             Fragment fragment;
             switch (position){
-                case 1: return new TabTripFragment();
-                case 2: return new TabNotificationFragment();
-                case 3: return new TabChatFragment();
-                default: return new TabMapFragment();
+                case 1:
+                    tabTripFragment = new TabTripFragment();
+                    return tabTripFragment;
+                case 2:
+                    tabNotificationFragment = new TabNotificationFragment();
+                    return tabNotificationFragment;
+                case 3:
+                    tabChatFragment = new TabChatFragment();
+                    return tabChatFragment;
+                default:
+                    tabMapFragment = new TabMapFragment();
+                    return tabMapFragment;
             }
         }
 
