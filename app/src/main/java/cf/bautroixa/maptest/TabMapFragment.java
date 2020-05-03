@@ -27,17 +27,16 @@ import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
 import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
-import cf.bautroixa.maptest.interfaces.OnButtonClickedListener;
+import cf.bautroixa.maptest.interfaces.NavigableToState;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToState;
 import cf.bautroixa.maptest.theme.ViewAnim;
 
 
-public class TabMapFragment extends Fragment implements HasOnGoToMainActivityState {
+public class TabMapFragment extends Fragment implements NavigableToState {
     private static final String TAG = "MapFragment";
 
     public static final int STATE_HIDE = -1;
@@ -59,7 +58,7 @@ public class TabMapFragment extends Fragment implements HasOnGoToMainActivitySta
 
     // LISTENER
     private MapBackgroundInterfaces mapBackgroundInterfaces;
-    private OnGoToMainActivityState onNavigate;
+    private OnNavigationToState onNavigate;
     private Data.OnNewValueListener<User> userOnNewValueListener;
 
     DatasManager.OnItemInsertedListener<User> onUserInsertedListener;
@@ -139,12 +138,6 @@ public class TabMapFragment extends Fragment implements HasOnGoToMainActivitySta
                     selectedSearchResult = searchResult;
                     handleState(STATE_SEARCH_RESULT, null);
                     mapBackgroundInterfaces.target(searchResult);
-                }
-            });
-            ((SearchFragment) fragment).setOnAvatarClickedListener(new OnButtonClickedListener() {
-                @Override
-                public void onClick(View source) {
-                    onNavigate.newState(MainActivity.STATE_TAB_ME);
                 }
             });
         } else if (fragment instanceof BottomSheetMemberListFragment) {
@@ -320,8 +313,8 @@ public class TabMapFragment extends Fragment implements HasOnGoToMainActivitySta
     }
 
     @Override
-    public void setOnGoToMainActivityState(OnGoToMainActivityState onGoToMainActivityState) {
-        this.onNavigate = onGoToMainActivityState;
+    public void setOnNavigationToState(OnNavigationToState OnNavigationToState) {
+        this.onNavigate = OnNavigationToState;
     }
 
     public void setMapBackgroundInterfaces(MapBackgroundInterfaces mapBackgroundInterfaces) {

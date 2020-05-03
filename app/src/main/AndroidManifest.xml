@@ -63,7 +63,9 @@
         <activity
             android:name=".auth.ForgotPasswordActivity"
             android:theme="@style/NoActionBar" />
-        <activity android:name=".TabProfileFragment" />
+        <activity
+            android:name=".ProfileActivity"
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".auth.DetailProfileActivity"
             android:theme="@style/NoActionBar" />
@@ -109,8 +111,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/NoActionBar.NoStatusBar" />
+            android:theme="@style/NoActionBar.NoStatusBar"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

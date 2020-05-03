@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,14 +37,11 @@ import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
-import cf.bautroixa.maptest.interfaces.NavigableToState;
-import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
 import cf.bautroixa.maptest.interfaces.MapBackgroundCallbacks;
 import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
+import cf.bautroixa.maptest.interfaces.NavigableToState;
 import cf.bautroixa.maptest.interfaces.OnAppbarStateChanged;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
 import cf.bautroixa.maptest.interfaces.OnNavigationToState;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
@@ -81,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
     TabMapFragment tabMapFragment;
     TabTripFragment tabTripFragment;
     TabNotificationFragment tabNotificationFragment;
-    TabProfileFragment tabProfileFragment;
     TabChatFragment tabChatFragment;
 
     // Views
@@ -225,14 +220,14 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void selectItem(Data data) {
                     if (data instanceof Event) {
-                        int type = ((Event) data).getType();
-                        if (type == Event.Type.CHECKPOINT_ADDED && ((Event) data).getCheckpointRef() != null) {
-                            tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, checkpoint);
+                        Event event = (Event) data;
+                        int type = event.getType();
+                        if (type == Event.Type.CHECKPOINT_ADDED && event.getCheckpointRef() != null) {
+                            tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(event.getId()));
                             Objects.requireNonNull(tabLayout.getTabAt(0)).select();
                         }
-                        if ((type == Event.Type.USER_ADDED || type == Event.Type.USER_SOS_ADDED) && ((Event) data).getUserRef() != null) {
-                            tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, user);
-//                            bottomMembersFragment.selectUser(((Event) data).getUserRef().getId());
+                        if ((type == Event.Type.USER_ADDED || type == Event.Type.USER_SOS_ADDED) && event.getUserRef() != null) {
+                            tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(event.getId()));
                         }
                     }
                 }

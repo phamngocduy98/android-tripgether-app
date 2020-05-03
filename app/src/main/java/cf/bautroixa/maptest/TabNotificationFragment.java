@@ -27,7 +27,7 @@ import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class TabTripFragmentNotification extends OneAppbarFragment implements NavigableToState, DataItemsSelectable<Event> {
+public class TabNotificationFragment extends OneAppbarFragment implements NavigableToState, DataItemsSelectable<Event> {
     private MainAppManager manager;
 
     private RecyclerView rvNotifications;
@@ -38,7 +38,7 @@ public class TabTripFragmentNotification extends OneAppbarFragment implements Na
     private OnNavigationToState onNavigationToState;
     private OnDataItemSelected<Event> onEventItemSelected;
 
-    public TabTripFragmentNotification() {
+    public TabNotificationFragment() {
         manager = MainAppManager.getInstance();
         adapter = new NotificationAdapter();
         onItemInsertedListener = new DatasManager.OnItemInsertedListener<Event>() {
