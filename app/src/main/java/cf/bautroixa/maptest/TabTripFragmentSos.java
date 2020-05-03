@@ -176,7 +176,7 @@ public class TabTripFragmentSos extends Fragment implements HasOnGoToMainActivit
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onGoToMainActivityState.newState(MainActivity.STATE_MEMBER_STATUS, sosRequest);
+                    onGoToMainActivityState.newState(TabMapFragment.STATE_MEMBER_STATUS, sosRequest);
                 }
             });
         }

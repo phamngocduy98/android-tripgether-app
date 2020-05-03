@@ -29,6 +29,7 @@ import cf.bautroixa.maptest.auth.ChangePasswordActivity;
 import cf.bautroixa.maptest.auth.DetailProfileActivity;
 import cf.bautroixa.maptest.auth.LoginActivity;
 import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.settings.SettingActivity;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.utils.AlarmHelper;
@@ -61,7 +62,7 @@ public class TabProfileFragment extends OneAppbarFragment {
         imgAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(), DetailProfileActivity.class);
+                Intent intent = new Intent(getContext(), SettingActivity.class);
                 startActivity(intent);
             }
         });

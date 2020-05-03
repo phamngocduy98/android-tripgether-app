@@ -15,11 +15,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -41,6 +43,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -59,9 +63,20 @@ import java.util.Objects;
 import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
+import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.OnAppbarStateChanged;
+import cf.bautroixa.maptest.interfaces.OnButtonClickedListener;
+import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
+import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
+import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
+import cf.bautroixa.maptest.interfaces.OnGoToMainActivityState;
+import cf.bautroixa.maptest.theme.OneAppbarFragment;
+import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.CompassHelper;
 import cf.bautroixa.maptest.utils.CreateMarker;
 import cf.bautroixa.maptest.utils.ImageHelper;
@@ -74,66 +89,73 @@ import retrofit2.Response;
 import static cf.bautroixa.maptest.utils.CreateMarker.createMarker;
 
 
-public class TabMapFragment extends Fragment implements OnMapReadyCallback {
-
+public class TabMapFragment extends MapInterfaceFragment implements HasOnGoToMainActivityState {
     private static final String TAG = "MapFragment";
 
+    public static final int STATE_HIDE = -1;
+    public static final int STATE_FRIEND_LIST = 0;
+    public static final int STATE_FRIEND_LIST_EXPANDED = 1;
+    public static final int STATE_MEMBER_STATUS = 10;
+    public static final int STATE_CHECKPOINT = 21;
+    public static final int STATE_SEARCH_RESULT = 22;
+
+    public static final int SPACE_NONE = -1;
+    public static final int SPACE_BOTTOM = 1;
+    public static final int SPACE_BOTTOM_SHEET = 2;
+
+    // DATA AND STATE
     private MainAppManager manager;
     private FusedLocationProviderClient fusedLocationClient;
-    OnMapClicked onMapClicked;
-    OnMarkerClickedListener onMarkerClickedListener;
-    Marker activeMarker, tempMarker;
-
-    DatasManager.OnItemInsertedListener onUserInsertedListener;
-    DatasManager.OnItemChangedListener onUserChangedListener;
-    DatasManager.OnItemRemovedListener<User> onUserRemovedListener;
-
-    DatasManager.OnItemInsertedListener onCheckpointInsertedListener;
-    DatasManager.OnItemChangedListener onCheckpointChangedListener;
-    DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
-
-    int screenWidth, screenHeight;
-    float cameraBearing = 0;
-
+    private ArrayList<User> members;
+    private ArrayList<Checkpoint> checkpoints;
+    private int state, lastState = 0;
+    private User selectedUser = null;
+    private SearchResult selectedSearchResult = null;
     // utils service
     private CompassHelper compass;
 
-    // GG map component
-    private GoogleMap mMap;
+
+    // LISTENER
+    private OnGoToMainActivityState onNavigate;
+    private Data.OnNewValueListener<User> userOnNewValueListener;
+
+    DatasManager.OnItemInsertedListener<User> onUserInsertedListener;
+    DatasManager.OnItemChangedListener<User> onUserChangedListener;
+    DatasManager.OnItemRemovedListener<User> onUserRemovedListener;
+    DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
+    DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
+    DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
+
+    // VIEWS
+    private View statusBar;
+    private LinearLayout bottomSpace, bottomSheet;
+    private LinearLayout[] spaces = new LinearLayout[2];
+    private BottomSheetBehavior bottomSheetBehavior;
+    private FloatingActionButton fabMyLocation;
     private Marker myLocationMarker = null, myLocationRotationMarker = null, flagMarker = null;
-    private LatLng currentLocation = new LatLng(0, 0);
-    private Polyline routeLine = null;
 
-    private boolean isMapLoaded = false, isMarkerLoaded = false, isCheckpointLoaded = false, focusMyLocation = true;
-
-    private ArrayList<User> members;
-    private ArrayList<Checkpoint> checkpoints;
+    // CHILD FRAGMENT
+    BottomSheetMemberListFragment friendListStatusFragment;
+    BottomMembersFragment bottomMembersFragment;
+    BottomCheckpointsFragment bottomCheckpointsFragment;
+    SearchFragment searchFragment;
+    BottomNavigationFragment bottomNavigationFragment;
 
     public TabMapFragment() {
-        members = new ArrayList<>();
-        checkpoints = new ArrayList<>();
-    }
-
-    public void setOnMapClicked(OnMapClicked onMapClicked) {
-        this.onMapClicked = onMapClicked;
-    }
-
-    public void setOnMarkerClickedListener(OnMarkerClickedListener onMarkerClickedListener) {
-        this.onMarkerClickedListener = onMarkerClickedListener;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
-
-        initScreenSize();
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getContext()));
         manager = MainAppManager.getInstance();
-
         members = manager.getMembers();
         checkpoints = manager.getCheckpoints();
+
+        userOnNewValueListener = new Data.OnNewValueListener<User>() {
+            @Override
+            public void onNewData(User user) {
+                if (user.getActiveTrip() != null) {
+                    bottomSheet.setVisibility(View.VISIBLE);
+                } else {
+                    bottomSheet.setVisibility(View.GONE);
+                }
+            }
+        };
         onUserInsertedListener = new DatasManager.OnItemInsertedListener<User>() {
             @Override
             public void onItemInserted(int position, User user) {
@@ -162,14 +184,241 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getContext()));
+        compass = new CompassHelper(Objects.requireNonNull(getContext()));
+
+        members = manager.getMembers();
+        checkpoints = manager.getCheckpoints();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        compass = new CompassHelper(Objects.requireNonNull(getContext()));
         View view = inflater.inflate(R.layout.fragment_tab_map, container, false);
-        // GG map fragment
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_main);
-        Objects.requireNonNull(mapFragment).getMapAsync(this);
+        fabMyLocation = view.findViewById(R.id.fab_my_location);
+        bottomSpace = view.findViewById(R.id.bottom_space);
+        bottomSheet = view.findViewById(R.id.bottom_sheet);
+        spaces[SPACE_BOTTOM] = bottomSpace;
+        spaces[SPACE_BOTTOM_SHEET] = bottomSheet;
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // get fragments
+        friendListStatusFragment = (BottomSheetMemberListFragment) getChildFragmentManager().findFragmentById(R.id.frag_friend_list);
+        searchFragment = (SearchFragment) getChildFragmentManager().findFragmentById(R.id.frag_search);
+        bottomMembersFragment = new BottomMembersFragment();
+        bottomCheckpointsFragment = new BottomCheckpointsFragment();
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_main);
+
+        Objects.requireNonNull(mapFragment).getMapAsync(this);
+        bottomSheet();
+        fabMyLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                targetMyLocation();
+            }
+        });
+    }
+
+    @Override
+    public void onAttachFragment(@NotNull Fragment fragment) {
+        super.onAttachFragment(fragment);
+
+        if (fragment instanceof SearchFragment) {
+            ((SearchFragment) fragment).setOnSearchItemClickedListener(new SearchFragment.OnSearchItemClickedListener() {
+                @Override
+                public void onSearchItemClicked(SearchResult searchResult) {
+                    selectedSearchResult = searchResult;
+                    handleState(STATE_SEARCH_RESULT, null);
+                    targetSearchResult(searchResult);
+                }
+            });
+            ((SearchFragment) fragment).setOnAvatarClickedListener(new OnButtonClickedListener() {
+                @Override
+                public void onClick(View source) {
+                    onNavigate.newState(MainActivity.STATE_TAB_ME);
+                }
+            });
+        } else if (fragment instanceof BottomSheetMemberListFragment) {
+            ((BottomSheetMemberListFragment) fragment).setOnFriendItemClickListener(new OnDataItemSelected<User>() {
+                @Override
+                public void selectItem(User user) {
+                    selectedUser = user;
+                    handleState(STATE_MEMBER_STATUS, selectedUser);
+                }
+            });
+        } else if (fragment instanceof BottomMembersFragment) {
+            ((BottomMembersFragment) fragment).setOnDrawRouteButtonClickedListener(new OnDrawRouteRequest() {
+                @Override
+                public void drawRouteTo(LatLng target) {
+                    drawRoute(null, target, null);
+                }
+            });
+            ((BottomMembersFragment) fragment).setOnUserChangedListener(new OnDataItemSelected<User>() {
+                @Override
+                public void selectItem(User user) {
+                    clearRoute();
+                    targetUser(user);
+                }
+            });
+        } else if (fragment instanceof BottomCheckpointsFragment) {
+            ((BottomCheckpointsFragment) fragment).setOnDrawRouteRequestWithPathListener(new OnDrawRouteRequestWithPath() {
+                @Override
+                public void drawRoute(List<LatLng> latlngs) {
+                    drawRoute(latlngs);
+                }
+            });
+            ((BottomCheckpointsFragment) fragment).setOnCheckpointChanged(new OnDataItemSelected<Checkpoint>() {
+                @Override
+                public void selectItem(Checkpoint checkpoint) {
+                    clearRoute();
+                    targetCheckpoint(checkpoint, manager.getCheckpointsManager().indexOf(checkpoint.getId()));
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        manager.getMembersManager().addOnItemInsertedListener(onUserInsertedListener).addOnItemRemovedListener(onUserRemovedListener);
+        manager.getCheckpointsManager().addOnItemInsertedListener(onCheckpointInsertedListener).addOnItemRemovedListener(onCheckpointRemovedListener);
+        compass.start();
+    }
+
+    @Override
+    public void onMapLoaded() {
+        super.onMapLoaded();
+        initFriendMarkers();
+        initMyLocationMarker();
+        initLocationAndCompass();
+        initCheckpointMarker();
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        Log.d(TAG, "last state= " + lastState);
+        if (state != STATE_HIDE) {
+            // hide all
+            toggleToolbar(false);
+            toggleStatusBar(false);
+            selectActiveViewSpace(SPACE_NONE);
+            lastState = state;
+            state = STATE_HIDE;
+        } else {
+            // show all
+            toggleToolbar(true);
+            toggleStatusBar(true);
+            handleState(lastState, null);
+        }
+        Log.d(TAG, "click new state= " + state);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (myLocationRotationMarker.equals(marker) || myLocationMarker.equals(marker)) { // click my location marker, do nothing
+            onMapClick(mMap.getCameraPosition().target);
+            return true;
+        }
+        String type = marker.getSnippet(), id = marker.getTitle();
+        Log.d(TAG, "marker click" + type + "id=" + id);
+        if (type.equals(Collections.CHECKPOINTS)) {
+            handleState(STATE_CHECKPOINT, null);
+            bottomCheckpointsFragment.selectCheckpoint(id);
+        } else if (type.equals(Collections.USERS)) {
+            selectedUser = manager.getMembersManager().get(id);
+            handleState(STATE_MEMBER_STATUS, null);
+        }
+        return true;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        onNavigate = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        compass.stop();
+        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener).removeOnItemRemovedListener(onUserRemovedListener);
+        manager.getCheckpointsManager().removeOnItemInsertedListener(onCheckpointInsertedListener).removeOnItemRemovedListener(onCheckpointRemovedListener);
+    }
+
+    void handleState(int newState, @Nullable Data data) {
+        state = newState;
+        clearRoute();
+        clearTempMarker();
+        switch (state) {
+            case STATE_FRIEND_LIST:
+            case STATE_FRIEND_LIST_EXPANDED:
+                if (state == STATE_FRIEND_LIST) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                } else {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+                selectActiveViewSpace(SPACE_BOTTOM_SHEET);
+                break;
+            case STATE_MEMBER_STATUS:
+                selectActiveViewSpace(SPACE_BOTTOM);
+                replaceBottomSpace(bottomMembersFragment);
+                if (data instanceof User) selectedUser = (User) data;
+                if (data instanceof SosRequest) {
+                    selectedUser = manager.getMembersManager().get(data.getId()); // userId == sosId
+                }
+                targetUser(selectedUser);
+                bottomMembersFragment.selectUser(selectedUser.getId());
+                targetCamera(true, selectedUser.getLatLng());
+            case STATE_CHECKPOINT:
+                selectActiveViewSpace(SPACE_BOTTOM);
+                replaceBottomSpace(bottomCheckpointsFragment);
+                if (data instanceof Checkpoint) {
+                    bottomCheckpointsFragment.selectCheckpoint(data.getId());
+                    targetCheckpoint((Checkpoint) data, manager.getCheckpointsManager().indexOf(data.getId()));
+                }
+                break;
+            case STATE_SEARCH_RESULT:
+                selectActiveViewSpace(SPACE_BOTTOM);
+                targetSearchResult(selectedSearchResult);
+                replaceBottomSpace(BottomSearchPlaceFragment.newInstance(selectedSearchResult));
+                break;
+        }
+        Log.d(TAG, "new state= " + state);
+    }
+
+    void initMyLocationMarker() {
+        myLocationRotationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_direction)));
+        myLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation)
+                .anchor(0.5f, 0.5f)
+                .icon(BitmapDescriptorFactory.fromBitmap(createMarker(Objects.requireNonNull(getContext()), R.drawable.marker_my_location, 120, 120))));
+    }
+
+    void initFriendMarkers() {
+        if (!isMapLoaded) return;
+        for (User user : members) {
+            if (user.getMarker() != null) {
+                user.getMarker().remove();
+            }
+            user.setMarker(createFriendMarker(user));
+        }
+    }
+
+    void initCheckpointMarker() {
+        if (!isMapLoaded) return;
+        for (Checkpoint checkpoint : checkpoints) {
+            if (checkpoint.getMarker() != null) {
+                checkpoint.getMarker().remove();
+            }
+            checkpoint.setMarker(createCheckpointMarker(checkpoint));
+        }
     }
 
     void initLocationAndCompass() {
@@ -217,330 +466,50 @@ public class TabMapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    public void targetMyLocation() {
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16));
-        focusMyLocation = true;
+
+    void toggleStatusBar(boolean show) {
+        ViewAnim.toggleHideShow(statusBar, show, ViewAnim.DIRECTION_UP);
+    }
+
+    void toggleToolbar(boolean show) {
+        searchFragment.showHideToolbar(show);
+    }
+
+    void toggleSearchBar(boolean show) {
+        searchFragment.showHideCompletely(show);
+    }
+
+    void bottomSheet() {
+        bottomSheetBehavior = BottomSheetBehavior.from((View) (bottomSheet));
+        bottomSheetBehavior.setFitToContents(true);
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+                friendListStatusFragment.onBottomSheetStateChanged(i);
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+                friendListStatusFragment.onSlideBottomSheet(v);
+            }
+        });
+    }
+
+    private void replaceBottomSpace(Fragment fragment) {
+        FragmentTransaction ft = getChildFragmentManager().beginTransaction();
+        ft.replace(R.id.bottom_space, fragment);
+        ft.commit();
+    }
+
+    private void selectActiveViewSpace(int viewSpace) {
+        for (int i = 0; i < spaces.length; i++) {
+            ViewAnim.toggleHideShow(spaces[i], viewSpace == i, ViewAnim.DIRECTION_DOWN);
+        }
+        toggleSearchBar(true);
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        UiSettings uiSetting = mMap.getUiSettings();
-        uiSetting.setMapToolbarEnabled(false);
-//        uiSetting.setZoomControlsEnabled(false);
-//        mMap.setMyLocationEnabled(true);
-        try {
-            int nightModeFlags = Objects.requireNonNull(getContext()).getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-                if (!googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.maps_night))) {
-                    Log.e(TAG, "Style parsing failed.");
-                }
-            }
-        } catch (Resources.NotFoundException e) {
-            Log.e(TAG, "Can't find style. Error: ", e);
-        }
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 14));
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                isMapLoaded = true;
-                Log.d(TAG, "map loaded");
-                initFriendMarkers();
-                initMyLocationMarker();
-                initLocationAndCompass();
-                initCheckpointMarker();
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16));
-            }
-        });
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-//                if (flagMarker == null) {
-//                    flagMarker = mMap.addMarker(new MarkerOptions().position(latLng));
-//                } else {
-//                    flagMarker.setPosition(latLng);
-//                }
-            }
-        });
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                if (myLocationRotationMarker.equals(marker) || myLocationMarker.equals(marker)) { // click my location marker, do nothing
-                    if (onMapClicked != null)
-                        onMapClicked.onMapClicked(mMap.getCameraPosition().target);
-                    return true;
-                }
-                if (onMarkerClickedListener != null)
-                    onMarkerClickedListener.onMarkerClick(marker.getSnippet(), marker.getTitle());
-                return true;
-            }
-        });
-        mMap.setOnCameraMoveCanceledListener(new GoogleMap.OnCameraMoveCanceledListener() {
-            @Override
-            public void onCameraMoveCanceled() {
-//                groupMarkerInfo.setVisibility(View.GONE);
-                focusMyLocation = false;
-                cameraBearing = mMap.getCameraPosition().bearing;
-            }
-        });
-        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-            @Override
-            public void onCameraIdle() {
-                focusMyLocation = false;
-                cameraBearing = mMap.getCameraPosition().bearing;
-            }
-        });
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                if (onMapClicked != null) onMapClicked.onMapClicked(latLng);
-            }
-        });
-    }
-
-    void initMyLocationMarker() {
-        myLocationRotationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_direction)));
-        myLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation)
-                .anchor(0.5f, 0.5f)
-                .icon(BitmapDescriptorFactory.fromBitmap(createMarker(Objects.requireNonNull(getContext()), R.drawable.marker_my_location, 120, 120))));
-    }
-
-    void initFriendMarkers() {
-        if (!isMapLoaded) return;
-        for (User user : members) {
-            if (user.getMarker() != null) {
-                user.getMarker().remove();
-            }
-            user.setMarker(createFriendMarker(user));
-        }
-    }
-
-    void initCheckpointMarker() {
-        if (!isMapLoaded) return;
-        for (Checkpoint checkpoint : checkpoints) {
-            if (checkpoint.getMarker() != null) {
-                checkpoint.getMarker().remove();
-            }
-            checkpoint.setMarker(createCheckpointMarker(checkpoint));
-        }
-    }
-
-    @Nullable
-    private Marker createFriendMarker(final User user) {
-        if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
-        if (user.getMarker() == null) {
-            user.setMarker(mMap.addMarker(new MarkerOptions().position(user.getLatLng())
-                    .title(user.getId())
-                    .snippet(Collections.USERS)
-                    .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(Objects.requireNonNull(getContext()), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
-                        @Override
-                        public void edit(View view) {
-                            ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
-                            TextView tvName = view.findViewById(R.id.tv_name_map_marker_user);
-                            if (user.getAvatar() == null || user.getAvatar().equals(User.DEFAULT_AVATAR)) {
-                                markerImage.setVisibility(View.INVISIBLE);
-                                tvName.setText(user.getShortName());
-                            } else {
-                                ImageHelper.loadImage(user.getAvatar(), markerImage);
-                            }
-                        }
-                    })))));
-        }
-        return user.getMarker();
-    }
-
-    @Nullable
-    private Marker createCheckpointMarker(Checkpoint checkpoint) {
-        if (!isMapLoaded || checkpoint == null || checkpoint.getLatLng() == null) return null;
-        if (checkpoint.getMarker() == null) {
-            checkpoint.setMarker(mMap.addMarker(new MarkerOptions().position(checkpoint.getLatLng())
-                    .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS)));
-        }
-        return checkpoint.getMarker();
-    }
-
-    void targetCamera(boolean includeMyLocation, GoogleMap.CancelableCallback cancelableCallback, LatLng... latLngs) {
-        if (isMapLoaded) {
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for (LatLng point : latLngs) {
-                builder.include(point);
-            }
-            if (includeMyLocation) builder.include(currentLocation);
-            LatLngBounds bounds = builder.build();
-            targetCamera(bounds, cancelableCallback);
-        }
-    }
-
-    void targetCamera(LatLngBounds bounds, GoogleMap.CancelableCallback cancelableCallback) {
-        if (isMapLoaded) {
-//            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100), cancelableCallback); // padding 100
-            final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, Objects.requireNonNull(getContext()));
-            // TODO: calculate real bottomSpace height
-            final int bottomSpaceHeight = (int) PixelDPConverter.convertDpToPixel(200, getContext());
-            final int boundHeight = screenHeight - toolbarStatusbarHeight - bottomSpaceHeight;
-            Log.d(TAG, "tbheight = " + toolbarStatusbarHeight);
-            Log.d(TAG, "boundHei=" + boundHeight);
-            Log.d(TAG, "screenHe=" + screenHeight);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, screenWidth, boundHeight, 100), new GoogleMap.CancelableCallback() {
-                @Override
-                public void onFinish() {
-                    mMap.animateCamera(CameraUpdateFactory.scrollBy(0, (screenHeight - boundHeight) / 2f - toolbarStatusbarHeight));
-                }
-
-                @Override
-                public void onCancel() {
-
-                }
-            });
-
-        }
-    }
-
-    void targetCamera(boolean includeMyLocation, LatLng... latLngs) {
-        targetCamera(includeMyLocation, null, latLngs);
-    }
-
-    void targetSearchResult(SearchResult searchResult){
-        tempMarker = mMap.addMarker(new MarkerOptions().position(searchResult.getCoordinate())
-                .title(searchResult.getPlaceName())
-                .snippet(searchResult.getPlaceAddress())
-               );
-        targetCamera(false, searchResult.getCoordinate());
-    }
-
-    void targetCheckpoint(String checkpointId) {
-        Checkpoint checkpoint = manager.getCheckpointsManager().get(checkpointId);
-        final int checkpointIndex = manager.getCheckpointsManager().indexOf(checkpointId);
-        if (checkpoint != null && checkpoint.getLatLng() != null && getContext() != null) {
-            Log.d(TAG, "targeting...");
-            targetCamera(true, checkpoint.getLatLng());
-            if (activeMarker != null) activeMarker.setIcon(null);
-            activeMarker = checkpoint.getMarker();
-            // TODO: ( java.lang.IllegalArgumentException: Unmanaged descriptor ) bellow this line
-            if (activeMarker != null)
-                activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
-                    @Override
-                    public void edit(View view) {
-                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
-                        tvName.setText(String.valueOf(checkpointIndex));
-                    }
-                }))));
-        }
-    }
-
-    void targetUser(String userId) {
-        User user = manager.getMembersManager().get(userId);
-        if (user != null && user.getLatLng() != null && getContext() != null) {
-            Log.d(TAG, "targeting...");
-            targetCamera(true, user.getLatLng());
-        }
-    }
-
-    void drawRoute(List<LatLng> latLngs) {
-        final LatLngBounds.Builder bounds = new LatLngBounds.Builder();
-        PolylineOptions line = new PolylineOptions().clickable(true).addAll(latLngs);
-        clearRoute();
-        routeLine = mMap.addPolyline(line);
-        // add point to bound and apply bound to camera
-        for (LatLng latLng : latLngs) {
-            bounds.include(latLng);
-        }
-        targetCamera(bounds.build(), null);
-    }
-
-    public void clearRoute() {
-        if (routeLine != null) routeLine.remove();
-    }
-    public void clearTempMarker() {
-        if (tempMarker != null) tempMarker.remove();
-    }
-
-    void drawRoute(@Nullable LatLng fromN, final LatLng to, final GoogleMap.CancelableCallback callback) {
-        final LatLngBounds.Builder bounds = new LatLngBounds.Builder();
-        final LatLng from = (fromN != null) ? fromN : currentLocation;
-        bounds.include(from);
-        bounds.include(to);
-        NavigationRoute.builder(getContext())
-                .accessToken(getString(R.string.config_mapbox_map_api_key))
-                .origin(Point.fromLngLat(from.longitude, from.latitude))
-                .destination(Point.fromLngLat(to.longitude, to.latitude))
-                .build()
-                .getRoute(new Callback<DirectionsResponse>() {
-                    @Override
-                    public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
-                        if (response.body() != null) {
-                            for (DirectionsRoute route : response.body().routes()) {
-                                if (route.geometry() != null) {
-                                    List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
-                                    ArrayList<LatLng> latLngs = new ArrayList<>();
-                                    for (Point coord : coords) {
-                                        latLngs.add(new LatLng(coord.latitude(), coord.longitude()));
-                                    }
-                                    drawRoute(latLngs);
-                                }
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull Call<DirectionsResponse> call, @NotNull Throwable t) {
-                        Log.d(TAG, "Draw route failed");
-                    }
-                });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Objects.requireNonNull(getContext()).checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && getContext().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions();
-                return;
-            }
-        }
-        manager.getMembersManager().addOnItemInsertedListener(onUserInsertedListener).addOnItemRemovedListener(onUserRemovedListener);
-        manager.getCheckpointsManager().addOnItemInsertedListener(onCheckpointInsertedListener).addOnItemRemovedListener(onCheckpointRemovedListener);
-        compass.start();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        compass.stop();
-        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener).removeOnItemRemovedListener(onUserRemovedListener);
-        manager.getCheckpointsManager().removeOnItemInsertedListener(onCheckpointInsertedListener).removeOnItemRemovedListener(onCheckpointRemovedListener);
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        Log.d(TAG, "attach");
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        onMapClicked = null;
-    }
-
-    public void requestPermissions() {
-
-    }
-
-    private void initScreenSize() {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        Objects.requireNonNull(getActivity()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        screenHeight = displayMetrics.heightPixels;
-        screenWidth = displayMetrics.widthPixels;
-    }
-
-    public interface OnMarkerClickedListener {
-        void onMarkerClick(String type, String id);
-    }
-
-    public interface OnMapClicked {
-        void onMapClicked(LatLng latLng);
+    public void setOnGoToMainActivityState(OnGoToMainActivityState onGoToMainActivityState) {
+        this.onNavigate = onGoToMainActivityState;
     }
 }

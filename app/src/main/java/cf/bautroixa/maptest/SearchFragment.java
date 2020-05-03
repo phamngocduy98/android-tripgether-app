@@ -218,6 +218,7 @@ public class SearchFragment extends Fragment {
     }
 
     public void handleState(int state) {
+        if (getContext() == null) return; //TODO: for testing, do real fix here
         this.currentState = state;
         int _50dp = (int) PixelDPConverter.convertDpToPixel(50, getContext());
         switch (state) {

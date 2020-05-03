@@ -264,7 +264,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                 btnCheckIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onGoToMainActivityState.newState(MainActivity.STATE_FRIEND_LIST_EXPANDED);
+                        onGoToMainActivityState.newState(TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
                     }
                 });
             } else {

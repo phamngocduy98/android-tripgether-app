@@ -27,16 +27,17 @@ import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
 public class TabTripFragmentTrip extends Fragment implements HasOnGoToMainActivityState<SosRequest> {
-
     MainAppManager manager;
     OnDrawRouteRequest onDrawRouteRequest;
     DatasManager.OnItemInsertedListener<SosRequest> onItemInsertedListener;
     DatasManager.OnItemChangedListener<SosRequest> onItemChangedListener;
     DatasManager.OnItemRemovedListener<SosRequest> onItemRemovedListener;
+
     RecyclerView rvSos;
-    Button btnAddEditSos;
-    private OnGoToMainActivityState<SosRequest> onGoToMainActivityState = null;
     SosAdapter adapter;
+    Button btnAddEditSos;
+
+    private OnGoToMainActivityState<SosRequest> onGoToMainActivityState = null;
 
     public TabTripFragmentTrip() {
     }
@@ -176,7 +177,7 @@ public class TabTripFragmentTrip extends Fragment implements HasOnGoToMainActivi
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onGoToMainActivityState.newState(MainActivity.STATE_MEMBER_STATUS, sosRequest);
+                    onGoToMainActivityState.newState(TabMapFragment.STATE_MEMBER_STATUS, sosRequest);
                 }
             });
         }

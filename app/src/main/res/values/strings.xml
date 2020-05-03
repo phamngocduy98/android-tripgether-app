@@ -74,5 +74,15 @@
     <string name="btn_create_account">Tạo tài khoản</string>
     <string name="dialog_message_register_failed">Đăng kí thất bại! Địa chỉ email không hợp lệ hoặc địa chỉ email đã được đăng kí cho tài khoản khác</string>
     <string name="btn_route">Chỉ đường</string>
+    <string name="title_dark_mode_setting">Chế độ tối</string>
+    <string name="title_show_noti_setting">Hiện thông báo</string>
+    <string name="setting_dark_system_mode">Theo hệ thống</string>
+    <string name="setting_dark_light_mode">Sáng</string>
+    <string name="setting_dark_dark_mode">Tối</string>
+    <string name="setting_dark_auto_mode">Tự động</string>
+    <string name="title_vibrate_setting">Rung</string>
+    <string name="title_setting">Cài đặt</string>
+    <string name="btn_on">Bật</string>
+    <string name="btn_off">Tắt</string>
 
 </resources>
