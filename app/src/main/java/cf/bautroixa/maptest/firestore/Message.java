@@ -20,6 +20,8 @@ public class Message extends Data {
 
     DocumentReference fromUser;
     String text, attachment;
+
+    // TODO: time == null means message not delivered
     @ServerTimestamp
     Timestamp time;
 

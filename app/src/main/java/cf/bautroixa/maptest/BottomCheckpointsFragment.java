@@ -264,7 +264,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
                 btnCheckIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onNavigationToState.newState(MainActivity.STATE_FRIEND_LIST_EXPANDED);
+                        onNavigationToState.newState(TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
                     }
                 });
             } else {

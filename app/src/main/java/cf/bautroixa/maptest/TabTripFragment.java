@@ -53,7 +53,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     ViewPager2 pager;
     TabLayout tabLayout;
     TabAdapter adapter;
-    String[] tabNames = {"Điểm đến", "Yêu cầu hỗ trợ"};
+    String[] tabNames = {"Chuyến đi", "Điểm đến"};
     private Data.OnNewValueListener<User> userOnNewValue;
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected;
     private OnDrawRouteRequest onDrawRouteToSosUser;
@@ -351,14 +351,14 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         @Override
         public Fragment createFragment(int position) {
             Fragment fragment;
-            if (position == 0) {
+            if (position == 1) {
                 fragment = new TabTripFragmentCheckpoints();
                 ((TabTripFragmentCheckpoints) fragment).setOnCheckpointItemSelected(onCheckpointItemSelected);
                 return fragment;
             } else {
-                fragment = new TabTripFragmentSos();
-                ((TabTripFragmentSos) fragment).setOnDrawRouteRequest(onDrawRouteToSosUser);
-                ((TabTripFragmentSos) fragment).setOnNavigationToState(onNavigationToState);
+                fragment = new TabTripFragmentTrip();
+                ((TabTripFragmentTrip) fragment).setOnDrawRouteRequest(onDrawRouteToSosUser);
+                ((TabTripFragmentTrip) fragment).setOnNavigationToState(onNavigationToState);
                 return fragment;
             }
         }

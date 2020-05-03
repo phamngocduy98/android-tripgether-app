@@ -26,19 +26,20 @@ import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class TabTripFragmentSos extends Fragment implements NavigableToState<SosRequest> {
+public class TabTripFragmentTrip extends Fragment implements NavigableToState<SosRequest> {
 
     MainAppManager manager;
     OnDrawRouteRequest onDrawRouteRequest;
     DatasManager.OnItemInsertedListener<SosRequest> onItemInsertedListener;
     DatasManager.OnItemChangedListener<SosRequest> onItemChangedListener;
     DatasManager.OnItemRemovedListener<SosRequest> onItemRemovedListener;
+
     RecyclerView rvSos;
     Button btnAddEditSos;
     private OnNavigationToState<SosRequest> onNavigationToState = null;
     SosAdapter adapter;
 
-    public TabTripFragmentSos() {
+    public TabTripFragmentTrip() {
     }
 
     public void setOnDrawRouteRequest(OnDrawRouteRequest onDrawRouteRequest) {
@@ -90,7 +91,7 @@ public class TabTripFragmentSos extends Fragment implements NavigableToState<Sos
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_tab_trip_subtab_sos, container, false);
+        View v = inflater.inflate(R.layout.fragment_tab_trip_subtab_trip, container, false);
         btnAddEditSos = v.findViewById(R.id.btn_add_edit_sos_frag_tab_trip_subtab_checkpoints);
 
         if (manager.getSosRequestsManager().get(manager.getCurrentUser().getId()) != null) {
@@ -176,7 +177,7 @@ public class TabTripFragmentSos extends Fragment implements NavigableToState<Sos
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onNavigationToState.newState(MainActivity.STATE_MEMBER_STATUS, sosRequest);
+                    onNavigationToState.newState(TabMapFragment.STATE_MEMBER_STATUS, sosRequest);
                 }
             });
         }

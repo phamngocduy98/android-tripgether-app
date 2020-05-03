@@ -205,7 +205,7 @@ public class BottomSheetMemberListFragment extends Fragment {
     }
 
     public class FriendStatusViewHolder extends RecyclerView.ViewHolder {
-        protected TextView tvName, tvLocation, tvCount, tvBattery, tvNameInAvatar;
+        protected TextView tvName, tvLocation, tvCount, tvLastUpdate, tvNameInAvatar;
         protected RoundedImageView imgAvatar;
         protected View view;
         protected User currentUser;
@@ -222,13 +222,15 @@ public class BottomSheetMemberListFragment extends Fragment {
             tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend);
             imgAvatar = itemView.findViewById(R.id.img_avatar_status_item_friend);
             tvName = itemView.findViewById(R.id.tv_name_status_item_friend);
-            tvBattery = itemView.findViewById(R.id.tv_battery_status_item_friend);
+            tvLastUpdate = itemView.findViewById(R.id.tv_last_update_item_friend);
             tvLocation = itemView.findViewById(R.id.tv_location_status_item_friend);
             tvCount = itemView.findViewById(R.id.tv_count_status_item_friend);
         }
 
         public void update(User user) {
-            tvBattery.setText(user.getBattery() + "%");
+            if (user.getLastUpdate() != null){
+                tvLastUpdate.setText(DateFormatter.format(user.getLastUpdate()));
+            }
             progressBattery.setProgress(user.getBattery());
             tvLocation.setText(user.getCurrentLocation());
             if (!user.getAvatar().equals(currentUser.getAvatar())) {

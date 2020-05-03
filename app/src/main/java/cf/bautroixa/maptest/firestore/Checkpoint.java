@@ -12,6 +12,7 @@ public class Checkpoint extends Data {
     @Exclude public static final String NAME = "name";
     @Exclude public static final String COORD = "coordinate";
     @Exclude public static final String LOCATION = "location";
+    @Exclude public static final String PLACE_NAME = "placeName";
     @Exclude public static final String TIME = "time";
 
     @Exclude Marker marker;
@@ -22,6 +23,7 @@ public class Checkpoint extends Data {
     String name;
     GeoPoint coordinate;
     String location;
+    String placeName;
     Timestamp time;
 
     public Checkpoint() {
@@ -92,6 +94,23 @@ public class Checkpoint extends Data {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getPlaceName(){
+        // make it compatible with old checkpoint instance, TODO: normalize all checkpoints in Firestore
+        if (placeName == null){
+            String[] locations = location.split(",");
+            if (locations.length > 0) {
+                setPlaceName(locations[0]);
+            } else {
+                setPlaceName(location);
+            }
+        }
+        return placeName;
+    }
+
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
 
     public Timestamp getTime() {

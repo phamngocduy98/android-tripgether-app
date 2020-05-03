@@ -90,7 +90,7 @@
         <item name="android:textAlignment">center</item>
     </style>
 
-    <style name="OneUI.RadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+    <style name="OneUI.VerticalRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
         <item name="android:button">@null</item>
         <item name="android:drawableBottom">?android:attr/listChoiceIndicatorSingle</item>
         <item name="android:gravity">center</item>
@@ -105,6 +105,12 @@
         <item name="colorPrimaryDark">@color/colorTextButton</item>
         <item name="colorPrimary">@color/colorTextButton</item>
         <item name="colorControlActivated">@color/colorTextButton</item>
+    </style>
+
+    <style name="OneUI.HorizontalRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+<!--        <item name="android:buttonTint">@color/colorTextButton</item>-->
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingStart">8dp</item>
     </style>
 
     <style name="TextView.LongBadge" parent="Theme.AppCompat.Light.NoActionBar">
@@ -201,5 +207,7 @@
         <item name="android:paddingBottom">16dp</item>
         <item name="android:textSize">20sp</item>
     </style>
-
+    <style name="ListItem.Title" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">16sp</item>
+    </style>
 </resources>
