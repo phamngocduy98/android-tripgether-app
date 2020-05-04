@@ -20,10 +20,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
-import cf.bautroixa.maptest.theme.OneBottomSheetDialog;
+import cf.bautroixa.maptest.theme.FullScreenDialogFragment;
+import cf.bautroixa.maptest.theme.ViewAnim;
 
-public class SosRequestEditDialogFragment extends OneBottomSheetDialog {
-
+public class SosRequestEditDialogFragment extends FullScreenDialogFragment {
     private static final String TAG = "SosRequestEditDialogFragment";
     private Button btnOK, btnCancel;
     private EditText editDesc;
@@ -31,6 +31,7 @@ public class SosRequestEditDialogFragment extends OneBottomSheetDialog {
     private RadioButton radioHigh, radioMedium, radioLow;
 
     private int selectedLever;
+    private SosRequest sosRequest;
 
     private FirebaseAuth mAuth;
     private MainAppManager manager;
@@ -47,10 +48,31 @@ public class SosRequestEditDialogFragment extends OneBottomSheetDialog {
     @Override
     public void onResume() {
         super.onResume();
-        SosRequest sosRequest = manager.getSosRequestsManager().get(manager.getCurrentUser().getId());
+        sosRequest = manager.getSosRequestsManager().get(manager.getCurrentUser().getId());
         if (sosRequest != null) {
-            editDesc.setText(sosRequest.getDescription());
-            selectButtonFromLever(sosRequest.getLever());
+            if (!sosRequest.isResolved()) {
+                editDesc.setText(sosRequest.getDescription());
+                selectButtonFromLever(sosRequest.getLever());
+                btnOK.setText("Cập nhật");
+                btnCancel.setText("Xóa (đã giải quyết)");
+                btnCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ViewAnim.toggleLoading(getContext(), btnCancel, true, "");
+                        Task<Void> updateTask = sosRequest.sendUpdate(null, SosRequest.RESOLVED, true);
+                        if (updateTask != null)
+                            updateTask.addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    ViewAnim.toggleLoading(getContext(), btnCancel, false, "Xóa");
+                                    if (task.isSuccessful()) {
+                                        dismiss();
+                                    }
+                                }
+                            });
+                    }
+                });
+            }
         }
     }
 

@@ -1,11 +1,15 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.Nullable;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ServerTimestamp;
 
 public class User extends Data {
     @Exclude
@@ -35,15 +39,17 @@ public class User extends Data {
     @Exclude
     public static final String ACTIVE_TRIP = "activeTrip";
     @Exclude
-    boolean isLeader;
+    public static final String LAST_UPDATE = "lastUpdate";
 
     String name;
     String avatar;
 
-    @Exclude public static final String IMAGENAME = "imageName";
+    @Exclude
+    public static final String IMAGENAME = "imageName";
     String imageName;
     String phoneNumber;
-    @Exclude public static final String Email = "phoneNumber";
+    @Exclude
+    public static final String Email = "phoneNumber";
     String email;
 
     GeoPoint currentCoord;
@@ -51,8 +57,12 @@ public class User extends Data {
 
     Long speed;
     int battery;
+    @Nullable
     DocumentReference activeTrip;
     String fcmToken;
+
+    @ServerTimestamp
+    Timestamp lastUpdate;
 
     @Exclude
     LatLng latLng;
@@ -60,16 +70,6 @@ public class User extends Data {
     Marker marker;
 
     public User() {
-    }
-
-    @Exclude
-    public boolean isLeader() {
-        return isLeader;
-    }
-
-    @Exclude
-    public void setLeader(boolean leader) {
-        isLeader = leader;
     }
 
     public String getName() {
@@ -137,6 +137,7 @@ public class User extends Data {
         this.battery = battery;
     }
 
+    @Nullable
     public DocumentReference getActiveTrip() {
         return activeTrip;
     }
@@ -159,6 +160,15 @@ public class User extends Data {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    @Nullable
+    public Timestamp getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Timestamp lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     @Exclude
@@ -184,6 +194,7 @@ public class User extends Data {
     }
 
     @Exclude
+    @Nullable
     public Marker getMarker() {
         return marker;
     }
@@ -199,6 +210,7 @@ public class User extends Data {
         User user = documentSnapshot.toObject(User.class);
         if (user != null) update(user);
     }
+
     @Exclude
     public void update(User user) {
         this.name = user.name;
@@ -210,8 +222,9 @@ public class User extends Data {
         this.speed = user.speed;
         this.battery = user.battery;
         this.activeTrip = user.activeTrip;
+        this.lastUpdate = user.lastUpdate;
         this.latLng = new LatLng(currentCoord.getLatitude(), currentCoord.getLongitude());
-        if (this.marker != null){
+        if (this.marker != null) {
             marker.setPosition(this.latLng);
         }
     }
@@ -220,7 +233,7 @@ public class User extends Data {
     @Override
     public void onRemove() {
         super.onRemove();
-        if (this.marker != null){
+        if (this.marker != null) {
             marker.remove();
         }
     }

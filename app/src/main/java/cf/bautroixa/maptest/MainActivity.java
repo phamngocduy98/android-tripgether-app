@@ -1,24 +1,30 @@
 package cf.bautroixa.maptest;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.Checkpoint;
@@ -30,68 +36,55 @@ import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.Trip;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
+import cf.bautroixa.maptest.interfaces.MapBackgroundCallbacks;
+import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
+import cf.bautroixa.maptest.interfaces.NavigableToState;
 import cf.bautroixa.maptest.interfaces.OnAppbarStateChanged;
-import cf.bautroixa.maptest.interfaces.OnButtonClickedListener;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToState;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
-import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
 
-public class MainActivity extends AppCompatActivity implements TabMapFragment.OnMapClicked, BottomNavigationFragment.OnTabChangedListener {
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    public static final int STATE_HIDE = -1;
-
-    // MAP TAB
-    public static final int STATE_FRIEND_LIST = 0;
-    public static final int STATE_FRIEND_LIST_EXPANDED = 1;
-    public static final int STATE_MEMBER_STATUS = 10;
-
-    //TRIP TAB
-    public static final int STATE_TAB_TRIP = 20;
-    public static final int STATE_CHECKPOINT = 21;
-
-    // OTHER TAB
-    public static final int STATE_TAB_NOTIFICATION = 30;
-    public static final int STATE_TAB_ME = 40;
-    public static final int STATE_TAB_CHAT = 50;
+    public static final int STATE_TAB_MAP = 0;
+    public static final int STATE_TAB_TRIP = 1;
+    public static final int STATE_TAB_NOTIFICATION = 2;
+    public static final int STATE_TAB_ME = 3;
+    public static final int STATE_TAB_CHAT = 4;
 
     // SPACE
     public static final int SPACE_NONE = -1;
     public static final int SPACE_CENTER = 0;
-    public static final int SPACE_BOTTOM = 1;
-    public static final int SPACE_BOTTOM_SHEET = 2;
 
     int state, lastState = 0;
     int appbarState = OnAppbarStateChanged.State.EXTENDED;
 
-    User selectedUser = null;
+    String[] tabNames = {"Bản đồ", "Chuyến đi", "Thông báo", "Trò chuyện"};
+
+    // back
+    Handler backHandler;
+    Runnable backCallback;
+    boolean isBackPressed = false;
 
     // listener
     Data.OnNewValueListener<User> userOnNewValueListener;
 
     // fragment for tab
-    BottomSheetMemberListFragment friendListStatusFragment;
-    BottomMembersFragment bottomMembersFragment;
-    BottomCheckpointsFragment bottomCheckpointsFragment;
-    SearchFragment searchFragment;
-    BottomNavigationFragment bottomNavigationFragment;
+    MapBackgroundFragment mapBackgroundFragment;
     TabMapFragment tabMapFragment;
     TabTripFragment tabTripFragment;
     TabNotificationFragment tabNotificationFragment;
-    TabProfileFragment tabProfileFragment;
     TabChatFragment tabChatFragment;
 
     // Views
     View statusBar;
-    LinearLayout bottomSpace, bottomSheet, centerSpace;
-    LinearLayout[] spaces;
-    BottomSheetBehavior bottomSheetBehavior;
-    FloatingActionButton fabMyLocation;
+    ViewPager2 bottomNavPager;
+    TabLayout tabLayout;
+
+    BotNavPagerAdapter adapter;
 
     // Utils / Helper
     ShakePhoneHelper shakePhoneHelper;
@@ -107,36 +100,22 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
         manager = MainAppManager.getInstance();
 
         // bind view
+        mapBackgroundFragment = (MapBackgroundFragment) getSupportFragmentManager().findFragmentById(R.id.frag_map_background);
         initStatusBar();
-        fabMyLocation = findViewById(R.id.fab_my_location);
-        fabMyLocation.setOnClickListener(new View.OnClickListener() {
+        bottomNavPager = findViewById(R.id.bot_nav_pager);
+        tabLayout = findViewById(R.id.bottom_navigation);
+
+        adapter = new BotNavPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        bottomNavPager.setAdapter(adapter);
+        bottomNavPager.setSaveEnabled(false);
+        bottomNavPager.setUserInputEnabled(false);
+        bottomNavPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+        new TabLayoutMediator(tabLayout, bottomNavPager, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
-            public void onClick(View v) {
-                tabMapFragment.targetMyLocation();
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                tab.setText(tabNames[position]);
             }
-        });
-
-        bottomSpace = findViewById(R.id.bottom_space);
-        centerSpace = findViewById(R.id.center_space);
-        bottomSheet = findViewById(R.id.bottom_sheet);
-        spaces = new LinearLayout[3];
-        spaces[SPACE_CENTER] = centerSpace;
-        spaces[SPACE_BOTTOM] = bottomSpace;
-        spaces[SPACE_BOTTOM_SHEET] = bottomSheet;
-
-        // get fragment
-        tabMapFragment = (TabMapFragment) getSupportFragmentManager().findFragmentById(R.id.frag_map);
-        friendListStatusFragment = (BottomSheetMemberListFragment) getSupportFragmentManager().findFragmentById(R.id.frag_friend_list);
-        searchFragment = (SearchFragment) getSupportFragmentManager().findFragmentById(R.id.frag_search);
-        bottomNavigationFragment = (BottomNavigationFragment) getSupportFragmentManager().findFragmentById(R.id.frag_bottom_navigation);
-        bottomMembersFragment = new BottomMembersFragment();
-        bottomCheckpointsFragment = new BottomCheckpointsFragment();
-        tabNotificationFragment = new TabNotificationFragment();
-        tabTripFragment = new TabTripFragment();
-        tabProfileFragment = new TabProfileFragment();
-        tabChatFragment = new TabChatFragment();
-
-        bottomSheet();
+        }).attach();
 
         // lac de diem danh
         shakePhoneHelper = new ShakePhoneHelper(this, new ShakePhoneHelper.OnShakeListener() {
@@ -145,16 +124,7 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
 
             }
         });
-        userOnNewValueListener = new Data.OnNewValueListener<User>() {
-            @Override
-            public void onNewData(User user) {
-                if (user.getActiveTrip() != null) {
-                    bottomSheet.setVisibility(View.VISIBLE);
-                } else {
-                    bottomSheet.setVisibility(View.GONE);
-                }
-            }
-        };
+
         tripOnNewValueListener = new Data.OnNewValueListener<Trip>() {
             @Override
             public void onNewData(Trip trip) {
@@ -172,9 +142,8 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
         if (bundle != null) {
             String checkpointId = bundle.getString("checkpointId", null);
             if (checkpointId != null) {
-                tabMapFragment.targetCheckpoint(checkpointId);
-                handleState(STATE_CHECKPOINT);
-                bottomCheckpointsFragment.selectCheckpoint(checkpointId);
+                tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(checkpointId));
+                Objects.requireNonNull(tabLayout.getTabAt(0)).select();
             }
         }
     }
@@ -182,10 +151,6 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     @Override
     protected void onResume() {
         super.onResume();
-        if (manager.isLoggedIn()) {
-            userOnNewValueListener.onNewData(manager.getCurrentUser());
-        }
-        manager.getCurrentUser().addOnNewValueListener(userOnNewValueListener);
         manager.getCurrentTrip().addOnNewValueListener(tripOnNewValueListener);
         manager.getEventsManager().addOnItemInsertedListener(onEventInsertedListener);
         shakePhoneHelper.start();
@@ -194,7 +159,6 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
     @Override
     protected void onPause() {
         super.onPause();
-        manager.getCurrentUser().removeOnNewValueListener(userOnNewValueListener);
         manager.getCurrentTrip().removeOnNewValueListener(tripOnNewValueListener);
         manager.getEventsManager().removeOnItemInsertedListener(onEventInsertedListener);
         shakePhoneHelper.stop();
@@ -202,11 +166,20 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
 
     @Override
     public void onBackPressed() {
-        // this.lastState == STATE_HIDE means that no previous state, or can't back to hide state
-        if (this.lastState != STATE_HIDE) {
-            handleState(this.lastState);
-            this.lastState = STATE_HIDE;
+        if (bottomNavPager.getCurrentItem() == 0 && tabMapFragment.onBackPressed()) return;
+        if (!isBackPressed) {
+            isBackPressed = true;
+            Toast.makeText(MainActivity.this, R.string.toast_back_again_to_exit, Toast.LENGTH_SHORT).show();
+            backHandler = new Handler();
+            backCallback = new Runnable() {
+                @Override
+                public void run() {
+                    isBackPressed = false;
+                }
+            };
+            backHandler.postDelayed(backCallback, 3000);
         } else {
+            if (backHandler != null) backHandler.removeCallbacks(backCallback);
             super.onBackPressed();
         }
     }
@@ -225,237 +198,103 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
             });
         }
 
-        if (fragment instanceof HasOnGoToMainActivityState) {
-            ((HasOnGoToMainActivityState) fragment).setOnGoToMainActivityState(new OnGoToMainActivityState() {
+        if (fragment instanceof NavigableToState) {
+            ((NavigableToState) fragment).setOnNavigationToState(new OnNavigationToState() {
                 @Override
                 public void newState(int state, Data[] data) {
                     if (data.length > 0) {
                         if (data[0] instanceof SosRequest) {
-                            selectedUser = manager.getMembersManager().get(data[0].getId()); // userId == sosId
-                            handleState(STATE_MEMBER_STATUS);
+                            User user = manager.getMembersManager().get(data[0].getId()); // userId == sosId
+                            tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, user);
+                            Objects.requireNonNull(tabLayout.getTabAt(0)).select();
                             return;
                         }
                     }
-                    handleState(state);
+                    tabMapFragment.handleState(state, data[0]);
+                    Objects.requireNonNull(tabLayout.getTabAt(0)).select();
                 }
             });
         }
-
-        if (fragment instanceof SearchFragment) {
-            ((SearchFragment) fragment).setOnSearchItemClickedListener(new SearchFragment.OnSearchItemClickedListener() {
+        if (fragment instanceof DataItemsSelectable) {
+            ((DataItemsSelectable) fragment).setOnDataItemSelected(new OnDataItemSelected() {
                 @Override
-                public void onSearchItemClicked(SearchResult searchResult) {
-                    tabMapFragment.targetCamera(false, searchResult.getCoordinate());
-                }
-            });
-            ((SearchFragment) fragment).setOnAvatarClickedListener(new OnButtonClickedListener() {
-                @Override
-                public void onClick(View source) {
-                    bottomNavigationFragment.selectTab(BottomNavigationFragment.TAB_ME);
-                    handleState(STATE_TAB_ME);
-                }
-            });
-        } else if (fragment instanceof BottomSheetMemberListFragment) {
-            ((BottomSheetMemberListFragment) fragment).setOnFriendItemClickListener(new OnDataItemSelected<User>() {
-                @Override
-                public void selectItem(User user) {
-                    selectedUser = user;
-                    handleState(STATE_MEMBER_STATUS);
-                }
-            });
-        } else if (fragment instanceof BottomMembersFragment) {
-            ((BottomMembersFragment) fragment).setOnDrawRouteButtonClickedListener(new OnDrawRouteRequest() {
-                @Override
-                public void drawRouteTo(LatLng target) {
-                    tabMapFragment.drawRoute(null, target, null);
-                }
-            });
-            ((BottomMembersFragment) fragment).setOnUserChangedListener(new OnDataItemSelected<User>() {
-                @Override
-                public void selectItem(User user) {
-                    tabMapFragment.clearRoute();
-                    tabMapFragment.targetUser(user.getId());
-                }
-            });
-        } else if (fragment instanceof BottomCheckpointsFragment) {
-            ((BottomCheckpointsFragment) fragment).setOnDrawRouteRequestWithPathListener(new OnDrawRouteRequestWithPath() {
-                @Override
-                public void drawRoute(List<LatLng> latlngs) {
-                    tabMapFragment.drawRoute(latlngs);
-                }
-            });
-            ((BottomCheckpointsFragment) fragment).setOnCheckpointChanged(new OnDataItemSelected<Checkpoint>() {
-                @Override
-                public void selectItem(Checkpoint checkpoint) {
-                    tabMapFragment.clearRoute();
-                    tabMapFragment.targetCheckpoint(checkpoint.getId());
-                }
-            });
-        } else if (fragment instanceof TabMapFragment) {
-            ((TabMapFragment) fragment).setOnMapClicked(this);
-            ((TabMapFragment) fragment).setOnMarkerClickedListener(new TabMapFragment.OnMarkerClickedListener() {
-                @Override
-                public void onMarkerClick(String type, String id) {
-                    Log.d(TAG, "marker click" + type + "id=" + id);
-                    if (type.equals(Collections.CHECKPOINTS)) {
-                        handleState(STATE_CHECKPOINT);
-                        bottomCheckpointsFragment.selectCheckpoint(id);
-                    } else if (type.equals(Collections.USERS)) {
-                        selectedUser = manager.getMembersManager().get(id);
-                        handleState(STATE_MEMBER_STATUS);
+                public void selectItem(Data data) {
+                    if (data instanceof Event) {
+                        Event event = (Event) data;
+                        int type = event.getType();
+                        if (type == Event.Type.CHECKPOINT_ADDED && event.getCheckpointRef() != null) {
+                            tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(event.getId()));
+                            Objects.requireNonNull(tabLayout.getTabAt(0)).select();
+                        }
+                        if ((type == Event.Type.USER_ADDED || type == Event.Type.USER_SOS_ADDED) && event.getUserRef() != null) {
+                            tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(event.getId()));
+                        }
                     }
                 }
             });
-        } else if (fragment instanceof BottomNavigationFragment) {
-            ((BottomNavigationFragment) fragment).setOnTabChangedListener(this);
-        } else if (fragment instanceof TabTripFragment) {
+        }
+        if (fragment instanceof TabTripFragment) {
             ((TabTripFragment) fragment).setOnCheckpointItemSelected(new OnDataItemSelected<Checkpoint>() {
                 @Override
                 public void selectItem(Checkpoint checkpoint) {
-                    tabMapFragment.clearRoute();
-                    tabMapFragment.targetCheckpoint(checkpoint.getId());
-                    bottomCheckpointsFragment.selectCheckpoint(checkpoint.getId());
-                    handleState(STATE_CHECKPOINT);
+                    tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, checkpoint);
+                    Objects.requireNonNull(tabLayout.getTabAt(0)).select();
                 }
             });
-        }
-    }
-
-    private void handleState(int newState) {
-        state = newState;
-        tabMapFragment.clearRoute();
-        switch (state) {
-            case STATE_FRIEND_LIST:
-            case STATE_FRIEND_LIST_EXPANDED:
-                if (state == STATE_FRIEND_LIST) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                } else {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else if (fragment instanceof TabMapFragment) {
+            ((TabMapFragment) fragment).setMapBackgroundInterfaces(new MapBackgroundInterfaces() {
+                @Override
+                public void targetMyLocation() {
+                    mapBackgroundFragment.targetMyLocation();
                 }
-                selectActiveViewSpace(SPACE_BOTTOM_SHEET);
-                break;
-            case STATE_MEMBER_STATUS:
-                selectActiveViewSpace(SPACE_BOTTOM);
-                replaceBottomSpace(bottomMembersFragment);
-                bottomMembersFragment.selectUser(selectedUser.getId());
-                if (tabMapFragment != null)
-                    tabMapFragment.targetCamera(true, selectedUser.getLatLng());
-                break;
-            case STATE_CHECKPOINT:
-                selectActiveViewSpace(SPACE_BOTTOM);
-                replaceBottomSpace(bottomCheckpointsFragment);
-                break;
-            case STATE_TAB_TRIP:
-                selectActiveViewSpace(SPACE_CENTER);
-                replaceCenterSpace(tabTripFragment);
-                break;
-            case STATE_TAB_NOTIFICATION:
-                selectActiveViewSpace(SPACE_CENTER);
-                replaceCenterSpace(tabNotificationFragment);
-                break;
-            case STATE_TAB_ME:
-                selectActiveViewSpace(SPACE_CENTER);
-                replaceCenterSpace(tabProfileFragment);
-                break;
-            case STATE_TAB_CHAT:
-                selectActiveViewSpace(SPACE_CENTER);
-                replaceCenterSpace(tabChatFragment);
-                break;
-        }
-        Log.d(TAG, "new state= " + state);
-    }
 
-    private void selectActiveViewSpace(int viewSpace) {
-        for (int i = 0; i < spaces.length; i++) {
-            ViewAnim.toggleHideShow(spaces[i], viewSpace == i, ViewAnim.DIRECTION_DOWN);
-        }
-        if (viewSpace == SPACE_CENTER) {
-            toggleStatusBar(true);
-            toggleSearchBar(false);
-        } else {
-            toggleSearchBar(true);
-        }
-    }
+                @Override
+                public void target(Object data) {
+                    if (data instanceof Checkpoint) {
+                        mapBackgroundFragment.targetCheckpoint((Checkpoint) data, manager.getCheckpointsManager().indexOf(((Checkpoint) data).getId()));
+                    } else if (data instanceof User) {
+                        mapBackgroundFragment.targetUser((User) data);
+                    } else if (data instanceof SearchResult) {
+                        mapBackgroundFragment.targetSearchResult((SearchResult) data);
+                    } else {
+                        Log.w(TAG, "target undefined Object type");
+                    }
+                }
 
-    private void replaceBottomSpace(Fragment fragment) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.bottom_space, fragment);
-        ft.commit();
-    }
+                @Override
+                public void cleanUpTempMarkerAndRoute() {
+                    mapBackgroundFragment.clearRoute();
+                    mapBackgroundFragment.clearTempMarker();
+                }
 
-    void replaceCenterSpace(Fragment fragment) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.center_space, fragment);
-        ft.commit();
-    }
+                @Override
+                public void drawRoute(@Nullable LatLng fromN, LatLng to) {
+                    mapBackgroundFragment.drawRoute(fromN, to);
+                }
+            });
+        } else if (fragment instanceof MapBackgroundFragment) {
+            ((MapBackgroundFragment) fragment).setMapBackgroundCallback(new MapBackgroundCallbacks() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    String type = marker.getSnippet(), id = marker.getTitle();
+                    Log.d(TAG, "marker click" + type + "id=" + id);
+                    if (type.equals(Collections.CHECKPOINTS)) {
+                        tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(id));
+                        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
+                        return true;
+                    } else if (type.equals(Collections.USERS)) {
+                        tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(id));
+                        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
+                        return true;
+                    }
+                    return false; // return false to show marker title and snippet normally
+                }
 
-    void toggleStatusBar(boolean show) {
-        ViewAnim.toggleHideShow(statusBar, show, ViewAnim.DIRECTION_UP);
-    }
-
-    void toggleToolbar(boolean show) {
-        searchFragment.showHideToolbar(show);
-    }
-
-    void toggleSearchBar(boolean show) {
-        searchFragment.showHideCompletely(show);
-    }
-
-    void bottomSheet() {
-        bottomSheetBehavior = BottomSheetBehavior.from((View) (bottomSheet));
-        bottomSheetBehavior.setFitToContents(true);
-        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View view, int i) {
-                friendListStatusFragment.onBottomSheetStateChanged(i);
-            }
-
-            @Override
-            public void onSlide(@NonNull View view, float v) {
-                friendListStatusFragment.onSlideBottomSheet(v);
-            }
-        });
-    }
-
-    @Override
-    public void onMapClicked(LatLng latLng) {
-        Log.d(TAG, "last state= " + lastState);
-        if (state != STATE_HIDE) {
-            // hide all
-            toggleToolbar(false);
-            toggleStatusBar(false);
-            selectActiveViewSpace(SPACE_NONE);
-            lastState = state;
-            state = STATE_HIDE;
-        } else {
-            // show all
-            toggleToolbar(true);
-            toggleStatusBar(true);
-            handleState(lastState);
-        }
-        Log.d(TAG, "click new state= " + state);
-    }
-
-    @Override
-    public void onTabChanged(int tabId) {
-        switch (tabId) {
-            case BottomNavigationFragment.TAB_MAP:
-                handleState(STATE_FRIEND_LIST);
-                break;
-            case BottomNavigationFragment.TAB_TRIP:
-                handleState(STATE_TAB_TRIP);
-                break;
-            case BottomNavigationFragment.TAB_NOTIFICATIONS:
-                handleState(STATE_TAB_NOTIFICATION);
-                break;
-            case BottomNavigationFragment.TAB_ME:
-                handleState(STATE_TAB_ME);
-                break;
-            case BottomNavigationFragment.TAB_NOTES:
-                handleState(STATE_TAB_CHAT);
-                break;
-            default:
-                break;
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    tabMapFragment.onMapClick(latLng);
+                }
+            });
         }
     }
 
@@ -469,5 +308,38 @@ public class MainActivity extends AppCompatActivity implements TabMapFragment.On
                 return insets;
             }
         });
+    }
+
+    class BotNavPagerAdapter extends FragmentStateAdapter {
+
+        public BotNavPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+            super(fragmentManager, lifecycle);
+        }
+
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            Fragment fragment;
+            switch (position){
+                case 1:
+                    tabTripFragment = new TabTripFragment();
+                    return tabTripFragment;
+                case 2:
+                    tabNotificationFragment = new TabNotificationFragment();
+                    return tabNotificationFragment;
+                case 3:
+                    tabChatFragment = new TabChatFragment();
+                    return tabChatFragment;
+                default:
+                    tabMapFragment = new TabMapFragment();
+                    return tabMapFragment;
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return 4;
+        }
     }
 }

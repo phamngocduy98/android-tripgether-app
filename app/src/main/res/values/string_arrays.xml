@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="setting_dark_mode">
+        <item>@string/setting_dark_system_mode</item>
+        <item>@string/setting_dark_light_mode</item>
+        <item>@string/setting_dark_dark_mode</item>
+        <item>@string/setting_dark_auto_mode</item>
+    </string-array>
+</resources>

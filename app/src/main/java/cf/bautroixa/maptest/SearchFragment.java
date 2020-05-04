@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -30,7 +31,6 @@ import java.util.List;
 
 import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.MainAppManager;
-import cf.bautroixa.maptest.interfaces.OnButtonClickedListener;
 import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
@@ -48,7 +48,6 @@ public class SearchFragment extends Fragment {
     private static final String TAG = "SearchFragment";
     private static final String ARG_AVATAR_URL = "avatar_url";
     OnSearchItemClickedListener onSearchItemClickedListener = null;
-    OnButtonClickedListener onAvatarClickedListener;
     int currentState = STATE_COLLAPSED;
     String avatarUrl = "";
     boolean showToolbar = true;
@@ -63,10 +62,6 @@ public class SearchFragment extends Fragment {
 
     public SearchFragment() {
         manager = MainAppManager.getInstance();
-    }
-
-    public void setOnAvatarClickedListener(OnButtonClickedListener onAvatarClickedListener) {
-        this.onAvatarClickedListener = onAvatarClickedListener;
     }
 
     public void showHideCompletely(boolean isShown) {
@@ -100,7 +95,8 @@ public class SearchFragment extends Fragment {
         imgAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (onAvatarClickedListener != null) onAvatarClickedListener.onClick(imgAvatar);
+                Intent intent = new Intent(getContext(), ProfileActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -218,12 +214,14 @@ public class SearchFragment extends Fragment {
     }
 
     public void handleState(int state) {
+        if (getContext() == null) return; //TODO: for testing, do real fix here
         this.currentState = state;
+        int _50dp = (int) PixelDPConverter.convertDpToPixel(50, getContext());
         switch (state) {
             case STATE_COLLAPSED:
                 showHideToolbar(showToolbar);
                 btnBack.setVisibility(View.GONE);
-                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(24, getContext()), 0, 50, 0);
+                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(24, getContext()), 0, _50dp, 0);
                 ViewAnim.toggleHideShow(rvSearchResult, false, ViewAnim.DIRECTION_UP);
                 editSearch.clearFocus();
                 KeyboardHelper.hideSoftKeyboard(editSearch);
@@ -231,7 +229,7 @@ public class SearchFragment extends Fragment {
             case STATE_SEARCH:
                 ViewAnim.toggleHideShow(toolbar, true, ViewAnim.DIRECTION_UP);
                 btnBack.setVisibility(View.VISIBLE);
-                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(50, getContext()), 0, 50, 0);
+                editSearch.setPadding(_50dp, 0, _50dp, 0);
                 ViewAnim.toggleHideShow(rvSearchResult, true, ViewAnim.DIRECTION_UP);
                 break;
         }

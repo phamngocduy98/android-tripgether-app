@@ -3,6 +3,10 @@ package cf.bautroixa.maptest.data;
 import com.google.android.gms.maps.model.LatLng;
 
 public class SearchResult {
+    public static final String PLACE_NAME = "placeName";
+    public static final String PLACE_ADDRESS = "placeAddress";
+    public static final String COORDINATE = "coordinate";
+
     private String placeName;
     private String placeAddress;
     private LatLng coordinate;

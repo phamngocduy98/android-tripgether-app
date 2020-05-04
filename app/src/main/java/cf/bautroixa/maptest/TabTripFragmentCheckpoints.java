@@ -108,7 +108,9 @@ public class TabTripFragmentCheckpoints extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        isLeader = manager.getCurrentUser().getId().equals(manager.getCurrentTrip().getLeader().getId());
+        String userId = manager.getCurrentUser().getId();
+        String leaderId = manager.getCurrentTrip().getLeader().getId();
+        isLeader = userId.equals(leaderId);
         btnAddCheckpoint.setVisibility(isLeader && manager.getCheckpoints().size() == 0 ? View.VISIBLE : View.INVISIBLE);
         if (manager.getCurrentTripRef() != null) onTripChanged.onNewData(manager.getCurrentTrip());
         manager.getCurrentTrip().addOnNewValueListener(onTripChanged);

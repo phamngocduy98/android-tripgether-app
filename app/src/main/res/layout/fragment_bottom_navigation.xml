@@ -22,6 +22,12 @@
         app:tabUnboundedRipple="false">
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_item_home"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trang chủ" />
+
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/tab_item_map"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,22 +40,10 @@
             android:text="Chuyến đi" />
 
         <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_notifications"
+            android:id="@+id/tab_item_chat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Thông báo" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_me"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tôi" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_notes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nhật ký" />
+            android:text="Trò chuyện" />
     </com.google.android.material.tabs.TabLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

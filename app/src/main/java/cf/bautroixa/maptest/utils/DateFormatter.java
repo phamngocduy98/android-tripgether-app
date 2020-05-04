@@ -13,31 +13,40 @@ public class DateFormatter {
         return simpleDateFormat.format(date);
     }
 
-    public static String format(Timestamp timestamp){
+    public static String format(Timestamp timestamp) {
         return format(timestamp.toDate());
     }
-    public static String format(Calendar calendar){
+
+    public static String format(Calendar calendar) {
         return format(calendar.getTime());
     }
-    public static String format(Date date){
+
+    public static String format(Date date) {
         Calendar then = Calendar.getInstance();
         then.setTime(date);
         Calendar now = Calendar.getInstance();
-        long deltaMinus = (then.getTimeInMillis()-now.getTimeInMillis())/1000/60;
+        long deltaMinus = (then.getTimeInMillis() - now.getTimeInMillis()) / 1000 / 60;
+        long deltaHour = deltaMinus / 60;
         int deltaDay = then.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR);
-        if (deltaMinus < -5){
-            return format(date,"HH:mm dd/MM/yyyy");
+        if (deltaDay < -1) {
+            return format(date, "HH:mm dd/MM/yyyy");
+        }
+        if (deltaHour > 0 && deltaHour < 3) {
+            return String.format("%d giờ trước", deltaHour);
+        }
+        if (deltaHour == 0) {
+            return String.format("%d phút %s", deltaMinus, deltaMinus < 0 ? "trước" : "nữa");
         }
         if (deltaDay * deltaDay <= 1) {
             return format(date, "HH:mm ") + formatDate(date);
         }
-        if (deltaDay < 7){
+        if (deltaDay < 7) {
             return format(date, "HH:mm ") + formatDate(date);
         }
-        if (now.get(Calendar.YEAR) == then.get(Calendar.YEAR)){
-            return format(date,"HH:mm dd MMM");
+        if (now.get(Calendar.YEAR) == then.get(Calendar.YEAR)) {
+            return format(date, "HH:mm dd MMM");
         }
-        return format(date,"HH:mm dd/MM/yyyy");
+        return format(date, "HH:mm dd/MM/yyyy");
     }
 
     public static String formatDateTime(Timestamp timestamp) {

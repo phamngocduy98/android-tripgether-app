@@ -3,12 +3,14 @@ package cf.bautroixa.maptest;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -17,11 +19,14 @@ import java.util.Arrays;
 
 import cf.bautroixa.maptest.auth.LoginActivity;
 import cf.bautroixa.maptest.data.RequestCodes;
+import cf.bautroixa.maptest.data.SharedPrefs;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.theme.OneDialog;
+import cf.bautroixa.maptest.utils.DarkModeHelper;
 
 public class SplashScreenActivity extends AppCompatActivity {
     private static final String TAG = "SplashScreenActivity";
+    private SharedPreferences sharedPref;
     private String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private ArrayList<String> essentialPermissions = new ArrayList<>(Arrays.asList(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION));
     private ArrayList<String> neededPermissions = new ArrayList<>();
@@ -33,6 +38,8 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+        sharedPref = getSharedPreferences(getString(R.string.shared_preference_name), MODE_PRIVATE);
+        AppCompatDelegate.setDefaultNightMode(DarkModeHelper.androidNightModes.get(sharedPref.getInt(SharedPrefs.DARK_MODE, DarkModeHelper.SYSTEM_MODE)));
 
         if (!checkAllPermissions()) {
             requestPermissions(permissions, RequestCodes.ALL_PERMISSIONS);

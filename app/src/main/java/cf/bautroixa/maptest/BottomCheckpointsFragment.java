@@ -40,10 +40,10 @@ import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Visit;
 import cf.bautroixa.maptest.firestore.VisitsManager;
-import cf.bautroixa.maptest.interfaces.HasOnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.NavigableToState;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnGoToMainActivityState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToState;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.DateFormatter;
 import cf.bautroixa.maptest.utils.Formater;
@@ -53,7 +53,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMainActivityState<Checkpoint> {
+public class BottomCheckpointsFragment extends Fragment implements NavigableToState<Checkpoint> {
     private static final String TAG = "TripOverviewFragment";
 
     private MainAppManager manager;
@@ -66,7 +66,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected = null;
 
     private ArrayList<Checkpoint> checkpoints;
-    private OnGoToMainActivityState<Checkpoint> onGoToMainActivityState = null;
+    private OnNavigationToState<Checkpoint> onNavigationToState = null;
 
     private Button btnCreateTrip, btnJoinTrip;
     private int activePos = 0;
@@ -110,8 +110,8 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
         this.onCheckpointItemSelected = onCheckpointItemSelected;
     }
 
-    public void setOnGoToMainActivityState(OnGoToMainActivityState<Checkpoint> onGoToMainActivityState) {
-        this.onGoToMainActivityState = onGoToMainActivityState;
+    public void setOnNavigationToState(OnNavigationToState<Checkpoint> onNavigationToState) {
+        this.onNavigationToState = onNavigationToState;
     }
 
     private void setTimeLineString(int position) {
@@ -228,7 +228,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
     public void onDetach() {
         super.onDetach();
         onDrawRouteRequest = null;
-        onGoToMainActivityState = null;
+        onNavigationToState = null;
         onCheckpointItemSelected = null;
     }
 
@@ -264,7 +264,7 @@ public class BottomCheckpointsFragment extends Fragment implements HasOnGoToMain
                 btnCheckIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onGoToMainActivityState.newState(MainActivity.STATE_FRIEND_LIST_EXPANDED);
+                        onNavigationToState.newState(TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
                     }
                 });
             } else {

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cf.bautroixa.maptest.network_io.HttpRequest;
@@ -129,6 +130,7 @@ public class MainAppManager {
     }
 
     public void logout() {
+        FirebaseAuth.getInstance().signOut();
         leaveTrip();
         currentUserRef = null;
         if (currentUser != null) currentUser.onRemove();
@@ -328,12 +330,19 @@ public class MainAppManager {
         return membersManager.getData();
     }
 
-    public @Nullable
-    Checkpoint getActiveCheckpoint() {
+    @Nullable
+    public Checkpoint getActiveCheckpoint() {
         if (this.getCurrentTripRef() != null && this.currentTrip.getActiveCheckpoint() != null) {
             return this.getCheckpointsManager().get(this.currentTrip.getActiveCheckpoint().getId());
         }
         return null;
+    }
+
+    public boolean isTripLeader(){
+        if (getCurrentTripRef() != null) {
+            return Objects.equals(currentUser.getId(), currentTrip.getLeader().getId());
+        }
+        return false;
     }
 
     public DocumentReference getCurrentUserRef() {

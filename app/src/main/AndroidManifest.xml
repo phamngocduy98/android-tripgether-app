@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -19,11 +20,23 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <activity
+            android:name=".settings.SettingActivity"
+            android:theme="@style/NoActionBar" />
+        <activity
+            android:name=".settings.BooleanSettingActivity"
+            android:theme="@style/NoActionBar" />
+        <activity
+            android:name=".settings.DarkModeSettingActivity"
+            android:theme="@style/NoActionBar" />
+
         <activity
             android:name=".SplashScreenActivity"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter android:label="@string/app_name">
@@ -50,7 +63,9 @@
         <activity
             android:name=".auth.ForgotPasswordActivity"
             android:theme="@style/NoActionBar" />
-        <activity android:name=".TabProfileFragment" />
+        <activity
+            android:name=".ProfileActivity"
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".auth.DetailProfileActivity"
             android:theme="@style/NoActionBar" />
@@ -96,7 +111,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/NoActionBar.NoStatusBar" />
+            android:theme="@style/NoActionBar.NoStatusBar"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
