@@ -1,6 +1,5 @@
 package cf.bautroixa.maptest;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
@@ -12,9 +11,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import net.glxn.qrgen.android.QRCode;
 
-import cf.bautroixa.maptest.firestore.Trip;
+import java.util.Objects;
+
+import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.utils.IntentHelper;
 
 public class TripInvitationActivity extends AppCompatActivity {
+    MainAppManager manager;
 
     ImageView imgQR;
     TextView tvCode;
@@ -25,12 +28,8 @@ public class TripInvitationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_trip_screen_2_invitation);
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle == null) {
-            finish();
-            return;
-        }
-        String tripId = bundle.getString(Trip.ID, "Error: No trip");
+        manager = MainAppManager.getInstance();
+        final String tripId = Objects.requireNonNull(manager.getCurrentTripRef()).getId();
 
         tvCode = findViewById(R.id.tv_code_activity_create_trip);
         imgQR = findViewById(R.id.img_qr_code_activity_create_trip);
@@ -44,10 +43,7 @@ public class TripInvitationActivity extends AppCompatActivity {
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent share = new Intent(Intent.ACTION_SEND);
-                share.setType("text/plain");
-                share.putExtra(Intent.EXTRA_TEXT, "Mã tham gia nhóm Tripgether của tôi là: " + tvCode.getText().toString());
-                startActivity(Intent.createChooser(share, "Chia sẻ mã tham gia"));
+                IntentHelper.sendTripCodeIntent(TripInvitationActivity.this, tripId);
             }
         });
         btnFinish.setOnClickListener(new View.OnClickListener() {

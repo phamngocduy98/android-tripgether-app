@@ -27,12 +27,13 @@ import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Trip;
+import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.utils.DateFormatter;
 
 
-public class TabTripFragmentCheckpoints extends Fragment {
+public class TabTripFragmentCheckpoints extends Fragment implements DataItemsSelectable<Checkpoint> {
     private MainAppManager manager;
     private ArrayList<Checkpoint> checkpoints;
     private String activeCheckpointId;
@@ -101,10 +102,6 @@ public class TabTripFragmentCheckpoints extends Fragment {
         };
     }
 
-    public void setOnCheckpointItemSelected(OnDataItemSelected<Checkpoint> onCheckpointItemSelected) {
-        this.onCheckpointItemSelected = onCheckpointItemSelected;
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -160,9 +157,9 @@ public class TabTripFragmentCheckpoints extends Fragment {
         onCheckpointItemSelected = null;
     }
 
-    public interface Payload {
-        int SET_ACTIVE_CHECKPOINT = 1;
-        int UNSET_ACTIVE_CHECKPOINT = 2;
+    @Override
+    public void setOnDataItemSelected(OnDataItemSelected<Checkpoint> onDataItemSelected) {
+        this.onCheckpointItemSelected = onCheckpointItemSelected;
     }
 
     public class CheckpointVH extends RecyclerView.ViewHolder {
@@ -324,5 +321,10 @@ public class TabTripFragmentCheckpoints extends Fragment {
         public int getItemCount() {
             return checkpoints.size();
         }
+    }
+
+    public interface Payload {
+        int SET_ACTIVE_CHECKPOINT = 1;
+        int UNSET_ACTIVE_CHECKPOINT = 2;
     }
 }

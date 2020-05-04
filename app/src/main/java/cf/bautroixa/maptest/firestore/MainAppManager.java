@@ -345,10 +345,16 @@ public class MainAppManager {
         return false;
     }
 
+    @Nullable
+    public SosRequest getMySosRequest() {
+        return sosRequestsManager.get(currentUserRef.getId());
+    }
+
     public DocumentReference getCurrentUserRef() {
         return currentUserRef;
     }
 
+    @Nullable
     public DocumentReference getCurrentTripRef() {
         return currentUser != null ? currentUser.getActiveTrip() : null;
     }

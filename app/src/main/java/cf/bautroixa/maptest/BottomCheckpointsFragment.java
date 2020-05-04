@@ -40,10 +40,10 @@ import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Visit;
 import cf.bautroixa.maptest.firestore.VisitsManager;
-import cf.bautroixa.maptest.interfaces.NavigableToState;
+import cf.bautroixa.maptest.interfaces.NavigableToMainTab;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnNavigationToState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.DateFormatter;
 import cf.bautroixa.maptest.utils.Formater;
@@ -53,7 +53,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BottomCheckpointsFragment extends Fragment implements NavigableToState<Checkpoint> {
+public class BottomCheckpointsFragment extends Fragment implements NavigableToMainTab {
     private static final String TAG = "TripOverviewFragment";
 
     private MainAppManager manager;
@@ -66,7 +66,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected = null;
 
     private ArrayList<Checkpoint> checkpoints;
-    private OnNavigationToState<Checkpoint> onNavigationToState = null;
+    private OnNavigationToMainTab onNavigationToMainTab = null;
 
     private Button btnCreateTrip, btnJoinTrip;
     private int activePos = 0;
@@ -110,8 +110,8 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
         this.onCheckpointItemSelected = onCheckpointItemSelected;
     }
 
-    public void setOnNavigationToState(OnNavigationToState<Checkpoint> onNavigationToState) {
-        this.onNavigationToState = onNavigationToState;
+    public void setOnNavigationToMainTab(OnNavigationToMainTab onNavigationToMainTab) {
+        this.onNavigationToMainTab = onNavigationToMainTab;
     }
 
     private void setTimeLineString(int position) {
@@ -228,7 +228,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
     public void onDetach() {
         super.onDetach();
         onDrawRouteRequest = null;
-        onNavigationToState = null;
+        onNavigationToMainTab = null;
         onCheckpointItemSelected = null;
     }
 
@@ -264,7 +264,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
                 btnCheckIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onNavigationToState.newState(TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
+                        onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMainFragment.STATE_FRIEND_LIST_EXPANDED);
                     }
                 });
             } else {

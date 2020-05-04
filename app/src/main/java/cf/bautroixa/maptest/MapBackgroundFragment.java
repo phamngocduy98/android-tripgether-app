@@ -144,8 +144,8 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
 
         ggMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.frag_map);
         Objects.requireNonNull(ggMapFragment).getMapAsync(this);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getContext()));
-        compass = new CompassHelper(Objects.requireNonNull(getContext()));
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+        compass = new CompassHelper(requireContext());
 
         members = manager.getMembers();
         checkpoints = manager.getCheckpoints();
@@ -175,7 +175,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
 //        uiSetting.setZoomControlsEnabled(false);
 //        mMap.setMyLocationEnabled(true);
         try {
-            int nightModeFlags = Objects.requireNonNull(getContext()).getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            int nightModeFlags = requireContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
             if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
                 if (!googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.maps_night))) {
                     Log.e(TAG, "Style parsing failed.");
@@ -242,7 +242,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
             user.setMarker(mMap.addMarker(new MarkerOptions().position(user.getLatLng())
                     .title(user.getId())
                     .snippet(Collections.USERS)
-                    .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(Objects.requireNonNull(getContext()), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
+                    .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
                         @Override
                         public void edit(View view) {
                             ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
@@ -284,7 +284,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
     void targetCamera(LatLngBounds bounds, GoogleMap.CancelableCallback cancelableCallback) {
         if (isMapLoaded) {
 //            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100), cancelableCallback); // padding 100
-            final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, Objects.requireNonNull(getContext()));
+            final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, requireContext());
             // TODO: calculate real bottomSpace height
             final int bottomSpaceHeight = (int) PixelDPConverter.convertDpToPixel(200, getContext());
             final int boundHeight = screenHeight - toolbarStatusbarHeight - bottomSpaceHeight;
@@ -419,7 +419,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_direction)));
         myLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation)
                 .anchor(0.5f, 0.5f)
-                .icon(BitmapDescriptorFactory.fromBitmap(createMarker(Objects.requireNonNull(getContext()), R.drawable.marker_my_location, 120, 120))));
+                .icon(BitmapDescriptorFactory.fromBitmap(createMarker(requireContext(), R.drawable.marker_my_location, 120, 120))));
     }
 
     void initFriendMarkers() {

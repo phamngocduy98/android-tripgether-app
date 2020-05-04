@@ -28,15 +28,15 @@ import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
-import cf.bautroixa.maptest.interfaces.NavigableToState;
+import cf.bautroixa.maptest.interfaces.NavigableToMainTab;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
 import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnNavigationToState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
 import cf.bautroixa.maptest.theme.ViewAnim;
 
 
-public class TabMapFragment extends Fragment implements NavigableToState {
+public class TabMainFragment extends Fragment implements NavigableToMainTab {
     private static final String TAG = "MapFragment";
 
     public static final int STATE_HIDE = -1;
@@ -58,7 +58,7 @@ public class TabMapFragment extends Fragment implements NavigableToState {
 
     // LISTENER
     private MapBackgroundInterfaces mapBackgroundInterfaces;
-    private OnNavigationToState onNavigate;
+    private OnNavigationToMainTab onNavigate;
     private Data.OnNewValueListener<User> userOnNewValueListener;
 
     DatasManager.OnItemInsertedListener<User> onUserInsertedListener;
@@ -82,7 +82,7 @@ public class TabMapFragment extends Fragment implements NavigableToState {
     BottomCheckpointsFragment bottomCheckpointsFragment;
     SearchFragment searchFragment;
 
-    public TabMapFragment() {
+    public TabMainFragment() {
         manager = MainAppManager.getInstance();
 
         userOnNewValueListener = new Data.OnNewValueListener<User>() {
@@ -313,8 +313,8 @@ public class TabMapFragment extends Fragment implements NavigableToState {
     }
 
     @Override
-    public void setOnNavigationToState(OnNavigationToState OnNavigationToState) {
-        this.onNavigate = OnNavigationToState;
+    public void setOnNavigationToMainTab(OnNavigationToMainTab OnNavigationToMainTab) {
+        this.onNavigate = OnNavigationToMainTab;
     }
 
     public void setMapBackgroundInterfaces(MapBackgroundInterfaces mapBackgroundInterfaces) {

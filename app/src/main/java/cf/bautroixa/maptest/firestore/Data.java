@@ -63,7 +63,9 @@ public abstract class Data {
     @Exclude
     public void addOnNewValueListener(OnNewValueListener listener) {
         this.onNewValueListeners.add(listener);
-//        listener.onNewData(this); TODO: send current value on first register
+        if (this.listenerRegistration == null)
+            Log.w(TAG, "addOnNewValueListener before setListenerRegistration");
+        listener.onNewData(this);
     }
 
     @Exclude
@@ -117,6 +119,9 @@ public abstract class Data {
 
     @Exclude
     public void onRemove() {
+        for (OnNewValueListener listener : onNewValueListeners) {
+            listener.onNewData(null);
+        }
         cancelListenerRegistration();
 //        this.onNewValueListeners.remove(0); // TODO: remove initListener
     }
@@ -132,6 +137,11 @@ public abstract class Data {
     }
 
     public interface OnNewValueListener<T extends Data> {
-        void onNewData(T data);
+        /**
+         * onNewData
+         *
+         * @param data new value, null if instance is destructed
+         */
+        void onNewData(@Nullable T data);
     }
 }

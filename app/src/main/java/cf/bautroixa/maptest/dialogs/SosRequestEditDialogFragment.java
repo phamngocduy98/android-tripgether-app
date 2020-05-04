@@ -48,7 +48,7 @@ public class SosRequestEditDialogFragment extends FullScreenDialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        sosRequest = manager.getSosRequestsManager().get(manager.getCurrentUser().getId());
+        sosRequest = manager.getMySosRequest();
         if (sosRequest != null) {
             if (!sosRequest.isResolved()) {
                 editDesc.setText(sosRequest.getDescription());

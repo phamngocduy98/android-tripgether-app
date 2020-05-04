@@ -19,15 +19,15 @@ import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.Event;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
-import cf.bautroixa.maptest.interfaces.NavigableToState;
+import cf.bautroixa.maptest.interfaces.NavigableToMainTab;
 import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnNavigationToState;
+import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class TabNotificationFragment extends OneAppbarFragment implements NavigableToState, DataItemsSelectable<Event> {
+public class TabNotificationFragment extends OneAppbarFragment implements NavigableToMainTab, DataItemsSelectable<Event> {
     private MainAppManager manager;
 
     private RecyclerView rvNotifications;
@@ -35,7 +35,7 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
 
     private DatasManager.OnItemInsertedListener<Event> onItemInsertedListener;
     private DatasManager.OnDataSetChangedListener<Event> onDataSetChangedListener;
-    private OnNavigationToState onNavigationToState;
+    private OnNavigationToMainTab onNavigationToMainTab;
     private OnDataItemSelected<Event> onEventItemSelected;
 
     public TabNotificationFragment() {
@@ -56,8 +56,8 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
     }
 
     @Override
-    public void setOnNavigationToState(OnNavigationToState onNavigationToState) {
-        this.onNavigationToState = onNavigationToState;
+    public void setOnNavigationToMainTab(OnNavigationToMainTab onNavigationToMainTab) {
+        this.onNavigationToMainTab = onNavigationToMainTab;
     }
 
     @Override
@@ -81,13 +81,6 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
         super.onViewCreated(view, savedInstanceState);
         setTitle("Thông báo");
         setSubtitle(String.format("%d thông báo chưa đọc", manager.getEventsManager().getData().size()));
-        setBackButtonOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onNavigationToState != null)
-                    onNavigationToState.newState(MainActivity.STATE_TAB_TRIP);
-            }
-        });
     }
 
     @Override
@@ -106,7 +99,7 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
     public void onDetach() {
         super.onDetach();
         onEventItemSelected = null;
-        onNavigationToState = null;
+        onNavigationToMainTab = null;
     }
 
     public class NotificationVH extends OneRecyclerView.ViewHolder {

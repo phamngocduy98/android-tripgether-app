@@ -102,8 +102,8 @@ public class SosRequest extends Data {
     }
 
     public interface SosLever {
-        int HIGH = 1;
-        int MEDIUM = 2;
-        int LOW = 3;
+        int HIGH = 0;
+        int MEDIUM = 1;
+        int LOW = 2;
     }
 }
