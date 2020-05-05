@@ -327,7 +327,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
             ((TabTripFragmentCheckpoints) childFragment).setOnDataItemSelected(new OnDataItemSelected<Checkpoint>() {
                 @Override
                 public void selectItem(Checkpoint checkpoint) {
-                    onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMainFragment.STATE_CHECKPOINT, checkpoint);
+                    onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, checkpoint);
                 }
             });
         } else if (childFragment instanceof TabTripFragmentTrip) {

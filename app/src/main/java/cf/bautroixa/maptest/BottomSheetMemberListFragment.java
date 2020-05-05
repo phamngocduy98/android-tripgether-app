@@ -41,9 +41,7 @@ public class BottomSheetMemberListFragment extends Fragment {
     private ArrayList<User> members;
 
     // listener
-    private DatasManager.OnItemInsertedListener<User> onUserInsertedListener;
-    private DatasManager.OnItemChangedListener<User> onUserChangedListener;
-    private DatasManager.OnItemRemovedListener<User> onUserRemovedListener;
+    private DatasManager.OnDatasChangedListener<User> onMembersChangedListener;
     private OnDataItemSelected<User> onFriendItemClickListener = null;
     private OnFilterUser onFilterUser, defaultUserFilter;
 
@@ -120,7 +118,7 @@ public class BottomSheetMemberListFragment extends Fragment {
         friendStatusAdapter = new FriendStatusAdapter();
         friendStatusLiteAdapter = new FriendStatusLiteAdapter();
 
-        onUserInsertedListener = new DatasManager.OnItemInsertedListener<User>() {
+        onMembersChangedListener = new DatasManager.OnDatasChangedListener<User>() {
             @Override
             public void onItemInserted(int position, User data) {
 //                if (members.size() == manager.getMembers().size() || onFilterUser == defaultUserFilter){
@@ -131,21 +129,25 @@ public class BottomSheetMemberListFragment extends Fragment {
                 Log.d(TAG, "insert" + position);
 //                }
             }
-        };
-        onUserChangedListener = new DatasManager.OnItemChangedListener<User>() {
+
             @Override
             public void onItemChanged(int position, User data) {
                 friendStatusAdapter.notifyItemChanged(position);
                 friendStatusLiteAdapter.notifyItemChanged(position);
                 Log.d(TAG, "change"+position);
             }
-        };
-        onUserRemovedListener = new DatasManager.OnItemRemovedListener<User>() {
+
             @Override
             public void onItemRemoved(int position, User data) {
                 friendStatusAdapter.notifyItemRemoved(position);
                 friendStatusLiteAdapter.notifyItemRemoved(position);
                 Log.d(TAG, "remove"+position);
+            }
+
+            @Override
+            public void onDataSetChanged(ArrayList<User> datas) {
+                friendStatusAdapter.notifyDataSetChanged();
+                friendStatusLiteAdapter.notifyDataSetChanged();
             }
         };
     }
@@ -153,17 +155,13 @@ public class BottomSheetMemberListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        manager.getMembersManager().addOnItemInsertedListener(onUserInsertedListener);
-        manager.getMembersManager().addOnItemChangedListener(onUserChangedListener);
-        manager.getMembersManager().addOnItemRemovedListener(onUserRemovedListener);
+        manager.getMembersManager().addOnDatasChangedListener(onMembersChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener);
-        manager.getMembersManager().removeOnItemChangedListener(onUserChangedListener);
-        manager.getMembersManager().removeOnItemRemovedListener(onUserRemovedListener);
+        manager.getMembersManager().removeOnDatasChangedListener(onMembersChangedListener);
     }
 
     @Override

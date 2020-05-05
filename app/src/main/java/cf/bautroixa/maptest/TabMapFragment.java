@@ -23,7 +23,6 @@ import java.util.List;
 import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Data;
-import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
@@ -36,7 +35,7 @@ import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
 import cf.bautroixa.maptest.theme.ViewAnim;
 
 
-public class TabMainFragment extends Fragment implements NavigableToMainTab {
+public class TabMapFragment extends Fragment implements NavigableToMainTab {
     private static final String TAG = "MapFragment";
 
     public static final int STATE_HIDE = -1;
@@ -61,13 +60,6 @@ public class TabMainFragment extends Fragment implements NavigableToMainTab {
     private OnNavigationToMainTab onNavigate;
     private Data.OnNewValueListener<User> userOnNewValueListener;
 
-    DatasManager.OnItemInsertedListener<User> onUserInsertedListener;
-    DatasManager.OnItemChangedListener<User> onUserChangedListener;
-    DatasManager.OnItemRemovedListener<User> onUserRemovedListener;
-    DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
-    DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
-    DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
-
     // VIEWS
     private View statusBar;
     private LinearLayout bottomSpace, bottomSheet;
@@ -82,7 +74,7 @@ public class TabMainFragment extends Fragment implements NavigableToMainTab {
     BottomCheckpointsFragment bottomCheckpointsFragment;
     SearchFragment searchFragment;
 
-    public TabMainFragment() {
+    public TabMapFragment() {
         manager = MainAppManager.getInstance();
 
         userOnNewValueListener = new Data.OnNewValueListener<User>() {

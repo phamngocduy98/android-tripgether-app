@@ -39,10 +39,7 @@ public class TabTripFragmentCheckpoints extends Fragment implements DataItemsSel
     private String activeCheckpointId;
     private boolean isLeader;
 
-    private DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
-    private DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
-    private DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
-    private DatasManager.OnDataSetChangedListener<Checkpoint> onCheckpointDataSetChangedListener;
+    private DatasManager.OnDatasChangedListener<Checkpoint> onCheckpointsChangedListener;
     private Data.OnNewValueListener<Trip> onTripChanged;
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected;
 
@@ -65,7 +62,7 @@ public class TabTripFragmentCheckpoints extends Fragment implements DataItemsSel
                 }
             }
         };
-        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener<Checkpoint>() {
+        onCheckpointsChangedListener = new DatasManager.OnDatasChangedListener<Checkpoint>() {
             @Override
             public void onItemInserted(int position, Checkpoint data) {
                 adapter.notifyItemInserted(position);
@@ -77,24 +74,21 @@ public class TabTripFragmentCheckpoints extends Fragment implements DataItemsSel
                     }
                 }
             }
-        };
-        onCheckpointChangedListener = new DatasManager.OnItemChangedListener<Checkpoint>() {
+
             @Override
-            public void onItemChanged(final int position, Checkpoint data) {
+            public void onItemChanged(int position, Checkpoint data) {
                 adapter.notifyItemChanged(position);
             }
-        };
-        onCheckpointRemovedListener = new DatasManager.OnItemRemovedListener<Checkpoint>() {
+
             @Override
-            public void onItemRemoved(int position, Checkpoint checkpoint) {
+            public void onItemRemoved(int position, Checkpoint data) {
                 adapter.notifyItemRemoved(position);
                 if (isLeader && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
                     btnAddCheckpoint.setVisibility(View.VISIBLE);
             }
-        };
-        onCheckpointDataSetChangedListener = new DatasManager.OnDataSetChangedListener<Checkpoint>() {
+
             @Override
-            public void onDataSetChanged(ArrayList<Checkpoint> checkpoints) {
+            public void onDataSetChanged(ArrayList<Checkpoint> datas) {
                 adapter.notifyDataSetChanged();
                 if (isLeader && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
                     btnAddCheckpoint.setVisibility(View.VISIBLE);
@@ -111,20 +105,14 @@ public class TabTripFragmentCheckpoints extends Fragment implements DataItemsSel
         btnAddCheckpoint.setVisibility(isLeader && manager.getCheckpoints().size() == 0 ? View.VISIBLE : View.INVISIBLE);
         if (manager.getCurrentTripRef() != null) onTripChanged.onNewData(manager.getCurrentTrip());
         manager.getCurrentTrip().addOnNewValueListener(onTripChanged);
-        manager.getCheckpointsManager().addOnItemChangedListener(onCheckpointChangedListener)
-                .addOnItemInsertedListener(onCheckpointInsertedListener)
-                .addOnItemRemovedListener(onCheckpointRemovedListener)
-                .addOnDataSetChangedListener(onCheckpointDataSetChangedListener);
+        manager.getCheckpointsManager().addOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         manager.getCurrentTrip().removeOnNewValueListener(onTripChanged);
-        manager.getCheckpointsManager().removeOnItemChangedListener(onCheckpointChangedListener)
-                .removeOnItemInsertedListener(onCheckpointInsertedListener)
-                .removeOnItemRemovedListener(onCheckpointRemovedListener)
-                .removeOnDataSetChangedListener(onCheckpointDataSetChangedListener);
+        manager.getCheckpointsManager().removeOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
     @Override

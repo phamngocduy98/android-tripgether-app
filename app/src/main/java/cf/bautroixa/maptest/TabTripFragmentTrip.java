@@ -35,10 +35,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
     MainAppManager manager;
     private String[] leverStrings = new String[3];
     private OnNavigationToMainTab onNavigationToMainTab;
-    private DatasManager.OnItemInsertedListener<SosRequest> onItemInsertedListener;
-    private DatasManager.OnItemChangedListener<SosRequest> onItemChangedListener;
-    private DatasManager.OnItemRemovedListener<SosRequest> onItemRemovedListener;
-    private DatasManager.OnDataSetChangedListener<SosRequest> onDataSetChangedListener;
+    private DatasManager.OnDatasChangedListener<SosRequest> onSosChangedListener;
 
     /**
      * VIEWS
@@ -64,29 +61,26 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
         leverStrings = getResources().getStringArray(R.array.alert_levers_array);
 
         adapter = new SosAdapter();
-        onItemInsertedListener = new DatasManager.OnItemInsertedListener<SosRequest>() {
+        onSosChangedListener = new DatasManager.OnDatasChangedListener<SosRequest>() {
             @Override
             public void onItemInserted(int position, SosRequest data) {
                 adapter.notifyItemChanged(position);
                 if (sosRequests.size() > 0 && tvHeaderSos.getVisibility() == View.GONE)
                     tvHeaderSos.setVisibility(View.VISIBLE);
             }
-        };
-        onItemChangedListener = new DatasManager.OnItemChangedListener<SosRequest>() {
+
             @Override
-            public void onItemChanged(int position, SosRequest sosRequest) {
+            public void onItemChanged(int position, SosRequest data) {
                 adapter.notifyItemChanged(position);
             }
-        };
-        onItemRemovedListener = new DatasManager.OnItemRemovedListener<SosRequest>() {
+
             @Override
             public void onItemRemoved(int position, SosRequest data) {
                 adapter.notifyItemRemoved(position);
                 if (sosRequests.size() == 0 && tvHeaderSos.getVisibility() == View.VISIBLE)
                     tvHeaderSos.setVisibility(View.GONE);
             }
-        };
-        onDataSetChangedListener = new DatasManager.OnDataSetChangedListener<SosRequest>() {
+
             @Override
             public void onDataSetChanged(ArrayList<SosRequest> datas) {
                 adapter.notifyDataSetChanged();
@@ -150,29 +144,20 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
             btnAddEditSos.setText("Tạo yêu cầu hỗ trợ");
             btnAddEditSos.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add_white_24dp, 0, 0, 0);
         }
-        manager.getSosRequestsManager().addOnItemInsertedListener(onItemInsertedListener)
-                .addOnItemChangedListener(onItemChangedListener)
-                .addOnItemRemovedListener(onItemRemovedListener)
-                .addOnDataSetChangedListener(onDataSetChangedListener);
+        manager.getSosRequestsManager().addOnDatasChangedListener(onSosChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        manager.getSosRequestsManager().removeOnItemInsertedListener(onItemInsertedListener)
-                .removeOnItemChangedListener(onItemChangedListener)
-                .removeOnItemRemovedListener(onItemRemovedListener)
-                .removeOnDataSetChangedListener(onDataSetChangedListener);
+        manager.getSosRequestsManager().removeOnDatasChangedListener(onSosChangedListener);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         onNavigationToMainTab = null;
-        onItemInsertedListener = null;
-        onItemChangedListener = null;
-        onItemRemovedListener = null;
-        onDataSetChangedListener = null;
+        onSosChangedListener = null;
     }
 
     public void setOnNavigationToMainTab(OnNavigationToMainTab onNavigationToMainTab) {
@@ -224,7 +209,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMainFragment.STATE_MEMBER_STATUS, sosRequest);
+                    onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, sosRequest);
                 }
             });
         }

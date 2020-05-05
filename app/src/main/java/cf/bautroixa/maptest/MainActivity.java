@@ -23,6 +23,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.data.FcmMessage;
@@ -54,13 +55,12 @@ public class MainActivity extends AppCompatActivity {
     Handler backHandler;
     int appbarState = OnAppbarStateChanged.State.EXTENDED;
     // listener
-    DatasManager.OnItemInsertedListener<Event> onEventInsertedListener;
+    DatasManager.OnDatasChangedListener<Event> onEventsChangedListener;
     Runnable backCallback;
     boolean isBackPressed = false;
-    DatasManager.OnDataSetChangedListener<Event> onEventDataSetChangedListener;
     // tab fragment
     MapBackgroundFragment mapBackgroundFragment;
-    TabMainFragment tabMapFragment;
+    TabMapFragment tabMapFragment;
     private MainAppManager manager;
     TabTripFragment tabTripFragment;
     TabNotificationFragment tabNotificationFragment;
@@ -79,10 +79,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         manager = MainAppManager.getInstance();
-        onEventInsertedListener = new DatasManager.OnItemInsertedListener<Event>() {
+        onEventsChangedListener = new DatasManager.OnDatasChangedListener<Event>() {
             @Override
             public void onItemInserted(int position, Event data) {
 //                Objects.requireNonNull(tabLayout.getTabAt(TAB_NOTI)).getOrCreateBadge().setNumber(position + 1);
+            }
+
+            @Override
+            public void onItemChanged(int position, Event data) {
+
+            }
+
+            @Override
+            public void onItemRemoved(int position, Event data) {
+
+            }
+
+            @Override
+            public void onDataSetChanged(ArrayList<Event> datas) {
+
             }
         };
         backHandler = new Handler();
@@ -138,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        manager.getEventsManager().addOnItemInsertedListener(onEventInsertedListener).addOnDataSetChangedListener(onEventDataSetChangedListener);
+        manager.getEventsManager().addOnDatasChangedListener(onEventsChangedListener);
         shakePhoneHelper.start();
     }
 
@@ -146,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (backHandler != null) backHandler.removeCallbacks(backCallback);
-        manager.getEventsManager().removeOnItemInsertedListener(onEventInsertedListener).addOnDataSetChangedListener(onEventDataSetChangedListener);
+        manager.getEventsManager().removeOnDatasChangedListener(onEventsChangedListener);
         shakePhoneHelper.stop();
     }
 
@@ -185,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                         if (data.length > 0) {
                             if (data[0] instanceof SosRequest) {
                                 User user = manager.getMembersManager().get(data[0].getId()); // userId == sosId
-                                tabMapFragment.handleState(TabMainFragment.STATE_MEMBER_STATUS, user);
+                                tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, user);
                                 Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
                             }
                         } else {
@@ -206,18 +221,18 @@ public class MainActivity extends AppCompatActivity {
                         Event event = (Event) data;
                         int type = event.getType();
                         if (type == Event.Type.CHECKPOINT_ADDED && event.getCheckpointRef() != null) {
-                            tabMapFragment.handleState(TabMainFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(event.getId()));
+                            tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(event.getId()));
                             Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
                         }
                         if ((type == Event.Type.USER_ADDED || type == Event.Type.USER_SOS_ADDED) && event.getUserRef() != null) {
-                            tabMapFragment.handleState(TabMainFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(event.getId()));
+                            tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(event.getId()));
                         }
                     }
                 }
             });
         }
-        if (fragment instanceof TabMainFragment) {
-            ((TabMainFragment) fragment).setMapBackgroundInterfaces(new MapBackgroundInterfaces() {
+        if (fragment instanceof TabMapFragment) {
+            ((TabMapFragment) fragment).setMapBackgroundInterfaces(new MapBackgroundInterfaces() {
                 @Override
                 public void targetMyLocation() {
                     mapBackgroundFragment.targetMyLocation();
@@ -254,11 +269,11 @@ public class MainActivity extends AppCompatActivity {
                     String type = marker.getSnippet(), id = marker.getTitle();
                     Log.d(TAG, "marker click" + type + "id=" + id);
                     if (type.equals(Collections.CHECKPOINTS)) {
-                        tabMapFragment.handleState(TabMainFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(id));
+                        tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(id));
                         Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
                         return true;
                     } else if (type.equals(Collections.USERS)) {
-                        tabMapFragment.handleState(TabMainFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(id));
+                        tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(id));
                         Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
                         return true;
                     }
@@ -296,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
         public Fragment createFragment(int position) {
             switch (position){
                 case 1:
-                    tabMapFragment = new TabMainFragment();
+                    tabMapFragment = new TabMapFragment();
                     return tabMapFragment;
                 case 2:
                     tabNotificationFragment = new TabNotificationFragment();

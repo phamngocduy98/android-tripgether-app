@@ -59,9 +59,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToMa
     private MainAppManager manager;
 
     private TextView tvLocation, tvTime, tvTimeLine;
-    private DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
-    private DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
-    private DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
+    private DatasManager.OnDatasChangedListener<Checkpoint> onCheckpointsChangedListener;
     private OnDrawRouteRequestWithPath onDrawRouteRequest = null;
     private OnDataItemSelected<Checkpoint> onCheckpointItemSelected = null;
 
@@ -80,24 +78,25 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToMa
         checkpoints = manager.getCheckpoints();
 
         adapter = new Adapter();
-        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener<Checkpoint>() {
+        onCheckpointsChangedListener = new DatasManager.OnDatasChangedListener<Checkpoint>() {
             @Override
             public void onItemInserted(int position, Checkpoint data) {
                 adapter.notifyItemInserted(position);
-                Log.d(TAG, "insert" + position);
             }
-        };
-        onCheckpointChangedListener = new DatasManager.OnItemChangedListener<Checkpoint>() {
+
             @Override
             public void onItemChanged(int position, Checkpoint data) {
-                Log.d(TAG, "changed" + position);
                 adapter.notifyItemChanged(position);
             }
-        };
-        onCheckpointRemovedListener = new DatasManager.OnItemRemovedListener<Checkpoint>() {
+
             @Override
-            public void onItemRemoved(int position, Checkpoint checkpoint) {
+            public void onItemRemoved(int position, Checkpoint data) {
                 adapter.notifyItemRemoved(position);
+            }
+
+            @Override
+            public void onDataSetChanged(ArrayList<Checkpoint> datas) {
+                adapter.notifyDataSetChanged();
             }
         };
     }
@@ -171,17 +170,13 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToMa
         super.onResume();
         Log.d(TAG, "onResume");
         scrollToSelectedCheckpoint();
-        manager.getCheckpointsManager().addOnItemChangedListener(onCheckpointChangedListener)
-                .addOnItemInsertedListener(onCheckpointInsertedListener)
-                .addOnItemRemovedListener(onCheckpointRemovedListener);
+        manager.getCheckpointsManager().addOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        manager.getCheckpointsManager().removeOnItemChangedListener(onCheckpointChangedListener)
-                .removeOnItemInsertedListener(onCheckpointInsertedListener)
-                .removeOnItemRemovedListener(onCheckpointRemovedListener);
+        manager.getCheckpointsManager().removeOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
     @Override
@@ -264,7 +259,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToMa
                 btnCheckIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMainFragment.STATE_FRIEND_LIST_EXPANDED);
+                        onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
                     }
                 });
             } else {
@@ -370,7 +365,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToMa
                 btnRoute.setVisibility(View.VISIBLE);
                 btnStart.setVisibility(View.VISIBLE);
                 btnCheckIn.setVisibility(View.GONE);
-                checkpoint.getVisitsManager().removeOnItemInsertedListener(onItemInsertedListener);
+                checkpoint.getVisitsManager().removeOnDatasChangedListener(onItemInsertedListener);
             }
         }
     }

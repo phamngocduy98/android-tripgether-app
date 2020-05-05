@@ -32,8 +32,7 @@ public class TabChatFragment extends Fragment {
     MainAppManager manager;
     ArrayList<Message> messages;
 
-    DatasManager.OnItemInsertedListener<Message> onReceiveMessage;
-    DatasManager.OnDataSetChangedListener<Message> onResetMessages;
+    DatasManager.OnDatasChangedListener<Message> onMessagesChangedListener;
 
     private MessagesAdapter mAdapter;
     private EditText editMessage;
@@ -41,13 +40,22 @@ public class TabChatFragment extends Fragment {
     public TabChatFragment() {
         manager = MainAppManager.getInstance();
         messages = manager.getMessagesManager().getData();
-        onReceiveMessage = new DatasManager.OnItemInsertedListener<Message>() {
+        onMessagesChangedListener = new DatasManager.OnDatasChangedListener<Message>() {
             @Override
             public void onItemInserted(int position, Message data) {
                 mAdapter.notifyItemInserted(position);
             }
-        };
-        onResetMessages = new DatasManager.OnDataSetChangedListener<Message>() {
+
+            @Override
+            public void onItemChanged(int position, Message data) {
+
+            }
+
+            @Override
+            public void onItemRemoved(int position, Message data) {
+
+            }
+
             @Override
             public void onDataSetChanged(ArrayList<Message> datas) {
                 mAdapter.notifyDataSetChanged();
@@ -80,15 +88,13 @@ public class TabChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        manager.getMessagesManager().addOnItemInsertedListener(onReceiveMessage)
-                .addOnDataSetChangedListener(onResetMessages);
+        manager.getMessagesManager().addOnDatasChangedListener(onMessagesChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        manager.getMessagesManager().removeOnItemInsertedListener(onReceiveMessage)
-                .removeOnDataSetChangedListener(onResetMessages);
+        manager.getMessagesManager().removeOnDatasChangedListener(onMessagesChangedListener);
     }
 
     public interface MessageViewType {

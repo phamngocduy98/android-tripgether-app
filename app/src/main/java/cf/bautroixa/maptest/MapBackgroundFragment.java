@@ -72,30 +72,31 @@ import static cf.bautroixa.maptest.utils.CreateMarker.createMarker;
 
 public class MapBackgroundFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraMoveCanceledListener, GoogleMap.OnCameraIdleListener, GoogleMap.OnMapClickListener {
     private static final String TAG = "MapBackgroundFragment";
-    protected LatLng currentLocation = new LatLng(0, 0);
-    int screenWidth, screenHeight;
-    MapBackgroundCallbacks mapBackgroundCallbacks;
-    DatasManager.OnItemInsertedListener<User> onUserInsertedListener;
-    DatasManager.OnItemChangedListener<User> onUserChangedListener;
-    DatasManager.OnItemRemovedListener<User> onUserRemovedListener;
-    DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
-    float cameraBearing = 0;
-    protected boolean isMapLoaded = false;
-    protected boolean isMarkerLoaded = false;
-    protected boolean isCheckpointLoaded = false;
-    protected boolean focusMyLocation = true;
-    DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
-    DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
-    Marker activeMarker, tempMarker;
+
     private MainAppManager manager;
     private FusedLocationProviderClient fusedLocationClient;
     private CompassHelper compass;
     private GoogleMap mMap;
+
     // DATAs AND STATEs
     private ArrayList<User> members;
     private ArrayList<Checkpoint> checkpoints;
+
+    protected boolean isMarkerLoaded = false;
+    protected boolean isCheckpointLoaded = false;
+    int screenWidth, screenHeight;
+    float cameraBearing = 0;
+    // listener
+    MapBackgroundCallbacks mapBackgroundCallbacks;
+    DatasManager.OnDatasChangedListener<User> onMembersChangedListener;
+    DatasManager.OnDatasChangedListener<Checkpoint> onCheckpointsChangedListener;
+    Marker activeMarker, tempMarker;
+    private boolean isMapLoaded = false;
+    private boolean focusMyLocation = true;
+
     // Views
     private Marker myLocationMarker = null, myLocationRotationMarker = null, flagMarker = null;
+    private LatLng currentLocation = new LatLng(0, 0);
     private Polyline routeLine = null;
     private SupportMapFragment ggMapFragment;
 
@@ -104,29 +105,48 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         members = manager.getMembers();
         checkpoints = manager.getCheckpoints();
 
-        onUserInsertedListener = new DatasManager.OnItemInsertedListener<User>() {
+        onMembersChangedListener = new DatasManager.OnDatasChangedListener<User>() {
             @Override
             public void onItemInserted(int position, User user) {
                 user.setMarker(createFriendMarker(user));
             }
-        };
-        onUserRemovedListener = new DatasManager.OnItemRemovedListener<User>() {
+
+            @Override
+            public void onItemChanged(int position, User data) {
+
+            }
+
             @Override
             public void onItemRemoved(int position, User user) {
                 if (activeMarker != null && activeMarker.equals(user.getMarker()))
                     activeMarker = null;
             }
+
+            @Override
+            public void onDataSetChanged(ArrayList<User> datas) {
+
+            }
         };
-        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener<Checkpoint>() {
+
+        onCheckpointsChangedListener = new DatasManager.OnDatasChangedListener<Checkpoint>() {
             @Override
             public void onItemInserted(int position, Checkpoint checkpoint) {
                 checkpoint.setMarker(createCheckpointMarker(checkpoint));
             }
-        };
-        onCheckpointRemovedListener = new DatasManager.OnItemRemovedListener<Checkpoint>() {
+
+            @Override
+            public void onItemChanged(int position, Checkpoint checkpoint) {
+
+            }
+
             @Override
             public void onItemRemoved(int position, Checkpoint checkpoint) {
                 if (checkpoint.getMarker().equals(activeMarker)) activeMarker = null;
+            }
+
+            @Override
+            public void onDataSetChanged(ArrayList<Checkpoint> datas) {
+
             }
         };
     }
@@ -155,16 +175,16 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
     public void onResume() {
         super.onResume();
         compass.start();
-        manager.getMembersManager().addOnItemInsertedListener(onUserInsertedListener).addOnItemRemovedListener(onUserRemovedListener);
-        manager.getCheckpointsManager().addOnItemInsertedListener(onCheckpointInsertedListener).addOnItemRemovedListener(onCheckpointRemovedListener);
+        manager.getMembersManager().addOnDatasChangedListener(onMembersChangedListener);
+        manager.getCheckpointsManager().addOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         compass.stop();
-        manager.getMembersManager().removeOnItemInsertedListener(onUserInsertedListener).removeOnItemRemovedListener(onUserRemovedListener);
-        manager.getCheckpointsManager().removeOnItemInsertedListener(onCheckpointInsertedListener).removeOnItemRemovedListener(onCheckpointRemovedListener);
+        manager.getMembersManager().removeOnDatasChangedListener(onMembersChangedListener);
+        manager.getCheckpointsManager().removeOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
     @Override
@@ -212,6 +232,23 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         initLocationAndCompass();
         initCheckpointMarker();
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16));
+    }
+
+    @Override
+    public void onCameraMoveCanceled() {
+        focusMyLocation = false;
+        cameraBearing = mMap.getCameraPosition().bearing;
+    }
+
+    @Override
+    public void onCameraIdle() {
+        focusMyLocation = false;
+        cameraBearing = mMap.getCameraPosition().bearing;
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        mapBackgroundCallbacks.onMapClick(latLng);
     }
 
     @Override
@@ -395,23 +432,6 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
                         Log.d(TAG, "Draw route failed");
                     }
                 });
-    }
-
-    @Override
-    public void onCameraMoveCanceled() {
-        focusMyLocation = false;
-        cameraBearing = mMap.getCameraPosition().bearing;
-    }
-
-    @Override
-    public void onCameraIdle() {
-        focusMyLocation = false;
-        cameraBearing = mMap.getCameraPosition().bearing;
-    }
-
-    @Override
-    public void onMapClick(LatLng latLng) {
-        mapBackgroundCallbacks.onMapClick(latLng);
     }
 
     void initMyLocationMarker() {

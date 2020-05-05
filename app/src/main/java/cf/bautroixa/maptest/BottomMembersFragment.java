@@ -45,10 +45,7 @@ public class BottomMembersFragment extends Fragment {
     private String lastActiveCheckpointId = "";
 
     // Listener
-    private DatasManager.OnItemInsertedListener<User> onUserItemInsertedListener;
-    private DatasManager.OnItemChangedListener<User> onUserItemChangedListener;
-    private DatasManager.OnItemRemovedListener<User> onUserItemRemovedListener;
-    private DatasManager.OnDataSetChangedListener<User> onUserDataSetChangedListener;
+    private DatasManager.OnDatasChangedListener<User> onMembersChangedListener;
     private Data.OnNewValueListener<Trip> onTripChanged;
 
     private OnDrawRouteRequest onDrawRouteRequest;
@@ -81,27 +78,22 @@ public class BottomMembersFragment extends Fragment {
             }
         };
 
-        onUserItemInsertedListener = new DatasManager.OnItemInsertedListener<User>() {
+        onMembersChangedListener = new DatasManager.OnDatasChangedListener<User>() {
             @Override
             public void onItemInserted(int position, User data) {
                 adapter.notifyItemInserted(position);
             }
-        };
 
-        onUserItemChangedListener = new DatasManager.OnItemChangedListener<User>() {
             @Override
             public void onItemChanged(int position, User data) {
                 adapter.notifyItemChanged(position);
             }
-        };
 
-        onUserItemRemovedListener = new DatasManager.OnItemRemovedListener<User>() {
             @Override
             public void onItemRemoved(int position, User data) {
                 adapter.notifyItemRemoved(position);
             }
-        };
-        onUserDataSetChangedListener = new DatasManager.OnDataSetChangedListener<User>() {
+
             @Override
             public void onDataSetChanged(ArrayList<User> datas) {
                 adapter.notifyDataSetChanged();
@@ -145,20 +137,14 @@ public class BottomMembersFragment extends Fragment {
         scrollToSelectedUser();
         onTripChanged.onNewData(manager.getCurrentTrip());
         manager.getCurrentTrip().addOnNewValueListener(onTripChanged);
-        manager.getMembersManager().addOnItemInsertedListener(onUserItemInsertedListener)
-                .addOnItemChangedListener(onUserItemChangedListener)
-                .addOnItemRemovedListener(onUserItemRemovedListener)
-                .addOnDataSetChangedListener(onUserDataSetChangedListener);
+        manager.getMembersManager().addOnDatasChangedListener(onMembersChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         manager.getCurrentTrip().removeOnNewValueListener(onTripChanged);
-        manager.getMembersManager().removeOnItemInsertedListener(onUserItemInsertedListener)
-                .removeOnItemChangedListener(onUserItemChangedListener)
-                .removeOnItemRemovedListener(onUserItemRemovedListener)
-                .removeOnDataSetChangedListener(onUserDataSetChangedListener);
+        manager.getMembersManager().removeOnDatasChangedListener(onMembersChangedListener);
     }
 
     @Override

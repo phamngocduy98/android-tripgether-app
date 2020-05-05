@@ -33,21 +33,29 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
     private RecyclerView rvNotifications;
     private NotificationAdapter adapter;
 
-    private DatasManager.OnItemInsertedListener<Event> onItemInsertedListener;
-    private DatasManager.OnDataSetChangedListener<Event> onDataSetChangedListener;
+    private DatasManager.OnDatasChangedListener<Event> onEventsChangedListener;
     private OnNavigationToMainTab onNavigationToMainTab;
     private OnDataItemSelected<Event> onEventItemSelected;
 
     public TabNotificationFragment() {
         manager = MainAppManager.getInstance();
         adapter = new NotificationAdapter();
-        onItemInsertedListener = new DatasManager.OnItemInsertedListener<Event>() {
+        onEventsChangedListener = new DatasManager.OnDatasChangedListener<Event>() {
             @Override
             public void onItemInserted(int position, Event data) {
                 adapter.notifyItemChanged(position);
             }
-        };
-        onDataSetChangedListener = new DatasManager.OnDataSetChangedListener<Event>() {
+
+            @Override
+            public void onItemChanged(int position, Event data) {
+
+            }
+
+            @Override
+            public void onItemRemoved(int position, Event data) {
+
+            }
+
             @Override
             public void onDataSetChanged(ArrayList<Event> datas) {
                 adapter.notifyDataSetChanged();
@@ -86,13 +94,13 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
     @Override
     public void onResume() {
         super.onResume();
-        manager.getEventsManager().addOnItemInsertedListener(onItemInsertedListener).addOnDataSetChangedListener(onDataSetChangedListener);
+        manager.getEventsManager().addOnDatasChangedListener(onEventsChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        manager.getEventsManager().removeOnItemInsertedListener(onItemInsertedListener).removeOnDataSetChangedListener(onDataSetChangedListener);
+        manager.getEventsManager().removeOnDatasChangedListener(onEventsChangedListener);
     }
 
     @Override
