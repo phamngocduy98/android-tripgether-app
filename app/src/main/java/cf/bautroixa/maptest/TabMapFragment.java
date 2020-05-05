@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,25 +19,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Data;
-import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.interfaces.MapBackgroundControllable;
 import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
-import cf.bautroixa.maptest.interfaces.NavigableToState;
-import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnNavigationToState;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.ViewAnim;
 
 
-public class TabMapFragment extends Fragment implements NavigableToState {
+public class TabMapFragment extends Fragment implements Navigable, MapBackgroundControllable {
     private static final String TAG = "MapFragment";
 
     public static final int STATE_HIDE = -1;
@@ -58,15 +54,8 @@ public class TabMapFragment extends Fragment implements NavigableToState {
 
     // LISTENER
     private MapBackgroundInterfaces mapBackgroundInterfaces;
-    private OnNavigationToState onNavigate;
+    private NavigationInterfaces navigationInterfaces;
     private Data.OnNewValueListener<User> userOnNewValueListener;
-
-    DatasManager.OnItemInsertedListener<User> onUserInsertedListener;
-    DatasManager.OnItemChangedListener<User> onUserChangedListener;
-    DatasManager.OnItemRemovedListener<User> onUserRemovedListener;
-    DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
-    DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
-    DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
 
     // VIEWS
     private View statusBar;
@@ -83,8 +72,12 @@ public class TabMapFragment extends Fragment implements NavigableToState {
     SearchFragment searchFragment;
 
     public TabMapFragment() {
-        manager = MainAppManager.getInstance();
+    }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        manager = MainAppManager.getInstance();
         userOnNewValueListener = new Data.OnNewValueListener<User>() {
             @Override
             public void onNewData(User user) {
@@ -95,7 +88,6 @@ public class TabMapFragment extends Fragment implements NavigableToState {
                 }
             }
         };
-
     }
 
     @Override
@@ -130,68 +122,23 @@ public class TabMapFragment extends Fragment implements NavigableToState {
     @Override
     public void onAttachFragment(@NotNull Fragment fragment) {
         super.onAttachFragment(fragment);
-
         if (fragment instanceof SearchFragment) {
-            ((SearchFragment) fragment).setOnSearchItemClickedListener(new SearchFragment.OnSearchItemClickedListener() {
-                @Override
-                public void onSearchItemClicked(SearchResult searchResult) {
-                    selectedSearchResult = searchResult;
-                    handleState(STATE_SEARCH_RESULT, null);
-                    mapBackgroundInterfaces.target(searchResult);
-                }
-            });
+            ((SearchFragment) fragment).setNavigationInterfaces(navigationInterfaces);
         } else if (fragment instanceof BottomSheetMemberListFragment) {
-            ((BottomSheetMemberListFragment) fragment).setOnFriendItemClickListener(new OnDataItemSelected<User>() {
-                @Override
-                public void selectItem(User user) {
-                    selectedUser = user;
-                    handleState(STATE_MEMBER_STATUS, selectedUser);
-                }
-            });
+            ((BottomSheetMemberListFragment) fragment).setNavigationInterfaces(navigationInterfaces);
         } else if (fragment instanceof BottomMembersFragment) {
-            ((BottomMembersFragment) fragment).setOnDrawRouteButtonClickedListener(new OnDrawRouteRequest() {
-                @Override
-                public void drawRouteTo(LatLng target) {
-                    mapBackgroundInterfaces.drawRoute(null, target);
-                }
-            });
-            ((BottomMembersFragment) fragment).setOnChangeSelectedUserListener(new OnDataItemSelected<User>() {
-                @Override
-                public void selectItem(User user) {
-                    mapBackgroundInterfaces.cleanUpTempMarkerAndRoute();
-                    mapBackgroundInterfaces.target(user);
-                }
-            });
+            ((BottomMembersFragment) fragment).setNavigationInterfaces(navigationInterfaces);
+            ((BottomMembersFragment) fragment).setMapBackgroundInterfaces(mapBackgroundInterfaces);
         } else if (fragment instanceof BottomCheckpointsFragment) {
-            ((BottomCheckpointsFragment) fragment).setOnDrawRouteRequestWithPathListener(new OnDrawRouteRequestWithPath() {
-                @Override
-                public void drawRoute(List<LatLng> latlngs) {
-                    drawRoute(latlngs);
-                }
-            });
-            ((BottomCheckpointsFragment) fragment).setOnCheckpointChanged(new OnDataItemSelected<Checkpoint>() {
-                @Override
-                public void selectItem(Checkpoint checkpoint) {
-                    mapBackgroundInterfaces.cleanUpTempMarkerAndRoute();
-                    mapBackgroundInterfaces.target(checkpoint);
-                }
-            });
+            ((BottomCheckpointsFragment) fragment).setMapBackgroundInterfaces(mapBackgroundInterfaces);
+            ((BottomCheckpointsFragment) fragment).setNavigationInterfaces(navigationInterfaces);
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (manager.isLoggedIn()) {
-            userOnNewValueListener.onNewData(manager.getCurrentUser());
-        }
         manager.getCurrentUser().addOnNewValueListener(userOnNewValueListener);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        onNavigate = null;
     }
 
     @Override
@@ -200,9 +147,15 @@ public class TabMapFragment extends Fragment implements NavigableToState {
         manager.getCurrentUser().removeOnNewValueListener(userOnNewValueListener);
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        navigationInterfaces = null;
+    }
+
+
     /**
      * onBackPressed
-     *
      * @return true if back is handled
      */
     public boolean onBackPressed() {
@@ -235,7 +188,7 @@ public class TabMapFragment extends Fragment implements NavigableToState {
         Log.d(TAG, "click new state= " + state);
     }
 
-    void handleState(int newState, @Nullable Data data) {
+    void handleState(int newState, @Nullable Object data) {
         state = newState;
         mapBackgroundInterfaces.cleanUpTempMarkerAndRoute();
         switch (state) {
@@ -253,7 +206,8 @@ public class TabMapFragment extends Fragment implements NavigableToState {
                 replaceBottomSpace(bottomMembersFragment);
                 if (data instanceof User) selectedUser = (User) data;
                 if (data instanceof SosRequest) {
-                    selectedUser = manager.getMembersManager().get(data.getId()); // userId == sosId
+                    SosRequest sosRequest = (SosRequest) data;
+                    selectedUser = manager.getMembersManager().get(sosRequest.getId()); // userId == sosId
                 }
                 mapBackgroundInterfaces.target(selectedUser);
                 bottomMembersFragment.selectUser(selectedUser.getId());
@@ -262,14 +216,16 @@ public class TabMapFragment extends Fragment implements NavigableToState {
                 selectActiveViewSpace(SPACE_BOTTOM);
                 replaceBottomSpace(bottomCheckpointsFragment);
                 if (data instanceof Checkpoint) {
-                    bottomCheckpointsFragment.selectCheckpoint(data.getId());
+                    Checkpoint checkpoint = (Checkpoint) data;
+                    bottomCheckpointsFragment.selectCheckpoint(checkpoint.getId());
                     mapBackgroundInterfaces.target(data);
                 }
                 break;
             case STATE_SEARCH_RESULT:
                 selectActiveViewSpace(SPACE_BOTTOM);
+                selectedSearchResult = (SearchResult) data;
                 mapBackgroundInterfaces.target(selectedSearchResult);
-                replaceBottomSpace(BottomSearchPlaceFragment.newInstance(selectedSearchResult));
+                replaceBottomSpace(BottomSearchPlaceFragment.newInstance(selectedSearchResult, mapBackgroundInterfaces));
                 break;
         }
         Log.d(TAG, "new state= " + state);
@@ -307,14 +263,14 @@ public class TabMapFragment extends Fragment implements NavigableToState {
 
     private void selectActiveViewSpace(int viewSpace) {
         for (int i = 0; i < spaces.length; i++) {
-            ViewAnim.toggleHideShow(spaces[i], viewSpace == i, ViewAnim.DIRECTION_DOWN);
+            ViewAnim.toggleHideShow(spaces[i], viewSpace == i, ViewAnim.HIDE_DIRECTION_DOWN);
         }
         toggleSearchBar(true);
     }
 
     @Override
-    public void setOnNavigationToState(OnNavigationToState OnNavigationToState) {
-        this.onNavigate = OnNavigationToState;
+    public void setNavigationInterfaces(NavigationInterfaces NavigationInterfaces) {
+        this.navigationInterfaces = NavigationInterfaces;
     }
 
     public void setMapBackgroundInterfaces(MapBackgroundInterfaces mapBackgroundInterfaces) {

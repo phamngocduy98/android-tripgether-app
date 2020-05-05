@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -30,7 +32,7 @@ import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.utils.AlarmHelper;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class ProfileActivity extends OneAppbarActivity {
+public class ProfileActivity extends OneAppbarActivity implements Toolbar.OnMenuItemClickListener {
     GoogleSignInClient mGoogleSignInClient;
     private MainAppManager manager;
     private SharedPreferences sharedPref;
@@ -48,6 +50,8 @@ public class ProfileActivity extends OneAppbarActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_tab_profile);
+        setToolbarMenu(R.menu.fragment_profile);
+        getToolbar().setOnMenuItemClickListener(this);
         imgAvatar = findViewById(R.id.appbar_img_avatar);
         switchService = findViewById(R.id.switch_toggle_service);
         LinearLayout mPersonalInformationLinear = findViewById(R.id.ln_personal_information);
@@ -57,7 +61,7 @@ public class ProfileActivity extends OneAppbarActivity {
         imgAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+                Intent intent = new Intent(ProfileActivity.this, DetailProfileActivity.class);
                 startActivity(intent);
             }
         });
@@ -123,7 +127,7 @@ public class ProfileActivity extends OneAppbarActivity {
         String avatarUrl = "";
         if (manager.isLoggedIn()) {
             if (!avatarUrl.equals(manager.getCurrentUser().getAvatar())) {
-                ImageHelper.loadImage(manager.getCurrentUser().getAvatar(), imgAvatar, 100, 100);
+                ImageHelper.loadCircleImage(manager.getCurrentUser().getAvatar(), imgAvatar, 100, 100);
             }
             setTitle(manager.getCurrentUser().getName());
         }
@@ -140,5 +144,15 @@ public class ProfileActivity extends OneAppbarActivity {
                     }
                 });
 
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_setup_frag_profile:
+                startActivity(new Intent(ProfileActivity.this, SettingActivity.class));
+                break;
+        }
+        return false;
     }
 }

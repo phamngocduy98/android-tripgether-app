@@ -32,25 +32,36 @@ public class TabChatFragment extends Fragment {
     MainAppManager manager;
     ArrayList<Message> messages;
 
-    DatasManager.OnItemInsertedListener<Message> onReceiveMessage;
-    DatasManager.OnDataSetChangedListener<Message> onResetMessages;
+    DatasManager.OnDatasChangedListener<Message> onMessagesChangedListener;
 
     private MessagesAdapter mAdapter;
+    private RecyclerView rvMessages;
     private EditText editMessage;
 
     public TabChatFragment() {
         manager = MainAppManager.getInstance();
         messages = manager.getMessagesManager().getData();
-        onReceiveMessage = new DatasManager.OnItemInsertedListener<Message>() {
+        onMessagesChangedListener = new DatasManager.OnDatasChangedListener<Message>() {
             @Override
             public void onItemInserted(int position, Message data) {
                 mAdapter.notifyItemInserted(position);
+                rvMessages.smoothScrollToPosition(position);
             }
-        };
-        onResetMessages = new DatasManager.OnDataSetChangedListener<Message>() {
+
+            @Override
+            public void onItemChanged(int position, Message data) {
+
+            }
+
+            @Override
+            public void onItemRemoved(int position, Message data) {
+
+            }
+
             @Override
             public void onDataSetChanged(ArrayList<Message> datas) {
                 mAdapter.notifyDataSetChanged();
+                rvMessages.smoothScrollToPosition(datas.size());
             }
         };
     }
@@ -70,7 +81,7 @@ public class TabChatFragment extends Fragment {
                 editMessage.setText("");
             }
         });
-        RecyclerView rvMessages = v.findViewById(R.id.rv_messages);
+        rvMessages = v.findViewById(R.id.rv_messages);
         mAdapter = new MessagesAdapter();
         rvMessages.setAdapter(mAdapter);
         rvMessages.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
@@ -80,15 +91,13 @@ public class TabChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        manager.getMessagesManager().addOnItemInsertedListener(onReceiveMessage)
-                .addOnDataSetChangedListener(onResetMessages);
+        manager.getMessagesManager().addOnDatasChangedListener(onMessagesChangedListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        manager.getMessagesManager().removeOnItemInsertedListener(onReceiveMessage)
-                .removeOnDataSetChangedListener(onResetMessages);
+        manager.getMessagesManager().removeOnDatasChangedListener(onMessagesChangedListener);
     }
 
     public interface MessageViewType {
@@ -136,7 +145,7 @@ public class TabChatFragment extends Fragment {
             }
             if (sender != null) {
                 tvMessageSender.setText(sender.getName());
-                ImageHelper.loadImage(sender.getAvatar(), imgMessageItemAvatar);
+                ImageHelper.loadCircleImage(sender.getAvatar(), imgMessageItemAvatar);
             }
             if (message.getFromUser().getId().equals(manager.getCurrentUser().getId())) {
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) linearMainMessageItem.getLayoutParams();

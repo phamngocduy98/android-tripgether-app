@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -27,31 +28,32 @@ import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Trip;
-import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.utils.DateFormatter;
 
 
-public class TabTripFragmentCheckpoints extends Fragment {
+public class TabTripFragmentCheckpoints extends Fragment implements Navigable {
     private MainAppManager manager;
     private ArrayList<Checkpoint> checkpoints;
     private String activeCheckpointId;
-    private boolean isLeader;
 
-    private DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
-    private DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
-    private DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
-    private DatasManager.OnDataSetChangedListener<Checkpoint> onCheckpointDataSetChangedListener;
+    private NavigationInterfaces navigationInterfaces;
+    private DatasManager.OnDatasChangedListener<Checkpoint> onCheckpointsChangedListener;
     private Data.OnNewValueListener<Trip> onTripChanged;
-    private OnDataItemSelected<Checkpoint> onCheckpointItemSelected;
 
     private Button btnAddCheckpoint;
     private CheckpointsAdapter adapter;
 
     public TabTripFragmentCheckpoints() {
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
         manager = MainAppManager.getInstance();
         checkpoints = manager.getCheckpoints();
-
         onTripChanged = new Data.OnNewValueListener<Trip>() {
             @Override
             public void onNewData(Trip trip) {
@@ -64,70 +66,38 @@ public class TabTripFragmentCheckpoints extends Fragment {
                 }
             }
         };
-        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener<Checkpoint>() {
+        onCheckpointsChangedListener = new DatasManager.OnDatasChangedListener<Checkpoint>() {
             @Override
             public void onItemInserted(int position, Checkpoint data) {
                 adapter.notifyItemInserted(position);
                 if (btnAddCheckpoint != null) {
-                    if (isLeader && manager.getCheckpoints().size() == 0) {
+                    if (manager.isTripLeader() && manager.getCheckpoints().size() == 0) {
                         btnAddCheckpoint.setVisibility(View.VISIBLE);
                     } else {
                         btnAddCheckpoint.setVisibility(View.INVISIBLE);
                     }
                 }
             }
-        };
-        onCheckpointChangedListener = new DatasManager.OnItemChangedListener<Checkpoint>() {
+
             @Override
-            public void onItemChanged(final int position, Checkpoint data) {
+            public void onItemChanged(int position, Checkpoint data) {
                 adapter.notifyItemChanged(position);
             }
-        };
-        onCheckpointRemovedListener = new DatasManager.OnItemRemovedListener<Checkpoint>() {
+
             @Override
-            public void onItemRemoved(int position, Checkpoint checkpoint) {
+            public void onItemRemoved(int position, Checkpoint data) {
                 adapter.notifyItemRemoved(position);
-                if (isLeader && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
+                if (manager.isTripLeader() && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
                     btnAddCheckpoint.setVisibility(View.VISIBLE);
             }
-        };
-        onCheckpointDataSetChangedListener = new DatasManager.OnDataSetChangedListener<Checkpoint>() {
+
             @Override
-            public void onDataSetChanged(ArrayList<Checkpoint> checkpoints) {
+            public void onDataSetChanged(ArrayList<Checkpoint> datas) {
                 adapter.notifyDataSetChanged();
-                if (isLeader && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
+                if (manager.isTripLeader() && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
                     btnAddCheckpoint.setVisibility(View.VISIBLE);
             }
         };
-    }
-
-    public void setOnCheckpointItemSelected(OnDataItemSelected<Checkpoint> onCheckpointItemSelected) {
-        this.onCheckpointItemSelected = onCheckpointItemSelected;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        String userId = manager.getCurrentUser().getId();
-        String leaderId = manager.getCurrentTrip().getLeader().getId();
-        isLeader = userId.equals(leaderId);
-        btnAddCheckpoint.setVisibility(isLeader && manager.getCheckpoints().size() == 0 ? View.VISIBLE : View.INVISIBLE);
-        if (manager.getCurrentTripRef() != null) onTripChanged.onNewData(manager.getCurrentTrip());
-        manager.getCurrentTrip().addOnNewValueListener(onTripChanged);
-        manager.getCheckpointsManager().addOnItemChangedListener(onCheckpointChangedListener)
-                .addOnItemInsertedListener(onCheckpointInsertedListener)
-                .addOnItemRemovedListener(onCheckpointRemovedListener)
-                .addOnDataSetChangedListener(onCheckpointDataSetChangedListener);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        manager.getCurrentTrip().removeOnNewValueListener(onTripChanged);
-        manager.getCheckpointsManager().removeOnItemChangedListener(onCheckpointChangedListener)
-                .removeOnItemInsertedListener(onCheckpointInsertedListener)
-                .removeOnItemRemovedListener(onCheckpointRemovedListener)
-                .removeOnDataSetChangedListener(onCheckpointDataSetChangedListener);
     }
 
     @Override
@@ -155,15 +125,33 @@ public class TabTripFragmentCheckpoints extends Fragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        onCheckpointItemSelected = null;
+    public void onResume() {
+        super.onResume();
+        btnAddCheckpoint.setVisibility(manager.isTripLeader() && manager.getCheckpoints().size() == 0 ? View.VISIBLE : View.INVISIBLE);
+        if (manager.getCurrentTripRef() != null) onTripChanged.onNewData(manager.getCurrentTrip());
+        manager.getCurrentTrip().addOnNewValueListener(onTripChanged);
+        manager.getCheckpointsManager().addOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
-    public interface Payload {
-        int SET_ACTIVE_CHECKPOINT = 1;
-        int UNSET_ACTIVE_CHECKPOINT = 2;
+    @Override
+    public void onPause() {
+        super.onPause();
+        manager.getCurrentTrip().removeOnNewValueListener(onTripChanged);
+        manager.getCheckpointsManager().removeOnDatasChangedListener(onCheckpointsChangedListener);
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        onCheckpointsChangedListener = null;
+        onTripChanged = null;
+    }
+
+    @Override
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
+    }
+
 
     public class CheckpointVH extends RecyclerView.ViewHolder {
         public TimelineView mTimelineView;
@@ -190,15 +178,14 @@ public class TabTripFragmentCheckpoints extends Fragment {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (onCheckpointItemSelected != null)
-                        onCheckpointItemSelected.selectItem(checkpoint);
+                    navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, checkpoint);
                 }
             });
             if (manager.getCurrentTripRef() != null && manager.getCurrentTrip().getActiveCheckpoint() != null) {
                 setActiveCheckpoint(checkpoint.getId().equals(manager.getCurrentTrip().getActiveCheckpoint().getId()));
             }
 
-            if (isLeader) {
+            if (manager.isTripLeader()) {
                 mTimelineView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -324,5 +311,10 @@ public class TabTripFragmentCheckpoints extends Fragment {
         public int getItemCount() {
             return checkpoints.size();
         }
+    }
+
+    public interface Payload {
+        int SET_ACTIVE_CHECKPOINT = 1;
+        int UNSET_ACTIVE_CHECKPOINT = 2;
     }
 }

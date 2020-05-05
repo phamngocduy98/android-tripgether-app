@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -40,10 +41,10 @@ import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Visit;
 import cf.bautroixa.maptest.firestore.VisitsManager;
-import cf.bautroixa.maptest.interfaces.NavigableToState;
-import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequestWithPath;
-import cf.bautroixa.maptest.interfaces.OnNavigationToState;
+import cf.bautroixa.maptest.interfaces.MapBackgroundControllable;
+import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.DateFormatter;
 import cf.bautroixa.maptest.utils.Formater;
@@ -53,160 +54,104 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BottomCheckpointsFragment extends Fragment implements NavigableToState<Checkpoint> {
+public class BottomCheckpointsFragment extends Fragment implements Navigable, MapBackgroundControllable {
     private static final String TAG = "TripOverviewFragment";
 
     private MainAppManager manager;
-
-    private TextView tvLocation, tvTime, tvTimeLine;
-    private DatasManager.OnItemInsertedListener<Checkpoint> onCheckpointInsertedListener;
-    private DatasManager.OnItemChangedListener<Checkpoint> onCheckpointChangedListener;
-    private DatasManager.OnItemRemovedListener<Checkpoint> onCheckpointRemovedListener;
-    private OnDrawRouteRequestWithPath onDrawRouteRequest = null;
-    private OnDataItemSelected<Checkpoint> onCheckpointItemSelected = null;
-
     private ArrayList<Checkpoint> checkpoints;
-    private OnNavigationToState<Checkpoint> onNavigationToState = null;
-
-    private Button btnCreateTrip, btnJoinTrip;
     private int activePos = 0;
-    Button btnRoute;
+
+    private NavigationInterfaces navigationInterfaces = null;
+    private MapBackgroundInterfaces mapBackgroundInterfaces = null;
+    private DatasManager.OnDatasChangedListener<Checkpoint> onCheckpointsChangedListener;
+    private DatasManager.OnDatasChangedListener<Visit> onVisitsChangedListener;
+
+    private TextView tvTopTimeLine;
     private RecyclerView rv;
     private Adapter adapter;
-
 
     public BottomCheckpointsFragment() {
         manager = MainAppManager.getInstance();
         checkpoints = manager.getCheckpoints();
+    }
 
-        adapter = new Adapter();
-        onCheckpointInsertedListener = new DatasManager.OnItemInsertedListener<Checkpoint>() {
+    @Override
+    public void onAttach(@NotNull Context context) {
+        super.onAttach(context);
+        onCheckpointsChangedListener = new DatasManager.OnDatasChangedListener<Checkpoint>() {
             @Override
             public void onItemInserted(int position, Checkpoint data) {
                 adapter.notifyItemInserted(position);
-                Log.d(TAG, "insert" + position);
             }
-        };
-        onCheckpointChangedListener = new DatasManager.OnItemChangedListener<Checkpoint>() {
+
             @Override
             public void onItemChanged(int position, Checkpoint data) {
-                Log.d(TAG, "changed" + position);
                 adapter.notifyItemChanged(position);
             }
-        };
-        onCheckpointRemovedListener = new DatasManager.OnItemRemovedListener<Checkpoint>() {
+
             @Override
-            public void onItemRemoved(int position, Checkpoint checkpoint) {
+            public void onItemRemoved(int position, Checkpoint data) {
                 adapter.notifyItemRemoved(position);
             }
+
+            @Override
+            public void onDataSetChanged(ArrayList<Checkpoint> datas) {
+                adapter.notifyDataSetChanged();
+            }
         };
-    }
 
-    public void setOnDrawRouteRequestWithPathListener(OnDrawRouteRequestWithPath mListener) {
-        this.onDrawRouteRequest = mListener;
-    }
-
-    public void setOnCheckpointChanged(OnDataItemSelected<Checkpoint> onCheckpointItemSelected) {
-        this.onCheckpointItemSelected = onCheckpointItemSelected;
-    }
-
-    public void setOnNavigationToState(OnNavigationToState<Checkpoint> onNavigationToState) {
-        this.onNavigationToState = onNavigationToState;
-    }
-
-    private void setTimeLineString(int position) {
-        if (checkpoints.size() == 0) {
-            tvTimeLine.setVisibility(View.GONE);
-            return;
-        }
-        tvTimeLine.setVisibility(View.VISIBLE);
-        if (position == 0) {
-            if (checkpoints.size() == 1) {
-                tvTimeLine.setText(Html.fromHtml("<b>" + DateFormatter.format(checkpoints.get(position).getTime()) + "</b>"));
-            } else {
-                tvTimeLine.setText(Html.fromHtml(
-                        "<b>" + DateFormatter.format(checkpoints.get(position).getTime()) + "</b> - "
-                                + DateFormatter.format(checkpoints.get(position + 1).getTime())
-                ));
-            }
-        } else if (position == checkpoints.size() - 1) {
-            tvTimeLine.setText(Html.fromHtml(
-                    DateFormatter.format(checkpoints.get(position - 1).getTime()) + " - <b>"
-                            + DateFormatter.format(checkpoints.get(position).getTime()) + "</b>"
-            ));
-        } else {
-            tvTimeLine.setText(Html.fromHtml(
-                    DateFormatter.format(checkpoints.get(0).getTime()) + " - <b>"
-                            + DateFormatter.format(checkpoints.get(position).getTime()) + "</b> - "
-                            + DateFormatter.format(checkpoints.get(position + 1).getTime())));
-        }
-    }
-
-    void selectCheckpoint(int position) {
-        if (position >= 0 && position < checkpoints.size()) {
-            rv.smoothScrollToPosition(position);
-        }
-    }
-
-    public void selectCheckpoint(String checkpointId) {
-        for (int i = 0; i < checkpoints.size(); i++) {
-            if (checkpointId.equals(checkpoints.get(i).getId())) {
-                activePos = i;
-                if (isResumed()) {
-                    scrollToSelectedCheckpoint();
+        onVisitsChangedListener = new DatasManager.OnDatasChangedListener<Visit>() {
+            @Override
+            public void onItemInserted(int position, Visit data) {
+                Checkpoint activeCheckpoint = manager.getActiveCheckpoint();
+                if (activeCheckpoint != null) {
+                    adapter.notifyItemChanged(manager.getCheckpointsManager().indexOf(activeCheckpoint), Payload.UPDATE_NOTI_COUNT);
                 }
-                return;
             }
-        }
-    }
 
-    private void scrollToSelectedCheckpoint() {
-        onCheckpointItemSelected.selectItem(checkpoints.get(activePos));
-        adapter.notifyItemChanged(activePos, Payload.MAYBE_NEED_BTN_UPDATE);
-        rv.smoothScrollToPosition(activePos);
-    }
+            @Override
+            public void onItemChanged(int position, Visit data) {
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        scrollToSelectedCheckpoint();
-        manager.getCheckpointsManager().addOnItemChangedListener(onCheckpointChangedListener)
-                .addOnItemInsertedListener(onCheckpointInsertedListener)
-                .addOnItemRemovedListener(onCheckpointRemovedListener);
-    }
+            }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        manager.getCheckpointsManager().removeOnItemChangedListener(onCheckpointChangedListener)
-                .removeOnItemInsertedListener(onCheckpointInsertedListener)
-                .removeOnItemRemovedListener(onCheckpointRemovedListener);
+            @Override
+            public void onItemRemoved(int position, Visit data) {
+
+            }
+
+            @Override
+            public void onDataSetChanged(ArrayList<Visit> datas) {
+
+            }
+        };
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_bottom_checkpoints, container, false);
+        return inflater.inflate(R.layout.fragment_bottom_checkpoints, container, false);
+    }
 
-        tvTimeLine = v.findViewById(R.id.tv_count_frag_trip_overview);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        tvTopTimeLine = view.findViewById(R.id.tv_count_frag_trip_overview);
+        setTimeLineString(0);
 
-        // joined
-        rv = v.findViewById(R.id.rv_checkpoints_frag_trip_overview);
+        adapter = new Adapter();
+        rv = view.findViewById(R.id.rv_checkpoints_frag_trip_overview);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rv);
-
-        setTimeLineString(0);
         rv.addOnScrollListener(new RecyclerViewOnScrollListener(RecyclerViewOnScrollListener.ScrollMode.SCROLL_IDLE, snapHelper, new RecyclerViewOnScrollListener.OnNewPosition() {
             @Override
             public void onNewPosition(int position) {
                 Log.d(TAG, "new pos = " + position + "/" + checkpoints.size() + " " + checkpoints.get(position).getId());
                 setTimeLineString(position);
                 adapter.notifyItemChanged(position, Payload.MAYBE_NEED_BTN_UPDATE);
-                onCheckpointItemSelected.selectItem(checkpoints.get(position));
+                mapBackgroundInterfaces.cleanUpTempMarkerAndRoute();
+                mapBackgroundInterfaces.target(checkpoints.get(position));
             }
         }));
 
@@ -215,34 +160,98 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
         } else {
             rv.setVisibility(View.VISIBLE);
         }
-        return v;
     }
 
     @Override
-    public void onAttach(@NotNull Context context) {
-        super.onAttach(context);
-        Log.d(TAG, "onAttach");
+    public void onResume() {
+        super.onResume();
+        smoothScrollToPosition(activePos);
+        manager.getCheckpointsManager().addOnDatasChangedListener(onCheckpointsChangedListener);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        manager.getCheckpointsManager().removeOnDatasChangedListener(onCheckpointsChangedListener);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        onDrawRouteRequest = null;
-        onNavigationToState = null;
-        onCheckpointItemSelected = null;
+        navigationInterfaces = null;
+        mapBackgroundInterfaces = null;
+        onCheckpointsChangedListener = null;
+        onVisitsChangedListener = null;
     }
+
+    public void smoothScrollToPosition(int position) {
+        if (activePos < checkpoints.size()) {
+            rv.smoothScrollToPosition(position);
+        } else {
+            Log.e(TAG, "scroll to index out of bounds");
+        }
+    }
+
+    private void setTimeLineString(int position) {
+        if (checkpoints.size() == 0) {
+            tvTopTimeLine.setVisibility(View.GONE);
+            return;
+        }
+        tvTopTimeLine.setVisibility(View.VISIBLE);
+        if (position == 0) {
+            if (checkpoints.size() == 1) {
+                tvTopTimeLine.setText(Html.fromHtml("<b>" + DateFormatter.format(checkpoints.get(position).getTime()) + "</b>"));
+            } else {
+                tvTopTimeLine.setText(Html.fromHtml(
+                        "<b>" + DateFormatter.format(checkpoints.get(position).getTime()) + "</b> - "
+                                + DateFormatter.format(checkpoints.get(position + 1).getTime())
+                ));
+            }
+        } else if (position == checkpoints.size() - 1) {
+            tvTopTimeLine.setText(Html.fromHtml(
+                    DateFormatter.format(checkpoints.get(position - 1).getTime()) + " - <b>"
+                            + DateFormatter.format(checkpoints.get(position).getTime()) + "</b>"
+            ));
+        } else {
+            tvTopTimeLine.setText(Html.fromHtml(
+                    DateFormatter.format(checkpoints.get(0).getTime()) + " - <b>"
+                            + DateFormatter.format(checkpoints.get(position).getTime()) + "</b> - "
+                            + DateFormatter.format(checkpoints.get(position + 1).getTime())));
+        }
+    }
+
+    public void selectCheckpoint(String checkpointId) {
+        for (int i = 0; i < checkpoints.size(); i++) {
+            if (checkpointId.equals(checkpoints.get(i).getId())) {
+                activePos = i;
+                if (isResumed()) smoothScrollToPosition(activePos);
+                return;
+            }
+        }
+    }
+
+    public void setMapBackgroundInterfaces(MapBackgroundInterfaces mapBackgroundInterfaces) {
+        this.mapBackgroundInterfaces = mapBackgroundInterfaces;
+    }
+
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
+    }
+
 
     enum ActionButton {
         BTN_ROLL_UP, BTN_ROUTE
+    }
+
+    interface Payload {
+        int MAYBE_NEED_BTN_UPDATE = 1;
+        int UPDATE_NOTI_COUNT = 2;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvLocation, tvTime, tvDate;
         Button btnRoute, btnStart, btnCheckIn;
         ActionButton activeBtn;
-
-        // TODO: remove listener onPause
-        DatasManager.OnItemInsertedListener<Visit> onItemInsertedListener;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -255,7 +264,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
             btnStart = itemView.findViewById(R.id.btn_start_direction_item_checkpoint_frag_trip_overview);
         }
 
-        void setRollUpButton(final Button btnCheckIn, final Checkpoint checkpoint) {
+        void setRollUpButton(final Checkpoint checkpoint) {
             VisitsManager visitsManager = checkpoint.getVisitsManager();
             Visit visit = visitsManager.get(manager.getCurrentUser().getId());
             if (visit != null) {
@@ -264,7 +273,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
                 btnCheckIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onNavigationToState.newState(TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
+                        navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_FRIEND_LIST_EXPANDED, checkpoint);
                     }
                 });
             } else {
@@ -280,7 +289,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
                                 if (task.isSuccessful()) {
                                     Log.d(TAG, "diem danh thanh cong!");
                                     ViewAnim.toggleLoading(getContext(), btnCheckIn, false, "Đã điểm danh!");
-                                    setRollUpButton(btnCheckIn, checkpoint);
+                                    setRollUpButton(checkpoint);
                                 }
                             }
                         });
@@ -294,15 +303,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
             tvLocation.setText(checkpoint.getLocation());
             tvTime.setText(DateFormatter.formatTime(checkpoint.getTime()));
             tvDate.setText(DateFormatter.formatDate(checkpoint.getTime()));
-            setRollUpButton(btnCheckIn, checkpoint);
-
-            onItemInsertedListener = new DatasManager.OnItemInsertedListener<Visit>() {
-                @Override
-                public void onItemInserted(int position, Visit data) {
-                    setRollUpButton(btnCheckIn, checkpoint);
-                }
-            };
-            setRollUpButton(btnCheckIn, checkpoint);
+            setRollUpButton(checkpoint);
             btnStart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -344,7 +345,7 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
                                             }
                                             latLngs.add(new LatLng(to.getLatitude(), to.getLongitude()));
                                             btnRoute.setText(String.format("%s/%s", Formater.formatDistance(routeDistance), Formater.formatTime(routeDuration)));
-                                            onDrawRouteRequest.drawRoute(latLngs);
+                                            mapBackgroundInterfaces.drawLine(latLngs);
                                         }
                                 }
 
@@ -364,13 +365,13 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
                 btnRoute.setVisibility(View.GONE);
                 btnStart.setVisibility(View.GONE);
                 btnCheckIn.setVisibility(View.VISIBLE);
-                checkpoint.getVisitsManager().addOnItemInsertedListener(onItemInsertedListener);
+                checkpoint.getVisitsManager().addOnDatasChangedListener(onVisitsChangedListener);
 
             } else {
                 btnRoute.setVisibility(View.VISIBLE);
                 btnStart.setVisibility(View.VISIBLE);
                 btnCheckIn.setVisibility(View.GONE);
-                checkpoint.getVisitsManager().removeOnItemInsertedListener(onItemInsertedListener);
+                checkpoint.getVisitsManager().removeOnDatasChangedListener(onVisitsChangedListener);
             }
         }
     }
@@ -393,10 +394,14 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
         public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
             if (payloads.size() > 0) {
                 Checkpoint checkpoint = checkpoints.get(position);
-                if (LatLngDistance.measureDistance(manager.getCurrentUser().getLatLng(), checkpoint.getLatLng()) < 50) {
-                    holder.updateBtn(checkpoint, ActionButton.BTN_ROLL_UP);
+                if ((int) payloads.get(0) == Payload.MAYBE_NEED_BTN_UPDATE) {
+                    if (LatLngDistance.measureDistance(manager.getCurrentUser().getLatLng(), checkpoint.getLatLng()) < 50) {
+                        holder.updateBtn(checkpoint, ActionButton.BTN_ROLL_UP);
+                    } else {
+                        holder.updateBtn(checkpoint, ActionButton.BTN_ROUTE);
+                    }
                 } else {
-                    holder.updateBtn(checkpoint, ActionButton.BTN_ROUTE);
+                    holder.setRollUpButton(checkpoint);
                 }
             } else {
                 super.onBindViewHolder(holder, position, payloads);
@@ -407,9 +412,5 @@ public class BottomCheckpointsFragment extends Fragment implements NavigableToSt
         public int getItemCount() {
             return checkpoints.size();
         }
-    }
-
-    interface Payload {
-        int MAYBE_NEED_BTN_UPDATE = 1;
     }
 }

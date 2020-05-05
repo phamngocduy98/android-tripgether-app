@@ -170,7 +170,7 @@ public class CreateTripActivity extends OneAppbarActivity {
             screen.post(new Runnable() {
                 @Override
                 public void run() {
-                    ViewAnim.toggleHideShow(screen, false, ViewAnim.DIRECTION_RIGHT);
+                    ViewAnim.toggleHideShow(screen, false, ViewAnim.HIDE_DIRECTION_RIGHT);
                     screen.setVisibility(View.VISIBLE);
                 }
             });
@@ -182,7 +182,7 @@ public class CreateTripActivity extends OneAppbarActivity {
         activeScreen = position;
         setSubtitle(String.format(getString(R.string.tv_step_activity_create_trip), activeScreen + 1, 2));
         for (int i = 0; i < screens.size(); i++) {
-            ViewAnim.toggleHideShow(screens.get(i), i == position, ViewAnim.DIRECTION_RIGHT);
+            ViewAnim.toggleHideShow(screens.get(i), i == position, ViewAnim.HIDE_DIRECTION_RIGHT);
         }
     }
 

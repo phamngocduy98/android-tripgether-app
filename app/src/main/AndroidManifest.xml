@@ -111,7 +111,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/NoActionBar.NoStatusBar"
+            android:theme="@style/NoActionBar"
             android:windowSoftInputMode="adjustResize" />
     </application>
 

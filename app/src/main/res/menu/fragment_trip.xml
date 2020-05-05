@@ -9,13 +9,14 @@
         app:iconTint="@color/colorText"
         app:showAsAction="always" />
     <item
-        android:id="@+id/menu_notification_frag_trip"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="Thông báo"
+        android:id="@+id/menu_send_sos_frag_trip"
+        android:icon="@drawable/ic_add_alert_black_24dp"
+        android:title="Gửi yêu cầu hỗ trợ"
         app:iconTint="@color/colorText"
         app:showAsAction="always" />
     <item
-        android:id="@+id/menu_send_sos_frag_trip"
+        android:id="@+id/menu_send_sos_2_frag_trip"
+        android:icon="@drawable/ic_add_alert_black_24dp"
         android:title="Gửi yêu cầu hỗ trợ SOS" />
     <item
         android:id="@+id/menu_request_check_in_frag_trip"

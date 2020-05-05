@@ -1,6 +1,7 @@
 package cf.bautroixa.maptest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,7 +19,7 @@ import com.gauravbhola.ripplepulsebackground.RipplePulseLayout;
 
 import cf.bautroixa.maptest.data.FcmMessage;
 import cf.bautroixa.maptest.data.NotificationItem;
-import cf.bautroixa.maptest.data.SharedRefKey;
+import cf.bautroixa.maptest.data.SharedPrefs;
 import cf.bautroixa.maptest.firestore.Event;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 
@@ -54,7 +55,7 @@ public class AlertActivity extends AppCompatActivity {
         ripplePulseLayout = findViewById(R.id.layout_ripplepulse);
         ripplePulseLayout.startRippleAnimation();
 
-        Bundle bundle = getIntent().getExtras();
+        final Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             String eventId = bundle.getString(FcmMessage.EVENT_ID, null);
             String eventTime = bundle.getString(FcmMessage.EVENT_TIME, null);
@@ -72,6 +73,9 @@ public class AlertActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     // TODO: intent to main activity with data
                     vibrator.cancel();
+                    Intent intent = new Intent(AlertActivity.this, MainActivity.class);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
                     finish();
                 }
             });
@@ -90,7 +94,7 @@ public class AlertActivity extends AppCompatActivity {
 
         // Vibrate
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        if (sharedPref.getBoolean(SharedRefKey.VIBRATE_ON, true) && vibrator.hasVibrator()) {
+        if (sharedPref.getBoolean(SharedPrefs.VIBRATE, true) && vibrator.hasVibrator()) {
             long[] pattern = {0, 100, 1000};
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0));

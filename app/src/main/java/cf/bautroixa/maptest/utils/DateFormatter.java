@@ -35,7 +35,8 @@ public class DateFormatter {
             return String.format("%d giờ trước", deltaHour);
         }
         if (deltaHour == 0) {
-            return String.format("%d phút %s", deltaMinus, deltaMinus < 0 ? "trước" : "nữa");
+            if (deltaMinus == 0) return "Vữa xong";
+            return String.format("%d phút %s", Math.abs(deltaMinus), deltaMinus < 0 ? "trước" : "nữa");
         }
         if (deltaDay * deltaDay <= 1) {
             return format(date, "HH:mm ") + formatDate(date);
