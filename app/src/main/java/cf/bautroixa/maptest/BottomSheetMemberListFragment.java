@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -26,14 +28,14 @@ import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.firestore.Visit;
-import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
 import cf.bautroixa.maptest.utils.DateFormatter;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class BottomSheetMemberListFragment extends Fragment {
-    // const
+public class BottomSheetMemberListFragment extends Fragment implements Navigable {
     private static final String TAG = "FriendListStatusFrag";
 
     // data and state
@@ -42,7 +44,7 @@ public class BottomSheetMemberListFragment extends Fragment {
 
     // listener
     private DatasManager.OnDatasChangedListener<User> onMembersChangedListener;
-    private OnDataItemSelected<User> onFriendItemClickListener = null;
+    private NavigationInterfaces navigationInterfaces;
     private OnFilterUser onFilterUser, defaultUserFilter;
 
     // view
@@ -53,6 +55,7 @@ public class BottomSheetMemberListFragment extends Fragment {
     private FriendStatusAdapter friendStatusAdapter, friendStatusLiteAdapter;
 
     public BottomSheetMemberListFragment() {
+        manager = MainAppManager.getInstance();
         members = new ArrayList<>();
         defaultUserFilter = new OnFilterUser() {
             @Override
@@ -63,57 +66,9 @@ public class BottomSheetMemberListFragment extends Fragment {
         onFilterUser = defaultUserFilter;
     }
 
-    public void setOnFriendItemClickListener(OnDataItemSelected<User> onFriendItemClickListener) {
-        this.onFriendItemClickListener = onFriendItemClickListener;
-    }
-
-    public void applyFilter(OnFilterUser onFilterUser) {
-        this.onFilterUser = onFilterUser;
-        members.clear();
-        for (User user : manager.getMembers()) {
-            if (onFilterUser.onUserFiltering(user)) {
-                members.add(user);
-            }
-        }
-        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
-        if (this.friendStatusLiteAdapter != null)
-            this.friendStatusLiteAdapter.notifyDataSetChanged();
-    }
-
-    public void removeFilter() {
-        onFilterUser = defaultUserFilter;
-        members.clear();
-        members.addAll(manager.getMembers());
-        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
-        if (this.friendStatusLiteAdapter != null)
-            this.friendStatusLiteAdapter.notifyDataSetChanged();
-    }
-
-    public void onBottomSheetStateChanged(int newState) {
-        if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-            // hide Lite list
-            ViewAnim.toggleHideShow(dragMark, false, ViewAnim.DIRECTION_UP);
-            ViewAnim.toggleHideShow(rvFriendListLite, false, ViewAnim.DIRECTION_UP);
-        }
-        if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-            // show lite list
-            ViewAnim.toggleHideShow(dragMark, true, ViewAnim.DIRECTION_UP);
-            ViewAnim.toggleHideShow(rvFriendListLite, true, ViewAnim.DIRECTION_UP);
-        }
-    }
-
-    public void onSlideBottomSheet(float percent) {
-        rvFriendListLite.setTranslationY(-rvFriendListLite.getHeight() * percent);
-        rvFriendListLite.setAlpha(1 - percent);
-        rvFriendList.setTranslationY(-rvFriendListLite.getHeight() * percent);
-        rvFriendList.setAlpha(percent);
-    }
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        manager = MainAppManager.getInstance();
-        members = new ArrayList<>();
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
         members.addAll(manager.getMembers());
         friendStatusAdapter = new FriendStatusAdapter();
         friendStatusLiteAdapter = new FriendStatusLiteAdapter();
@@ -153,6 +108,32 @@ public class BottomSheetMemberListFragment extends Fragment {
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_bottom_sheet_member_list, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        dragMark = view.findViewById(R.id.drag_mark_frag_friend_list_status);
+
+        rvFriendList = view.findViewById(R.id.rv_friend_list);
+        rvFriendListLite = view.findViewById(R.id.rv_friend_list_lite);
+        rvFriendList.setAdapter(friendStatusAdapter);
+        rvFriendListLite.setAdapter(friendStatusLiteAdapter);
+        rvFriendList.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvFriendListLite.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
+
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(rvFriendListLite);
+
+        ViewAnim.toggleHideShow(dragMark, true, ViewAnim.HIDE_DIRECTION_UP);
+        ViewAnim.toggleHideShow(rvFriendListLite, true, ViewAnim.HIDE_DIRECTION_UP);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         manager.getMembersManager().addOnDatasChangedListener(onMembersChangedListener);
@@ -165,33 +146,57 @@ public class BottomSheetMemberListFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_bottom_sheet_member_list, container, false);
-
-        dragMark = v.findViewById(R.id.drag_mark_frag_friend_list_status);
-
-        rvFriendList = v.findViewById(R.id.rv_friend_list);
-        rvFriendListLite = v.findViewById(R.id.rv_friend_list_lite);
-        rvFriendList.setAdapter(friendStatusAdapter);
-        rvFriendListLite.setAdapter(friendStatusLiteAdapter);
-        rvFriendList.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvFriendListLite.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
-
-        SnapHelper snapHelper = new PagerSnapHelper();
-        snapHelper.attachToRecyclerView(rvFriendListLite);
-
-        ViewAnim.toggleHideShow(dragMark, true, ViewAnim.DIRECTION_UP);
-        ViewAnim.toggleHideShow(rvFriendListLite, true, ViewAnim.DIRECTION_UP);
-
-        return v;
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
-        onFriendItemClickListener = null;
         this.removeFilter();
+        navigationInterfaces = null;
+        onMembersChangedListener = null;
+    }
+
+    public void applyFilter(OnFilterUser onFilterUser) {
+        this.onFilterUser = onFilterUser;
+        members.clear();
+        for (User user : manager.getMembers()) {
+            if (onFilterUser.onUserFiltering(user)) {
+                members.add(user);
+            }
+        }
+        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
+        if (this.friendStatusLiteAdapter != null)
+            this.friendStatusLiteAdapter.notifyDataSetChanged();
+    }
+
+    public void removeFilter() {
+        onFilterUser = defaultUserFilter;
+        members.clear();
+        members.addAll(manager.getMembers());
+        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
+        if (this.friendStatusLiteAdapter != null)
+            this.friendStatusLiteAdapter.notifyDataSetChanged();
+    }
+
+    public void onBottomSheetStateChanged(int newState) {
+        if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+            // hide Lite list
+            ViewAnim.toggleHideShow(dragMark, false, ViewAnim.HIDE_DIRECTION_UP);
+            ViewAnim.toggleHideShow(rvFriendListLite, false, ViewAnim.HIDE_DIRECTION_UP);
+        }
+        if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+            // show lite list
+            ViewAnim.toggleHideShow(dragMark, true, ViewAnim.HIDE_DIRECTION_UP);
+            ViewAnim.toggleHideShow(rvFriendListLite, true, ViewAnim.HIDE_DIRECTION_UP);
+        }
+    }
+
+    public void onSlideBottomSheet(float percent) {
+        rvFriendListLite.setTranslationY(-rvFriendListLite.getHeight() * percent);
+        rvFriendListLite.setAlpha(1 - percent);
+        rvFriendList.setTranslationY(-rvFriendListLite.getHeight() * percent);
+        rvFriendList.setAlpha(percent);
+    }
+
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
     }
 
     public interface OnFilterUser {
@@ -232,7 +237,7 @@ public class BottomSheetMemberListFragment extends Fragment {
             progressBattery.setProgress(user.getBattery());
             tvLocation.setText(user.getCurrentLocation());
             if (!user.getAvatar().equals(currentUser.getAvatar())) {
-                ImageHelper.loadImage(user.getAvatar(), imgAvatar);
+                ImageHelper.loadCircleImage(user.getAvatar(), imgAvatar);
             }
             if (manager.getSosRequestsManager().contains(user.getId())) {
                 tvCount.setText("SOS");
@@ -248,7 +253,6 @@ public class BottomSheetMemberListFragment extends Fragment {
             if (activeCheckpoint != null) {
                 Visit userVisit = activeCheckpoint.getVisitsManager().get(user.getId());
                 if (userVisit != null) {
-                    // TODO: userVisit.getTime() may NULL here OR NOT :V
                     tvLocation.setText(String.format("Đã có mặt lúc %s", DateFormatter.format(userVisit.getTime())));
                     tvCount.setText(R.string.tv_user_checked_in);
                     tvCount.setSelected(true); // green background
@@ -263,8 +267,18 @@ public class BottomSheetMemberListFragment extends Fragment {
                 imgAvatar.setVisibility(View.INVISIBLE);
                 tvNameInAvatar.setText(user.getShortName());
             }
-            ImageHelper.loadImage(user.getAvatar(), imgAvatar);
+            ImageHelper.loadCircleImage(user.getAvatar(), imgAvatar);
             this.update(user);
+        }
+    }
+
+    public class FriendStatusLiteAdapter extends FriendStatusAdapter {
+
+        @NonNull
+        @Override
+        public FriendStatusLiteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_bottom_sheet_member_list_item_lite, parent, false);
+            return new FriendStatusLiteViewHolder(v);
         }
     }
 
@@ -282,7 +296,7 @@ public class BottomSheetMemberListFragment extends Fragment {
 
         @Override
         public void bind(User user) {
-            ImageHelper.loadImage(user.getAvatar(), imgAvatar);
+            ImageHelper.loadCircleImage(user.getAvatar(), imgAvatar);
             if (user.getId().equals(manager.getCurrentTrip().getLeader().getId())) {
                 tvCount.setText("L");
             } else {
@@ -312,7 +326,7 @@ public class BottomSheetMemberListFragment extends Fragment {
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onFriendItemClickListener.selectItem(user);
+                    navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
                 }
             });
         }
@@ -325,7 +339,7 @@ public class BottomSheetMemberListFragment extends Fragment {
                 holder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onFriendItemClickListener.selectItem(user);
+                        navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
                     }
                 });
             } else {
@@ -337,16 +351,6 @@ public class BottomSheetMemberListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return members.size();
-        }
-    }
-
-    public class FriendStatusLiteAdapter extends FriendStatusAdapter {
-
-        @NonNull
-        @Override
-        public FriendStatusLiteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_bottom_sheet_member_list_item_lite, parent, false);
-            return new FriendStatusLiteViewHolder(v);
         }
     }
 }

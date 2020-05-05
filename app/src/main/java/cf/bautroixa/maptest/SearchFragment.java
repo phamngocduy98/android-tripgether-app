@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -28,9 +30,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.theme.ViewAnim;
@@ -42,42 +47,45 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class SearchFragment extends Fragment {
+public class SearchFragment extends Fragment implements Navigable {
     public static final int STATE_SEARCH = 1;
     public static final int STATE_COLLAPSED = 0;
     private static final String TAG = "SearchFragment";
-    private static final String ARG_AVATAR_URL = "avatar_url";
-    OnSearchItemClickedListener onSearchItemClickedListener = null;
-    int currentState = STATE_COLLAPSED;
-    String avatarUrl = "";
-    boolean showToolbar = true;
-    RecyclerView rvSearchResult;
-    SearchResultAdapter searchResultAdapter;
-    ConstraintLayout root;
-    Toolbar toolbar;
-    EditText editSearch;
-    ImageButton btnBack, btnClear;
-    RoundedImageView imgAvatar;
+
     private MainAppManager manager;
+    private NavigationInterfaces navigationInterfaces;
+
+    private int currentState = STATE_COLLAPSED;
+    private String avatarUrl = "";
+    private boolean showToolbar = true;
+
+    private ConstraintLayout root;
+    private Toolbar toolbar;
+    private EditText editSearch;
+    private ImageButton btnBack, btnClear;
+    private RoundedImageView imgAvatar;
+    private RecyclerView rvSearchResult;
+    private SearchResultAdapter searchResultAdapter;
 
     public SearchFragment() {
         manager = MainAppManager.getInstance();
     }
 
-    public void showHideCompletely(boolean isShown) {
-        ViewAnim.toggleHideShow(root, isShown, ViewAnim.DIRECTION_UP);
-    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
 
-    public void showHideToolbar(boolean isShown) {
-        showToolbar = isShown;
-        ViewAnim.toggleHideShow(toolbar, isShown, ViewAnim.DIRECTION_UP);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_search, container, false);
+        return inflater.inflate(R.layout.fragment_search, container, false);
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         root = view.findViewById(R.id.root_frag_search);
         toolbar = view.findViewById(R.id.toolbar_frag_search);
         btnBack = view.findViewById(R.id.btn_back_frag_search);
@@ -85,18 +93,17 @@ public class SearchFragment extends Fragment {
         imgAvatar = view.findViewById(R.id.img_avatar_frag_search);
         editSearch = view.findViewById(R.id.edit_search_location_frag_search);
 
-        toolbar.postDelayed(new Runnable() {
+        btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                ViewAnim.toggleHideShow(toolbar, false, ViewAnim.DIRECTION_UP);
+            public void onClick(View v) {
+                handleState(STATE_COLLAPSED);
+                editSearch.setText("");
             }
-        }, 5000);
-
+        });
         imgAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(), ProfileActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(getContext(), ProfileActivity.class));
             }
         });
 
@@ -104,15 +111,21 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (currentState == STATE_COLLAPSED) handleState(STATE_SEARCH);
+                editSearch.requestFocus();
             }
         });
-
         editSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     if (currentState == STATE_COLLAPSED) handleState(STATE_SEARCH);
                 }
+            }
+        });
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editSearch.setText("");
             }
         });
 
@@ -167,27 +180,10 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                handleState(STATE_COLLAPSED);
-                editSearch.setText("");
-            }
-        });
-
-        btnClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editSearch.setText("");
-            }
-        });
-
         rvSearchResult = view.findViewById(R.id.rv_search_results);
         searchResultAdapter = new SearchResultAdapter();
         rvSearchResult.setAdapter(searchResultAdapter);
         rvSearchResult.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
-
-        return view;
     }
 
     @Override
@@ -206,9 +202,9 @@ public class SearchFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (manager.isLoggedIn()) {
-            if (!avatarUrl.equals(manager.getCurrentUser().getAvatar())) {
+            if (!Objects.equals(avatarUrl, manager.getCurrentUser().getAvatar())) {
                 avatarUrl = manager.getCurrentUser().getAvatar();
-                ImageHelper.loadImage(avatarUrl, imgAvatar);
+                ImageHelper.loadCircleImage(avatarUrl, imgAvatar);
             }
         }
     }
@@ -222,31 +218,38 @@ public class SearchFragment extends Fragment {
                 showHideToolbar(showToolbar);
                 btnBack.setVisibility(View.GONE);
                 editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(24, getContext()), 0, _50dp, 0);
-                ViewAnim.toggleHideShow(rvSearchResult, false, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(rvSearchResult, false, ViewAnim.HIDE_DIRECTION_UP);
                 editSearch.clearFocus();
                 KeyboardHelper.hideSoftKeyboard(editSearch);
                 break;
             case STATE_SEARCH:
-                ViewAnim.toggleHideShow(toolbar, true, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(toolbar, true, ViewAnim.HIDE_DIRECTION_UP);
                 btnBack.setVisibility(View.VISIBLE);
                 editSearch.setPadding(_50dp, 0, _50dp, 0);
-                ViewAnim.toggleHideShow(rvSearchResult, true, ViewAnim.DIRECTION_UP);
+                ViewAnim.toggleHideShow(rvSearchResult, true, ViewAnim.HIDE_DIRECTION_UP);
                 break;
         }
     }
 
-    public void setOnSearchItemClickedListener(OnSearchItemClickedListener onSearchItemClickedListener) {
-        this.onSearchItemClickedListener = onSearchItemClickedListener;
-    }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        this.onSearchItemClickedListener = null;
+        this.navigationInterfaces = null;
     }
 
-    public interface OnSearchItemClickedListener {
-        void onSearchItemClicked(SearchResult searchResult);
+    public void showHideCompletely(boolean isShown) {
+        ViewAnim.toggleHideShow(root, isShown, ViewAnim.HIDE_DIRECTION_UP);
+    }
+
+    public void showHideToolbar(boolean isShown) {
+        showToolbar = isShown;
+        ViewAnim.toggleHideShow(toolbar, isShown, ViewAnim.HIDE_DIRECTION_UP);
+    }
+
+    @Override
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
     }
 
     public class SearchResultViewHolder extends OneRecyclerView.ViewHolder {
@@ -269,11 +272,9 @@ public class SearchFragment extends Fragment {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (onSearchItemClickedListener != null) {
-                        editSearch.setText(searchResult.getPlaceName());
-                        handleState(STATE_COLLAPSED);
-                        onSearchItemClickedListener.onSearchItemClicked(searchResult);
-                    }
+                    editSearch.setText(searchResult.getPlaceName());
+                    handleState(STATE_COLLAPSED);
+                    navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_SEARCH_RESULT, searchResult);
                 }
             });
         }

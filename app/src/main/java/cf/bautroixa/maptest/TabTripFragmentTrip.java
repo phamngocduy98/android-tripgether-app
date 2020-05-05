@@ -22,19 +22,19 @@ import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.interfaces.NavigableToMainTab;
-import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ImageHelper;
 import cf.bautroixa.maptest.utils.IntentHelper;
 
-public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab {
+public class TabTripFragmentTrip extends Fragment implements Navigable {
     ArrayList<SosRequest> sosRequests;
 
     MainAppManager manager;
     private String[] leverStrings = new String[3];
-    private OnNavigationToMainTab onNavigationToMainTab;
+    private NavigationInterfaces navigationInterfaces;
     private DatasManager.OnDatasChangedListener<SosRequest> onSosChangedListener;
 
     /**
@@ -133,10 +133,20 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
     }
 
     @Override
+    public void onAttachFragment(@NonNull Fragment childFragment) {
+        super.onAttachFragment(childFragment);
+        if (childFragment instanceof Navigable) {
+            ((Navigable) childFragment).setNavigationInterfaces(navigationInterfaces);
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         // TODO: improve performance
-        tvTripCode.setText(Objects.requireNonNull(manager.getCurrentTripRef()).getId());
+        if (manager.getCurrentTripRef() != null) {
+            tvTripCode.setText(manager.getCurrentTripRef().getId());
+        }
         if (manager.getMySosRequest() != null) {
             btnAddEditSos.setText("Cập nhật yêu cầu hỗ trợ");
             btnAddEditSos.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
@@ -156,12 +166,12 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
     @Override
     public void onDetach() {
         super.onDetach();
-        onNavigationToMainTab = null;
+        navigationInterfaces = null;
         onSosChangedListener = null;
     }
 
-    public void setOnNavigationToMainTab(OnNavigationToMainTab onNavigationToMainTab) {
-        this.onNavigationToMainTab = onNavigationToMainTab;
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
     }
 
     public class SosVH extends OneRecyclerView.ViewHolder {
@@ -187,7 +197,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
                 tvLever.setText(String.format("Mức độ: %s", leverStrings[sosRequest.getLever()]));
             }
             if (user != null) {
-                ImageHelper.loadImage(user.getAvatar(), imgAvatar);
+                ImageHelper.loadCircleImage(user.getAvatar(), imgAvatar);
                 tvName.setText(user.getName());
             }
             tvDes.setText(sosRequest.getDescription());
@@ -209,7 +219,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigableToMainTab 
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, sosRequest);
+                    navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, sosRequest);
                 }
             });
         }

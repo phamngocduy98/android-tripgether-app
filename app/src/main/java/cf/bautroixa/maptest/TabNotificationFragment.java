@@ -13,29 +13,29 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.data.NotificationItem;
+import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.Event;
 import cf.bautroixa.maptest.firestore.MainAppManager;
-import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
-import cf.bautroixa.maptest.interfaces.NavigableToMainTab;
-import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
+import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneRecyclerView;
 import cf.bautroixa.maptest.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ImageHelper;
 
-public class TabNotificationFragment extends OneAppbarFragment implements NavigableToMainTab, DataItemsSelectable<Event> {
+public class TabNotificationFragment extends OneAppbarFragment implements Navigable {
     private MainAppManager manager;
 
     private RecyclerView rvNotifications;
     private NotificationAdapter adapter;
 
     private DatasManager.OnDatasChangedListener<Event> onEventsChangedListener;
-    private OnNavigationToMainTab onNavigationToMainTab;
-    private OnDataItemSelected<Event> onEventItemSelected;
+    private NavigationInterfaces navigationInterfaces;
 
     public TabNotificationFragment() {
         manager = MainAppManager.getInstance();
@@ -61,16 +61,6 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
                 adapter.notifyDataSetChanged();
             }
         };
-    }
-
-    @Override
-    public void setOnNavigationToMainTab(OnNavigationToMainTab onNavigationToMainTab) {
-        this.onNavigationToMainTab = onNavigationToMainTab;
-    }
-
-    @Override
-    public void setOnDataItemSelected(OnDataItemSelected<Event> onEventItemSelected) {
-        this.onEventItemSelected = onEventItemSelected;
     }
 
     @Override
@@ -106,9 +96,14 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
     @Override
     public void onDetach() {
         super.onDetach();
-        onEventItemSelected = null;
-        onNavigationToMainTab = null;
+        navigationInterfaces = null;
     }
+
+    @Override
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
+    }
+
 
     public class NotificationVH extends OneRecyclerView.ViewHolder {
         View view;
@@ -133,7 +128,7 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
             } else {
                 imgType.setImageResource(R.drawable.ic_assistant_photo_black_24dp);
             }
-            ImageHelper.loadImage(notificationItem.getAvatar(), imgAvatar);
+            ImageHelper.loadCircleImage(notificationItem.getAvatar(), imgAvatar);
         }
     }
 
@@ -158,8 +153,18 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (onEventItemSelected != null)
-                        onEventItemSelected.selectItem(event);
+                    switch (event.getType()) {
+                        case Event.Type.CHECKPOINT_ADDED:
+                        case Event.Type.CHECKPOINT_ROLL_UP_ADDED:
+                            Checkpoint checkpoint = manager.getCheckpointsManager().get(Objects.requireNonNull(event.getCheckpointRef()).getId());
+                            navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, checkpoint);
+                            break;
+                        case Event.Type.USER_ADDED:
+                        case Event.Type.USER_SOS_ADDED:
+                            User user = manager.getMembersManager().get(Objects.requireNonNull(event.getUserRef()).getId());
+                            navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS);
+                            break;
+                    }
                 }
             });
         }

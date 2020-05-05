@@ -214,7 +214,7 @@ public class MainAppManager {
 
     public void sendJoinTrip(String tripRefId, final OnComplete onComplete) {
 //        sendJoinTrip(null, db.collection(Collections.TRIPS).document(tripRefId), onCompleteListener);
-        HttpRequest.getInstance().getTripService().joinTrip("omMSekFQ9cc45qljkrZpGXXZncg1", "lNDdjhIGvpWsjUdewVNn").enqueue(new Callback<HttpRequest.APIResponse>() {
+        HttpRequest.getInstance().getTripService().joinTrip(currentUserRef.getId(), tripRefId).enqueue(new Callback<HttpRequest.APIResponse>() {
             @Override
             public void onResponse(@NotNull Call<HttpRequest.APIResponse> call, @NotNull Response<HttpRequest.APIResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {

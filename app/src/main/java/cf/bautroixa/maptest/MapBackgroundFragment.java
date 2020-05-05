@@ -124,7 +124,8 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
 
             @Override
             public void onDataSetChanged(ArrayList<User> datas) {
-
+                mMap.clear();
+                initFriendMarkers(); // TODO: clear and re init marker
             }
         };
 
@@ -146,7 +147,8 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
 
             @Override
             public void onDataSetChanged(ArrayList<Checkpoint> datas) {
-
+                mMap.clear();
+                initCheckpointMarker(); // TODO: clear and re init marker
             }
         };
     }
@@ -189,11 +191,6 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        UiSettings uiSetting = mMap.getUiSettings();
-        uiSetting.setMapToolbarEnabled(false);
-//        uiSetting.setZoomControlsEnabled(false);
-//        mMap.setMyLocationEnabled(true);
         try {
             int nightModeFlags = requireContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
             if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
@@ -204,6 +201,11 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Can't find style. Error: ", e);
         }
+        mMap = googleMap;
+        UiSettings uiSetting = mMap.getUiSettings();
+        uiSetting.setMapToolbarEnabled(false);
+//        uiSetting.setZoomControlsEnabled(false);
+//        mMap.setMyLocationEnabled(true);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 14));
         mMap.setOnMapLoadedCallback(this);
@@ -288,7 +290,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
                                 markerImage.setVisibility(View.INVISIBLE);
                                 tvName.setText(user.getShortName());
                             } else {
-                                ImageHelper.loadImage(user.getAvatar(), markerImage);
+                                ImageHelper.loadCircleImage(user.getAvatar(), markerImage);
                             }
                         }
                     })))));
@@ -359,17 +361,19 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         if (checkpoint != null && checkpoint.getLatLng() != null && getContext() != null) {
             Log.d(TAG, "targeting...");
             targetCamera(true, checkpoint.getLatLng());
-            if (activeMarker != null) activeMarker.setIcon(null);
+            if (activeMarker != null) {
+//                activeMarker.setIcon(null);
+            }
             activeMarker = checkpoint.getMarker();
             // TODO: ( java.lang.IllegalArgumentException: Unmanaged descriptor ) bellow this line : setIcon on removed marker
-            if (activeMarker != null)
-                activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
-                    @Override
-                    public void edit(View view) {
-                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
-                        tvName.setText(String.valueOf(checkpointIndex));
-                    }
-                }))));
+//            if (activeMarker != null)
+//                activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
+//                    @Override
+//                    public void edit(View view) {
+//                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
+//                        tvName.setText(String.valueOf(checkpointIndex));
+//                    }
+//                }))));
         }
     }
 

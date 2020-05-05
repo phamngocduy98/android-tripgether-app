@@ -8,6 +8,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.ServerTimestamp;
 
+import java.util.Calendar;
+
 import cf.bautroixa.maptest.data.NotificationItem;
 
 public class Event extends Data {
@@ -66,9 +68,9 @@ public class Event extends Data {
         this.checkpointRef = checkpointRef;
     }
 
-    @Nullable
     public Timestamp getTime() {
-        return time;
+        if (time != null) return time;
+        return new Timestamp(Calendar.getInstance().getTime());
     }
 
     public void setTime(Timestamp time) {

@@ -29,6 +29,7 @@
         android:text="Your name\ndasd"
         android:textColor="@color/colorText"
         android:textSize="24sp"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/img_avatar_bottom_member_item"
         app:layout_constraintTop_toTopOf="@+id/img_avatar_bottom_member_item" />
@@ -57,6 +58,8 @@
         android:text="Near Bau Troi Xa Studio, Ha Noi, Viet Nam\n Duy pro asdasdasd as asd asd ad ad asd asd a"
         android:textColor="@color/colorTextSecondary"
         android:textSize="14sp"
+        android:drawableStart="@drawable/ic_place_black_24dp"
+        android:drawableTint="@color/colorText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/img_avatar_bottom_member_item"
         app:layout_constraintTop_toBottomOf="@+id/tv_name_bottom_member_item" />

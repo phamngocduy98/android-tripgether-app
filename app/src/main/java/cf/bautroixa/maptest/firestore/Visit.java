@@ -1,11 +1,11 @@
 package cf.bautroixa.maptest.firestore;
 
-import androidx.annotation.Nullable;
-
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Calendar;
 
 public class Visit extends Data {
     @Exclude
@@ -20,9 +20,9 @@ public class Visit extends Data {
         this.time = time;
     }
 
-    @Nullable
     public Timestamp getTime() {
-        return time;
+        if (time != null) return time;
+        return new Timestamp(Calendar.getInstance().getTime());
     }
 
     public void setTime(Timestamp time) {

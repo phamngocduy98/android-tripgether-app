@@ -15,7 +15,7 @@ import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.interfaces.OnDrawRouteRequest;
+import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
 import cf.bautroixa.maptest.theme.OneBottomSheetDialog;
 
 public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
@@ -24,14 +24,14 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
     SosRequest sosRequest;
     String sosRequestId;
     Data.OnNewValueListener<SosRequest> onSosRequestNewValueListener;
-    OnDrawRouteRequest onDrawRouteRequest;
+    MapBackgroundInterfaces mapBackgroundInterfaces;
     private MainAppManager manager;
     private TextView tvUserName, tvUserLocation, tvLever, tvDesc;
     private Button btnGetDirection;
 
-    public SosRequestViewDialogFragment(OnDrawRouteRequest onDrawRouteRequest) {
+    public SosRequestViewDialogFragment(MapBackgroundInterfaces mapBackgroundInterfaces) {
         manager = MainAppManager.getInstance();
-        this.onDrawRouteRequest = onDrawRouteRequest;
+        this.mapBackgroundInterfaces = mapBackgroundInterfaces;
         onSosRequestNewValueListener = new Data.OnNewValueListener<SosRequest>() {
             @Override
             public void onNewData(SosRequest sosRequest) {
@@ -40,10 +40,10 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
         };
     }
 
-    public static SosRequestViewDialogFragment newInstance(OnDrawRouteRequest onDrawRouteRequest, String sosRequestId) {
+    public static SosRequestViewDialogFragment newInstance(MapBackgroundInterfaces mapBackgroundInterfaces, String sosRequestId) {
         Bundle args = new Bundle();
         args.putString(ARG_ID, sosRequestId);
-        SosRequestViewDialogFragment fragment = new SosRequestViewDialogFragment(onDrawRouteRequest);
+        SosRequestViewDialogFragment fragment = new SosRequestViewDialogFragment(mapBackgroundInterfaces);
         fragment.setArguments(args);
         return fragment;
     }
@@ -79,7 +79,7 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
                 @Override
                 public void onClick(View v) {
                     // TODO: get direction heree
-                    onDrawRouteRequest.drawRouteTo(user.getLatLng());
+                    mapBackgroundInterfaces.drawRoute(null, user.getLatLng());
                 }
             });
         }

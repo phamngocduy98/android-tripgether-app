@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,31 +31,39 @@ import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.Trip;
-import cf.bautroixa.maptest.interfaces.NavigableToMainTab;
-import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.OnePromptDialog;
 import cf.bautroixa.maptest.utils.UrlParser;
 
 
-public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, NavigableToMainTab {
+public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, Navigable {
     private static final String TAG = "TabTripFragment";
     public static final int STATE_NONE = 0;
     public static final int STATE_NO_TRIP = 1;
     public static final int STATE_TRIP = 2;
+    public static final int TAB_TRIP = 0;
+    public static final int TAB_CHECKPOINTS = 1;
     String[] tabNames = {"Chuyến đi", "Điểm đến"};
+
+    private MainAppManager manager;
+    private int currentState = STATE_NONE;
+    private NavigationInterfaces navigationInterfaces = null;
+    private Data.OnNewValueListener<Trip> tripOnNewValueListener;
+
     Button btnCreateTrip, btnJoinTrip;
     ViewPager2 pager;
     TabLayout tabLayout;
     TabAdapter adapter;
-    private MainAppManager manager;
-    private int currentState = STATE_NONE;
-    private OnNavigationToMainTab onNavigationToMainTab = null;
-    private Data.OnNewValueListener<Trip> tripOnNewValueListener;
 
     public TabTripFragment() {
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
         manager = MainAppManager.getInstance();
         tripOnNewValueListener = new Data.OnNewValueListener<Trip>() {
             @Override
@@ -205,22 +214,16 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         switch (item.getItemId()) {
             case R.id.menu_add_frag_trip:
                 if (!manager.isTripLeader()) return false;
-                if (pager.getCurrentItem() == 0) {
                     DialogCheckpointEditFragment.newInstance(new DialogCheckpointEditFragment.OnCheckpointSetListener() {
                         @Override
                         public void onCheckpointSet(Checkpoint checkpoint) {
                             manager.getCheckpointsManager().create(null, checkpoint);
                         }
                     }).show(getChildFragmentManager(), "add checkpoint");
-                } else {
-                    new SosRequestEditDialogFragment().show(getChildFragmentManager(), "add edit sos");
-                }
-                return true;
-            case R.id.menu_notification_frag_trip:
                 return true;
             case R.id.menu_send_sos_frag_trip:
-                SosRequestEditDialogFragment sosDialogFragment = new SosRequestEditDialogFragment();
-                sosDialogFragment.show(getChildFragmentManager(), "send SOS");
+            case R.id.menu_send_sos_2_frag_trip:
+                new SosRequestEditDialogFragment().show(getChildFragmentManager(), "add edit sos");
                 return true;
             case R.id.menu_request_check_in_frag_trip:
                 OneDialog.Builder builder = new OneDialog.Builder();
@@ -316,22 +319,17 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         }
     }
 
-    public void setOnNavigationToMainTab(OnNavigationToMainTab onNavigationToMainTab) {
-        this.onNavigationToMainTab = onNavigationToMainTab;
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
     }
 
     @Override
     public void onAttachFragment(@NonNull Fragment childFragment) {
         super.onAttachFragment(childFragment);
         if (childFragment instanceof TabTripFragmentCheckpoints) {
-            ((TabTripFragmentCheckpoints) childFragment).setOnDataItemSelected(new OnDataItemSelected<Checkpoint>() {
-                @Override
-                public void selectItem(Checkpoint checkpoint) {
-                    onNavigationToMainTab.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, checkpoint);
-                }
-            });
+            ((TabTripFragmentCheckpoints) childFragment).setNavigationInterfaces(navigationInterfaces);
         } else if (childFragment instanceof TabTripFragmentTrip) {
-            ((TabTripFragmentTrip) childFragment).setOnNavigationToMainTab(onNavigationToMainTab);
+            ((TabTripFragmentTrip) childFragment).setNavigationInterfaces(navigationInterfaces);
         }
     }
 

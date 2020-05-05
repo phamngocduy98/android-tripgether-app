@@ -51,13 +51,19 @@ public class ImageHelper {
         }
     }
 
-    public static void loadImage(String imageUrl, ImageView target) {
-        loadImage(imageUrl, target, 50, 50);
+    public static void loadCircleImage(String imageUrl, ImageView target) {
+        loadCircleImage(imageUrl, target, 50, 50);
+    }
+
+    public static void loadCircleImage(String imageUrl, ImageView target, int width, int height) {
+        if (imageUrl == null || imageUrl.length() == 0)
+            imageUrl = "https://sites.google.com/site/masoibot/user/user.png";
+        Picasso.get().load(imageUrl).resize(width, height).centerCrop().transform(new CircleImageTransform()).placeholder(R.drawable.user).into(target);
     }
 
     public static void loadImage(String imageUrl, ImageView target, int width, int height) {
         if (imageUrl == null || imageUrl.length() == 0)
             imageUrl = "https://sites.google.com/site/masoibot/user/user.png";
-        Picasso.get().load(imageUrl).resize(width, height).centerCrop().transform(new CircleImageTransform()).placeholder(R.drawable.user).into(target);
+        Picasso.get().load(imageUrl).resize(width, height).centerCrop().placeholder(R.drawable.user).into(target);
     }
 }

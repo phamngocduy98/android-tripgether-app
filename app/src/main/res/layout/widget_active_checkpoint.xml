@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_widget_active_checkpoint"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_radius_full_white"
@@ -16,8 +17,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:marker="@drawable/ic_ticker"
         app:lineWidth="1dp"
+        app:marker="@drawable/ic_ticker"
         app:startLineColor="@color/colorBorder" />
 
     <TextView
@@ -32,24 +33,29 @@
 
     <TextView
         android:id="@+id/tv_name_widget_active_checkpoint"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:fontFamily="sans-serif-light"
         android:text="Điểm xuất phát"
         android:textSize="24sp"
+        app:layout_constraintEnd_toStartOf="@+id/tv_visited_count_widget_active_checkpoint"
         app:layout_constraintStart_toStartOf="@+id/tv_time_remain_widget_active_checkpoint"
         app:layout_constraintTop_toBottomOf="@+id/tv_time_remain_widget_active_checkpoint" />
 
     <TextView
         android:id="@+id/tv_location_widget_active_checkpoint"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="16dp"
-        android:textColor="@color/colorTextSecondary"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:singleLine="true"
         android:text="Gần đại học quốc gia Hà Nội"
+        android:textColor="@color/colorTextSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tv_name_widget_active_checkpoint"
         app:layout_constraintStart_toStartOf="@+id/tv_name_widget_active_checkpoint"
         app:layout_constraintTop_toBottomOf="@+id/tv_name_widget_active_checkpoint" />
 
@@ -60,8 +66,8 @@
         android:layout_marginEnd="24dp"
         android:fontFamily="sans-serif-condensed"
         android:text="1/10"
-        android:visibility="invisible"
         android:textSize="24sp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

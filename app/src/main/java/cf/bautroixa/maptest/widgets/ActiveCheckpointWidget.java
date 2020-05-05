@@ -1,31 +1,37 @@
 package cf.bautroixa.maptest.widgets;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
 
 import com.github.vipulasri.timelineview.TimelineView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import cf.bautroixa.maptest.MainActivity;
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.TabMapFragment;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.utils.DateFormatter;
 
 
-public class ActiveCheckpointWidget extends Fragment {
+public class ActiveCheckpointWidget extends Fragment implements Navigable {
     MainAppManager manager;
     ArrayList<Checkpoint> checkpoints;
 
+    ConstraintLayout root;
+    private NavigationInterfaces navigationInterfaces;
     TimelineView timelineView;
     TextView tvTimeRemain, tvName, tvLocation;
 
@@ -34,11 +40,17 @@ public class ActiveCheckpointWidget extends Fragment {
         checkpoints = manager.getCheckpoints();
     }
 
-    private void update(@Nullable Checkpoint checkpoint) {
+    private void update(@Nullable final Checkpoint checkpoint) {
         if (checkpoint != null){
             tvTimeRemain.setText(DateFormatter.format(checkpoint.getTime()));
             tvName.setText(checkpoint.getName());
             tvLocation.setText(checkpoint.getPlaceName());
+            root.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, checkpoint);
+                }
+            });
         }
     }
 
@@ -70,6 +82,7 @@ public class ActiveCheckpointWidget extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        root = view.findViewById(R.id.root_widget_active_checkpoint);
         timelineView = view.findViewById(R.id.timeline_widget_active_checkpoint);
         tvTimeRemain = view.findViewById(R.id.tv_time_remain_widget_active_checkpoint);
         tvName = view.findViewById(R.id.tv_name_widget_active_checkpoint);
@@ -86,5 +99,10 @@ public class ActiveCheckpointWidget extends Fragment {
         } else {
             update(getIncomingCheckpoint());
         }
+    }
+
+    @Override
+    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
+        this.navigationInterfaces = navigationInterfaces;
     }
 }

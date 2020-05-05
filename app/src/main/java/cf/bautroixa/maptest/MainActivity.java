@@ -24,25 +24,23 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.data.FcmMessage;
 import cf.bautroixa.maptest.data.SearchResult;
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.Collections;
-import cf.bautroixa.maptest.firestore.Data;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.Event;
 import cf.bautroixa.maptest.firestore.MainAppManager;
-import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
-import cf.bautroixa.maptest.interfaces.DataItemsSelectable;
 import cf.bautroixa.maptest.interfaces.MapBackgroundCallbacks;
+import cf.bautroixa.maptest.interfaces.MapBackgroundControllable;
 import cf.bautroixa.maptest.interfaces.MapBackgroundInterfaces;
-import cf.bautroixa.maptest.interfaces.NavigableToMainTab;
+import cf.bautroixa.maptest.interfaces.Navigable;
+import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.interfaces.OnAppbarStateChanged;
-import cf.bautroixa.maptest.interfaces.OnDataItemSelected;
-import cf.bautroixa.maptest.interfaces.OnNavigationToMainTab;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
 
@@ -167,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (bottomNavPager.getCurrentItem() == 0 && tabMapFragment.onBackPressed()) return;
+        if (bottomNavPager.getCurrentItem() == TAB_MAP && tabMapFragment.onBackPressed()) return;
         if (!isBackPressed) {
             isBackPressed = true;
             Toast.makeText(MainActivity.this, R.string.toast_back_again_to_exit, Toast.LENGTH_SHORT).show();
@@ -179,9 +177,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onAttachFragment(@NotNull Fragment fragment) {
+    public void onAttachFragment(@NotNull final Fragment fragment) {
         super.onAttachFragment(fragment);
-
         if (fragment instanceof OneAppbarFragment) {
             ((OneAppbarFragment) fragment).setAppbarState(appbarState);
             ((OneAppbarFragment) fragment).setOnAppbarStateChanged(new OnAppbarStateChanged() {
@@ -192,20 +189,16 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        if (fragment instanceof NavigableToMainTab) {
-            ((NavigableToMainTab) fragment).setOnNavigationToMainTab(new OnNavigationToMainTab() {
+        if (fragment instanceof Navigable) {
+            ((Navigable) fragment).setNavigationInterfaces(new NavigationInterfaces() {
                 @Override
-                public void navigate(int tab, int state, Data... data) {
+                public void navigate(int tab, int state, Object... data) {
+                    Objects.requireNonNull(tabLayout.getTabAt(tab)).select();
                     if (tab == TAB_MAP) {
                         if (data.length > 0) {
-                            if (data[0] instanceof SosRequest) {
-                                User user = manager.getMembersManager().get(data[0].getId()); // userId == sosId
-                                tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, user);
-                                Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
-                            }
-                        } else {
                             tabMapFragment.handleState(state, data[0]);
-                            Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
+                        } else {
+                            tabMapFragment.handleState(state, null);
                         }
                     } else {
                         Log.w(TAG, "navigate to tab Not implemented");
@@ -213,26 +206,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-        if (fragment instanceof DataItemsSelectable) {
-            ((DataItemsSelectable) fragment).setOnDataItemSelected(new OnDataItemSelected() {
-                @Override
-                public void selectItem(Data data) {
-                    if (data instanceof Event) {
-                        Event event = (Event) data;
-                        int type = event.getType();
-                        if (type == Event.Type.CHECKPOINT_ADDED && event.getCheckpointRef() != null) {
-                            tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(event.getId()));
-                            Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
-                        }
-                        if ((type == Event.Type.USER_ADDED || type == Event.Type.USER_SOS_ADDED) && event.getUserRef() != null) {
-                            tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(event.getId()));
-                        }
-                    }
-                }
-            });
-        }
-        if (fragment instanceof TabMapFragment) {
-            ((TabMapFragment) fragment).setMapBackgroundInterfaces(new MapBackgroundInterfaces() {
+        if (fragment instanceof MapBackgroundControllable) {
+            ((MapBackgroundControllable) fragment).setMapBackgroundInterfaces(new MapBackgroundInterfaces() {
                 @Override
                 public void targetMyLocation() {
                     mapBackgroundFragment.targetMyLocation();
@@ -241,7 +216,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void target(Object data) {
                     if (data instanceof Checkpoint) {
-                        mapBackgroundFragment.targetCheckpoint((Checkpoint) data, manager.getCheckpointsManager().indexOf(((Checkpoint) data).getId()));
+                        int index = manager.getCheckpointsManager().indexOf(((Checkpoint) data).getId());
+                        mapBackgroundFragment.targetCheckpoint((Checkpoint) data, index);
                     } else if (data instanceof User) {
                         mapBackgroundFragment.targetUser((User) data);
                     } else if (data instanceof SearchResult) {
@@ -261,6 +237,11 @@ public class MainActivity extends AppCompatActivity {
                 public void drawRoute(@Nullable LatLng fromN, LatLng to) {
                     mapBackgroundFragment.drawRoute(fromN, to);
                 }
+
+                @Override
+                public void drawLine(List<LatLng> latlngs) {
+                    mapBackgroundFragment.drawRoute(latlngs);
+                }
             });
         } else if (fragment instanceof MapBackgroundFragment) {
             ((MapBackgroundFragment) fragment).setMapBackgroundCallback(new MapBackgroundCallbacks() {
@@ -268,13 +249,12 @@ public class MainActivity extends AppCompatActivity {
                 public boolean onMarkerClick(Marker marker) {
                     String type = marker.getSnippet(), id = marker.getTitle();
                     Log.d(TAG, "marker click" + type + "id=" + id);
+                    Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
                     if (type.equals(Collections.CHECKPOINTS)) {
                         tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, manager.getCheckpointsManager().get(id));
-                        Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
                         return true;
                     } else if (type.equals(Collections.USERS)) {
                         tabMapFragment.handleState(TabMapFragment.STATE_MEMBER_STATUS, manager.getMembersManager().get(id));
-                        Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
                         return true;
                     }
                     return false; // return false to show marker title and snippet normally
@@ -309,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            switch (position){
+            switch (position) {
                 case 1:
                     tabMapFragment = new TabMapFragment();
                     return tabMapFragment;

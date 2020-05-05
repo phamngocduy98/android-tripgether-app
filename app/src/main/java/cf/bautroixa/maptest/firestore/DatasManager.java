@@ -71,6 +71,10 @@ public class DatasManager<T extends Data> {
         return index != null ? index : -1;
     }
 
+    public int indexOf(Data data) {
+        return indexOf(data.getId());
+    }
+
     public ArrayList<T> getData() {
         return list;
     }

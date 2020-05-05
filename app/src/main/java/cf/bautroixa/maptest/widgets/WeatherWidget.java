@@ -19,6 +19,7 @@ import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.network_io.WeatherApi;
 import cf.bautroixa.maptest.utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ImageHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,7 +39,10 @@ public class WeatherWidget extends Fragment {
     }
 
     private void updateWeather() {
+        if (!manager.isLoggedIn()) return;
+        tvTime.setText("Đang cập nhật ...");
         User currentUser = manager.getCurrentUser();
+        if (currentUser.getCurrentCoord() == null) return; // TODO: this is temp fix
         weatherApi.getWeather(currentUser.getCurrentCoord().getLatitude(), currentUser.getCurrentCoord().getLongitude(), getString(R.string.config_open_weather_map_api_appid)).enqueue(new Callback<WeatherApi.WeatherApiRes>() {
             @Override
             public void onResponse(Call<WeatherApi.WeatherApiRes> call, Response<WeatherApi.WeatherApiRes> response) {
@@ -50,7 +54,8 @@ public class WeatherWidget extends Fragment {
 
             @Override
             public void onFailure(Call<WeatherApi.WeatherApiRes> call, Throwable t) {
-                Log.d(TAG, t.getMessage());
+                Log.w(TAG, t.getMessage());
+                tvTime.setText("Lỗi mạng!");
                 t.printStackTrace();
             }
         });
@@ -61,6 +66,7 @@ public class WeatherWidget extends Fragment {
             updateWeather();
             return;
         }
+        ImageHelper.loadImage("http://openweathermap.org/img/wn/" + weather.weather[0].icon + "@2x.png", imgCondition, 50, 50);
         tvCurrentTemp.setText(String.format("%.0f°C", weather.main.temp));
         tvMinMaxTemp.setText(String.format("Cảm giác như %.1f°C", weather.main.feels_like));
 //        (%.1f°C~%.1f°C), weather.main.temp_min, weather.main.temp_max));
@@ -68,7 +74,7 @@ public class WeatherWidget extends Fragment {
         tvRain.setText(String.format("Độ ẩm: %d %%", weather.main.humidity));
         tvLocation.setText(weather.name);
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(weather.dt);
+        calendar.setTimeInMillis(weather.dt * 1000);
         tvTime.setText(DateFormatter.format(calendar.getTime()));
     }
 
@@ -83,6 +89,13 @@ public class WeatherWidget extends Fragment {
         tvCondition = view.findViewById(R.id.tv_condition_widget_weather);
         tvRain = view.findViewById(R.id.tv_rain_precipitation_widget_weather);
         imgCondition = view.findViewById(R.id.iv_condition_widget_weather);
+
+        tvTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateWeather();
+            }
+        });
         return view;
     }
 
