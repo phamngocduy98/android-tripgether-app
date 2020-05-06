@@ -91,7 +91,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (data.size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             FcmMessage fcmMessage = FcmMessage.fromHashMap(data);
-            if (fcmMessage.getPriority().equals(FcmMessage.Priority.HIGH)) {
+            if (fcmMessage.getPriority().equals(FcmMessage.Priority.HIGH) && fcmMessage.getType() > 0) {
+                // TODO: fcmMessage.getType() > 0 to only handle positive event like add checkpoint, request_check_in, add user (temporary fix)
                 //high priority event => handleNow (within 10 seconds)
                 handleNowIntentToNotificationActivity(data);
             } else {

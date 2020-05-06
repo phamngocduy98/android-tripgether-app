@@ -18,9 +18,9 @@ import java.util.ArrayList;
 
 public abstract class Data {
     @Exclude
-    protected static final String TAG = "DataClass";
-    @Exclude
     public static final String ID = "id";
+    @Exclude
+    protected static final String TAG = "DataClass";
     @Exclude
     protected ListenerRegistration listenerRegistration;
     @Exclude
@@ -29,6 +29,10 @@ public abstract class Data {
     protected String id;
     @Exclude
     protected ArrayList<OnNewValueListener> onNewValueListeners = new ArrayList<>();
+
+    @Exclude
+    @Nullable
+    protected OnNewValueListener initListener = null;
 
     public Data() {
     }
@@ -64,7 +68,7 @@ public abstract class Data {
     public void addOnNewValueListener(OnNewValueListener listener) {
         this.onNewValueListeners.add(listener);
         if (this.listenerRegistration == null)
-            Log.w(TAG, "addOnNewValueListener before setListenerRegistration");
+            Log.e(TAG, "addOnNewValueListener before setListenerRegistration");
         listener.onNewData(this);
     }
 
@@ -85,14 +89,14 @@ public abstract class Data {
 
 
     @Exclude
-    public void setListenerRegistration(final DatasManager dataManager, OnNewValueListener initListener) {
-        if (initListener != null) onNewValueListeners.add(initListener);
+    public void setListenerRegistration(@Nullable final DatasManager dataManager, @Nullable final OnNewValueListener initListener) {
+        this.initListener = initListener;
         final Data thisData = this;
         this.listenerRegistration = this.ref.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
+                    Log.e(TAG, "Listen failed.", e);
                 }
                 Log.d(TAG, "onDocumentSnapshot");
                 if (documentSnapshot != null) {
@@ -105,6 +109,9 @@ public abstract class Data {
                         } else {
                             onRemove();
                         }
+                    }
+                    if (initListener != null) {
+                        initListener.onNewData(thisData);
                     }
                     for (OnNewValueListener listener : onNewValueListeners) {
                         listener.onNewData(thisData);
@@ -123,7 +130,6 @@ public abstract class Data {
             listener.onNewData(null);
         }
         cancelListenerRegistration();
-//        this.onNewValueListeners.remove(0); // TODO: remove initListener
     }
 
     @Exclude

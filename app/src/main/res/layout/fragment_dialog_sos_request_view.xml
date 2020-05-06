@@ -20,40 +20,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingVertical="8dp"
+        android:drawableStart="@drawable/ic_person_black_24dp"
+        android:drawableTint="@color/colorText"
         android:text="AdminBautroixa" />
 
     <TextView
         android:id="@+id/tv_user_location_dialog_sos_request_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_place_black_24dp"
+        android:drawableTint="@color/colorText"
         android:text="Vị trí hiện tại" />
-
-    <TextView
-        android:id="@+id/tv_desc_dialog_sos_request_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="8dp"
-        android:text="Điện thoại hết pin rồi" />
 
     <TextView
         android:id="@+id/tv_lever_dialog_sos_request_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_notifications_black_24dp"
+        android:drawableTint="@color/colorText"
         android:paddingVertical="8dp"
         android:text="Mức độ nghiêm trọng: CAO" />
+
+    <TextView
+        android:id="@+id/tv_desc_dialog_sos_request_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_comment_black_24dp"
+        android:drawableTint="@color/colorText"
+        android:paddingVertical="8dp"
+        android:text="Điện thoại hết pin rồi" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btn_get_direction_dialog_sos_request_view"
-            style="@style/Button.FlatButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Chỉ đường" />
 
         <Button
             android:id="@+id/btn_close_dialog_sos_request_view"

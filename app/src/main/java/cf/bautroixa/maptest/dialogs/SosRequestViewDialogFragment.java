@@ -27,15 +27,17 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
     MapBackgroundInterfaces mapBackgroundInterfaces;
     private MainAppManager manager;
     private TextView tvUserName, tvUserLocation, tvLever, tvDesc;
-    private Button btnGetDirection;
+    private String[] leverStrings;
 
     public SosRequestViewDialogFragment(MapBackgroundInterfaces mapBackgroundInterfaces) {
         manager = MainAppManager.getInstance();
         this.mapBackgroundInterfaces = mapBackgroundInterfaces;
         onSosRequestNewValueListener = new Data.OnNewValueListener<SosRequest>() {
             @Override
-            public void onNewData(SosRequest sosRequest) {
-                updateView(sosRequest);
+            public void onNewData(@Nullable SosRequest sosRequest) {
+                if (sosRequest != null) {
+                    updateView(sosRequest);
+                }
             }
         };
     }
@@ -55,6 +57,7 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
             sosRequestId = getArguments().getString(ARG_ID);
             sosRequest = manager.getSosRequestsManager().get(sosRequestId);
         }
+        leverStrings = getResources().getStringArray(R.array.sos_lever);
     }
 
     @Override
@@ -74,17 +77,10 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
         final User user = manager.getMembersManager().get(sosRequest.getId());
         if (user != null) {
             tvUserName.setText(user.getName());
-            tvUserLocation.setText(user.getCurrentLocation());
-            btnGetDirection.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: get direction heree
-                    mapBackgroundInterfaces.drawRoute(null, user.getLatLng());
-                }
-            });
+            tvUserLocation.setText("Vị trí hiện tại: Gần " + user.getCurrentLocation());
         }
-        tvLever.setText("Mức độ: " + sosRequest.getLever());
-        tvDesc.setText(sosRequest.getDescription());
+        tvLever.setText("Mức độ nghiêm trọng: " + leverStrings[sosRequest.getLever()]);
+        tvDesc.setText("Thông điệp: " + sosRequest.getDescription());
     }
 
     @Nullable
@@ -96,8 +92,6 @@ public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
         tvUserLocation = view.findViewById(R.id.tv_user_location_dialog_sos_request_view);
         tvLever = view.findViewById(R.id.tv_lever_dialog_sos_request_view);
         tvDesc = view.findViewById(R.id.tv_desc_dialog_sos_request_view);
-
-        btnGetDirection = view.findViewById(R.id.btn_get_direction_dialog_sos_request_view);
         Button btnClose = view.findViewById(R.id.btn_close_dialog_sos_request_view);
 
         btnClose.setOnClickListener(new View.OnClickListener() {

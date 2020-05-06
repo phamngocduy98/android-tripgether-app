@@ -16,12 +16,6 @@
 
     <string name="shared_preference_name">tripgether</string>
     <string name="socket_token">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhbmRyb2lkIiwiaWF0IjoxNTg0Mjg4NTA1LCJleHAiOjE2MTU4NDYxMDV9.cezgSOYqispv6Qq_aUZBlp--O72YeGYMKhH3oriez68</string>
-
-    <string-array name="alert_levers_array">
-        <item>High</item>
-        <item>Medium</item>
-        <item>Low</item>
-    </string-array>
     <string name="tv_step_activity_create_trip">Tạo chuyến đi (Bước %d của %d)</string>
     <string name="btn_leave_trip">Leave trip</string>
     <string name="dialog_message_leave_trip">Bạn có chắc chắn muốn rời chuyến đi này không?</string>

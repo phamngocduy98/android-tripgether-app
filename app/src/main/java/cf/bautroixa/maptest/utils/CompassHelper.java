@@ -38,10 +38,10 @@ public class CompassHelper implements SensorEventListener {
         gsensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         msensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         if (gsensor == null) {
-            Log.w(TAG, "No gsensor");
+            Log.e(TAG, "No gsensor");
         }
         if (msensor == null) {
-            Log.w(TAG, "No msensor");
+            Log.e(TAG, "No msensor");
         }
     }
 

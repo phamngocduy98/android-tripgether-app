@@ -55,7 +55,7 @@ public abstract class CollectionsManager<T extends Data> extends DatasManager<T>
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
+                    Log.e(TAG, "Listen failed.", e);
                 }
                 if (queryDocumentSnapshots != null) {
                     for (DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {

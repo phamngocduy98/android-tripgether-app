@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_add_trip_frag_trip"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="Tạo chuyến đi" />
+    <item
+        android:id="@+id/menu_join_trip_frag_trip"
+        android:icon="@drawable/ic_assistant_photo_black_24dp"
+        android:title="Tham gia chuyến đi" />
+</menu>

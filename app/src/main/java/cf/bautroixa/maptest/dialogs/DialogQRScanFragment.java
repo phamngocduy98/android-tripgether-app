@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,12 +16,17 @@ import androidx.annotation.Nullable;
 import com.google.zxing.Result;
 
 import cf.bautroixa.maptest.data.RequestCodes;
+import cf.bautroixa.maptest.firestore.MainAppManager;
 import cf.bautroixa.maptest.theme.FullScreenDialogFragment;
+import cf.bautroixa.maptest.theme.LoadingDialogFragment;
 import cf.bautroixa.maptest.theme.OneDialog;
+import cf.bautroixa.maptest.utils.UrlParser;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class DialogQRScanFragment extends FullScreenDialogFragment implements ZXingScannerView.ResultHandler {
     private static final String TAG = "QRScanDialogFragment";
+
+    MainAppManager manager;
     private ZXingScannerView mScannerView;
     private OnQrResultListener onResult;
 
@@ -29,6 +35,7 @@ public class DialogQRScanFragment extends FullScreenDialogFragment implements ZX
     }
 
     public DialogQRScanFragment(OnQrResultListener onResult) {
+        manager = MainAppManager.getInstance();
         this.onResult = onResult;
     }
 
@@ -91,8 +98,22 @@ public class DialogQRScanFragment extends FullScreenDialogFragment implements ZX
     @Override
     public void handleResult(Result rawResult) {
         Log.v(TAG, "result = " + rawResult.getText() + ", TYPE = " + rawResult.getBarcodeFormat().toString()); // Prints the scan format (qrcode, pdf417 etc.)
-        onResult.onResult(rawResult.getText());
-        dismiss();
+        String tripCode = UrlParser.parseTripCode(requireContext(), rawResult.getText());
+        final LoadingDialogFragment loadingDialog = new LoadingDialogFragment();
+        loadingDialog.show(getChildFragmentManager(), "loading...");
+        manager.sendJoinTrip(tripCode, new MainAppManager.OnComplete() {
+            @Override
+            public void onComplete(boolean isSuccessful) {
+                if (isSuccessful) {
+                    Toast.makeText(getContext(), "Đã tham gia chuyến đi thành công!", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getContext(), "Chưa thể tham gia chuyến đi", Toast.LENGTH_LONG).show();
+                }
+                loadingDialog.dismiss();
+                dismiss();
+            }
+        });
+
         // If you would like to resume scanning, call this method below:
         //mScannerView.resumeCameraPreview(this);
     }

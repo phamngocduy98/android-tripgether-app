@@ -123,7 +123,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (account != null) firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Log.w(TAG, "Google sign in failed", e);
+                Log.e(TAG, "Google sign in failed", e);
                 loadingDialogFragment.dismiss();
             }
         }
@@ -142,7 +142,7 @@ public class LoginActivity extends AppCompatActivity {
                             onLoginSuccess();
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            Log.e(TAG, "signInWithCredential:failure", task.getException());
 //                            Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                         }
                     }

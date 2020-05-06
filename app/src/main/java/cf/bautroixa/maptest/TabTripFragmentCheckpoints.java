@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,8 +57,8 @@ public class TabTripFragmentCheckpoints extends Fragment implements Navigable {
         checkpoints = manager.getCheckpoints();
         onTripChanged = new Data.OnNewValueListener<Trip>() {
             @Override
-            public void onNewData(Trip trip) {
-                if (trip.getActiveCheckpoint() != null && !trip.getActiveCheckpoint().getId().equals(activeCheckpointId)) {
+            public void onNewData(@Nullable Trip trip) {
+                if (trip != null && trip.getActiveCheckpoint() != null && !trip.getActiveCheckpoint().getId().equals(activeCheckpointId)) {
                     if (activeCheckpointId != null) {
                         adapter.notifyItemChanged(manager.getCheckpointsManager().indexOf(activeCheckpointId));
                     }
@@ -93,6 +94,7 @@ public class TabTripFragmentCheckpoints extends Fragment implements Navigable {
 
             @Override
             public void onDataSetChanged(ArrayList<Checkpoint> datas) {
+                checkpoints = datas;
                 adapter.notifyDataSetChanged();
                 if (manager.isTripLeader() && manager.getCheckpoints().size() == 0 && btnAddCheckpoint != null)
                     btnAddCheckpoint.setVisibility(View.VISIBLE);
@@ -128,7 +130,6 @@ public class TabTripFragmentCheckpoints extends Fragment implements Navigable {
     public void onResume() {
         super.onResume();
         btnAddCheckpoint.setVisibility(manager.isTripLeader() && manager.getCheckpoints().size() == 0 ? View.VISIBLE : View.INVISIBLE);
-        if (manager.getCurrentTripRef() != null) onTripChanged.onNewData(manager.getCurrentTrip());
         manager.getCurrentTrip().addOnNewValueListener(onTripChanged);
         manager.getCheckpointsManager().addOnDatasChangedListener(onCheckpointsChangedListener);
     }

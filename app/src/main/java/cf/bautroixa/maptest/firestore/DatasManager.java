@@ -19,6 +19,7 @@ public class DatasManager<T extends Data> {
     public void put(T data) {
         String id = data.getId();
         Integer index = mapIdWithIndex.get(id);
+
         if (index != null) {
             update(index, data);
             for (OnDatasChangedListener<T> onDatasChangedListener : onDatasChangedListeners) {

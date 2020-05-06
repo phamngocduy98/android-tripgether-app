@@ -51,6 +51,7 @@
         android:layout_marginEnd="24dp"
         android:text="Khẩn cấp"
         android:textColor="@color/colorText"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_user_name_item_sos"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tv_user_name_item_sos" />
 </androidx.constraintlayout.widget.ConstraintLayout>

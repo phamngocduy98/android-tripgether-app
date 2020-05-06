@@ -60,6 +60,7 @@ public class TabChatFragment extends Fragment {
 
             @Override
             public void onDataSetChanged(ArrayList<Message> datas) {
+                messages = datas;
                 mAdapter.notifyDataSetChanged();
                 rvMessages.smoothScrollToPosition(datas.size());
             }

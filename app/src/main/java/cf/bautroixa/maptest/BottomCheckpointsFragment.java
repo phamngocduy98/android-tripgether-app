@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import cf.bautroixa.maptest.firestore.Checkpoint;
 import cf.bautroixa.maptest.firestore.DatasManager;
@@ -96,6 +97,7 @@ public class BottomCheckpointsFragment extends Fragment implements Navigable, Ma
 
             @Override
             public void onDataSetChanged(ArrayList<Checkpoint> datas) {
+                checkpoints = datas;
                 adapter.notifyDataSetChanged();
             }
         };
@@ -266,8 +268,7 @@ public class BottomCheckpointsFragment extends Fragment implements Navigable, Ma
 
         void setRollUpButton(final Checkpoint checkpoint) {
             VisitsManager visitsManager = checkpoint.getVisitsManager();
-            Visit visit = visitsManager.get(manager.getCurrentUser().getId());
-            if (visit != null) {
+            if (visitsManager.contains(manager.getCurrentUser().getId())) {
                 // đã điểm danh
                 btnCheckIn.setText(String.format("Xem danh sách (%d/%d)", visitsManager.getData().size(), manager.getMembers().size()));
                 btnCheckIn.setOnClickListener(new View.OnClickListener() {
@@ -283,7 +284,7 @@ public class BottomCheckpointsFragment extends Fragment implements Navigable, Ma
                     public void onClick(View v) {
                         Log.d(TAG, "diem danh");
                         ViewAnim.toggleLoading(getContext(), btnCheckIn, true, "");
-                        checkpoint.getVisitsManager().addVisit(manager.getCurrentUser()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        manager.sendCheckIn(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
@@ -395,7 +396,7 @@ public class BottomCheckpointsFragment extends Fragment implements Navigable, Ma
             if (payloads.size() > 0) {
                 Checkpoint checkpoint = checkpoints.get(position);
                 if ((int) payloads.get(0) == Payload.MAYBE_NEED_BTN_UPDATE) {
-                    if (LatLngDistance.measureDistance(manager.getCurrentUser().getLatLng(), checkpoint.getLatLng()) < 50) {
+                    if (manager.isReadyToCheckIn() && Objects.equals(checkpoint.getId(), Objects.requireNonNull(manager.getActiveCheckpoint()).getId())) {
                         holder.updateBtn(checkpoint, ActionButton.BTN_ROLL_UP);
                     } else {
                         holder.updateBtn(checkpoint, ActionButton.BTN_ROUTE);

@@ -45,8 +45,8 @@ import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.utils.ShakePhoneHelper;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
     public static final int TAB_TRIP = 0, TAB_MAP = 1, TAB_NOTI = 2, TAB_CHAT = 3;
+    private static final String TAG = "MainActivity";
     String[] tabNames = {"Chuyến đi", "Bản đồ", "Thông báo", "Trò chuyện"};
     ShakePhoneHelper shakePhoneHelper;
     // back twice to exit
@@ -59,17 +59,15 @@ public class MainActivity extends AppCompatActivity {
     // tab fragment
     MapBackgroundFragment mapBackgroundFragment;
     TabMapFragment tabMapFragment;
-    private MainAppManager manager;
     TabTripFragment tabTripFragment;
     TabNotificationFragment tabNotificationFragment;
     TabChatFragment tabChatFragment;
-
     // Views
     View statusBar;
     ViewPager2 bottomNavPager;
     TabLayout tabLayout;
-
     BotNavPagerAdapter adapter;
+    private MainAppManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                             tabMapFragment.handleState(state, null);
                         }
                     } else {
-                        Log.w(TAG, "navigate to tab Not implemented");
+                        Log.e(TAG, "navigate to tab Not implemented");
                     }
                 }
             });
@@ -223,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                     } else if (data instanceof SearchResult) {
                         mapBackgroundFragment.targetSearchResult((SearchResult) data);
                     } else {
-                        Log.w(TAG, "target undefined Object type");
+                        Log.e(TAG, "target undefined Object type");
                     }
                 }
 

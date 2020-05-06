@@ -69,7 +69,8 @@ public class BottomMembersFragment extends Fragment implements Navigable, MapBac
         super.onAttach(context);
         onTripChanged = new Data.OnNewValueListener<Trip>() {
             @Override
-            public void onNewData(Trip trip) {
+            public void onNewData(@Nullable Trip trip) {
+                if (trip == null) return;
                 if (trip.getActiveCheckpoint() == null) {
                     if (lastActiveCheckpointId.length() > 0) adapter.notifyDataSetChanged();
                     lastActiveCheckpointId = "";
@@ -99,6 +100,7 @@ public class BottomMembersFragment extends Fragment implements Navigable, MapBac
 
             @Override
             public void onDataSetChanged(ArrayList<User> datas) {
+                members = datas;
                 adapter.notifyDataSetChanged();
             }
         };
@@ -181,6 +183,10 @@ public class BottomMembersFragment extends Fragment implements Navigable, MapBac
     }
 
     private void newSelectedPosition(int position) {
+        if (position > members.size()) {
+            Log.e(TAG, "new Selected user index out of bounds");
+            return;
+        }
         final User activeUser = members.get(position);
         mapBackgroundInterfaces.cleanUpTempMarkerAndRoute();
         mapBackgroundInterfaces.target(activeUser);

@@ -65,7 +65,7 @@
             android:layout_height="wrap_content"
             android:paddingVertical="8dp"
             android:paddingStart="24dp"
-            android:text="Mời bạn bè tham gia chuyến đi cùng bạn"
+            android:text="Mời bạn bè tham gia cùng bạn"
             android:textColor="@color/colorTextSecondary"
             android:textSize="16sp"
             android:textStyle="bold" />

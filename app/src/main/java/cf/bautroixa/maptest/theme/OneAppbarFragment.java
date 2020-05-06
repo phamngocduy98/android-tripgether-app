@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.MenuRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +34,10 @@ public class OneAppbarFragment extends Fragment {
         this.btnBack.setOnClickListener(onClickListener);
     }
 
+    protected void setBackButtonIcon(@IdRes int resId) {
+        this.btnBack.setImageResource(resId);
+    }
+
     public void setSubtitle(CharSequence title) {
         if (this.tvSubtitle != null) this.tvSubtitle.setText(title);
     }
@@ -43,6 +48,7 @@ public class OneAppbarFragment extends Fragment {
     }
 
     public void setToolbarMenu(@MenuRes int menuResId) {
+        toolbar.getMenu().clear();
         toolbar.inflateMenu(menuResId);
     }
 

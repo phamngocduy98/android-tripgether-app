@@ -54,7 +54,7 @@ public class WeatherWidget extends Fragment {
 
             @Override
             public void onFailure(Call<WeatherApi.WeatherApiRes> call, Throwable t) {
-                Log.w(TAG, t.getMessage());
+                Log.e(TAG, t.getMessage());
                 tvTime.setText("Lỗi mạng!");
                 t.printStackTrace();
             }
@@ -66,7 +66,7 @@ public class WeatherWidget extends Fragment {
             updateWeather();
             return;
         }
-        ImageHelper.loadImage("http://openweathermap.org/img/wn/" + weather.weather[0].icon + "@2x.png", imgCondition, 50, 50);
+        ImageHelper.loadImage("https://openweathermap.org/img/wn/" + weather.weather[0].icon + "@2x.png", imgCondition, 50, 50);
         tvCurrentTemp.setText(String.format("%.0f°C", weather.main.temp));
         tvMinMaxTemp.setText(String.format("Cảm giác như %.1f°C", weather.main.feels_like));
 //        (%.1f°C~%.1f°C), weather.main.temp_min, weather.main.temp_max));

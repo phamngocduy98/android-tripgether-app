@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import cf.bautroixa.maptest.network_io.HttpRequest;
 import cf.bautroixa.maptest.utils.FailedTask;
+import cf.bautroixa.maptest.utils.LatLngDistance;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -65,7 +66,7 @@ public class MainAppManager {
         if (mAuth.getCurrentUser() != null) {
             login(mAuth);
         } else {
-            increaseInitProgress(true, 0, "construct MainAppManager instance", "user not logged in");
+//            increaseInitProgress(true, 0, "construct MainAppManager instance", "user not logged in");
         }
     }
 
@@ -117,7 +118,7 @@ public class MainAppManager {
                     initFcmToken();
                     if (user.getActiveTrip() == null) {
                         leaveTrip();
-                        increaseInitProgress(true, 1, "leave trip", "no active trip");
+//                        increaseInitProgress(true, 1, "leave trip", "no active trip");
                     } else if ((tripRef == null || !tripRef.getId().equals(user.getActiveTrip().getId()))) {
                         // join trip
                         joinTrip();
@@ -125,7 +126,7 @@ public class MainAppManager {
                 }
             });
         } else {
-            increaseInitProgress(true, 0, "login", "login failed or already logged in");
+//            increaseInitProgress(true, 0, "login", "login failed or already logged in");
         }
     }
 
@@ -142,7 +143,7 @@ public class MainAppManager {
                 @Override
                 public void onComplete(@NonNull Task<InstanceIdResult> task) {
                     if (!task.isSuccessful() || task.getResult() == null) {
-                        Log.w(TAG, "get FCM token failed failed", task.getException());
+                        Log.e(TAG, "get FCM token failed failed", task.getException());
                         return;
                     }
                     String token = task.getResult().getToken();
@@ -166,7 +167,7 @@ public class MainAppManager {
             @Override
             public void onNewData(Trip trip) {
                 membersManager.updateRefList(currentTrip.getMembers());
-                increaseInitProgress(false, 2, "join trip", "{name = " + trip.getName() + ", members.size = " + trip.getMembers().size() + "}");
+//                increaseInitProgress(false, 2, "join trip", "{name = " + trip.getName() + ", members.size = " + trip.getMembers().size() + "}");
             }
         });
         String tripId = getCurrentTripRef().getId();
@@ -174,15 +175,17 @@ public class MainAppManager {
         sosRequestsManager.setCollectionListener(db.collection(Collections.sos(tripId)), tripId);
         eventsManager.setCollectionListener(db.collection(Collections.events(tripId)), tripId);
         messagesManager.setCollectionListener(db.collection(Collections.messages(tripId)), tripId);
-        increaseInitProgress(false, 3, "init trip managers", "");
+//        increaseInitProgress(false, 3, "init trip managers", "");
     }
 
     private void leaveTrip() {
         Log.d(TAG, "leave trip");
-        if (currentTrip != null) currentTrip.onRemove();
         membersManager.clear();
         checkpointsManager.clear();
         sosRequestsManager.clear();
+        eventsManager.clear();
+        messagesManager.clear();
+        if (currentTrip != null) currentTrip.onRemove();
     }
 
     public void subscribeNotification() {
@@ -294,6 +297,14 @@ public class MainAppManager {
         batch.commit().addOnCompleteListener(onCompleteListener);
     }
 
+    public void sendCheckIn(OnCompleteListener<Void> onCompleteListener) {
+        if (!isReadyToCheckIn()) {
+            Log.w(TAG, "not ready to check in");
+            return;
+        }
+        Objects.requireNonNull(getActiveCheckpoint()).getVisitsManager().addVisit(currentUser).addOnCompleteListener(onCompleteListener);
+    }
+
     public User getCurrentUser() {
         return currentUser;
     }
@@ -338,11 +349,23 @@ public class MainAppManager {
         return null;
     }
 
-    public boolean isTripLeader(){
-        if (getCurrentTripRef() != null) {
+    public boolean isTripLeader() {
+        if (getCurrentTripRef() != null && currentTrip.getLeader() != null) {
             return Objects.equals(currentUser.getId(), currentTrip.getLeader().getId());
         }
         return false;
+    }
+
+    public boolean isReadyToCheckIn() {
+        Checkpoint activeCheckpoint = getActiveCheckpoint();
+        if (activeCheckpoint == null) return false;
+        return LatLngDistance.measureDistance(currentUser.getLatLng(), activeCheckpoint.getLatLng()) < 50; // less than 50 meter
+    }
+
+    public boolean isUserCheckedIn() {
+        Checkpoint activeCheckpoint = getActiveCheckpoint();
+        if (activeCheckpoint == null) return false;
+        return activeCheckpoint.getVisitsManager().contains(currentUser.getId()); // visitId == userId
     }
 
     @Nullable

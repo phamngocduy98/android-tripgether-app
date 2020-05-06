@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_send_sos_frag_trip"
+        android:icon="@drawable/ic_add_alert_black_24dp"
+        android:title="Gửi yêu cầu hỗ trợ"
+        app:iconTint="@color/colorText"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_send_sos_2_frag_trip"
+        android:icon="@drawable/ic_add_alert_black_24dp"
+        android:title="Gửi yêu cầu hỗ trợ SOS" />
+    <item
+        android:id="@+id/menu_share_frag_trip"
+        android:title="Chia sẻ chuyến đi"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_leave_trip_frag_trip"
+        android:title="Rời chuyến đi"
+        app:showAsAction="never" />
+</menu>

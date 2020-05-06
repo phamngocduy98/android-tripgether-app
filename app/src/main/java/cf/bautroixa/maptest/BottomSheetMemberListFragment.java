@@ -20,6 +20,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,7 +46,7 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
     // listener
     private DatasManager.OnDatasChangedListener<User> onMembersChangedListener;
     private NavigationInterfaces navigationInterfaces;
-    private OnFilterUser onFilterUser, defaultUserFilter;
+//    private OnFilterUser onFilterUser, defaultUserFilter;
 
     // view
     private TextView dragMark;
@@ -56,20 +57,20 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
 
     public BottomSheetMemberListFragment() {
         manager = MainAppManager.getInstance();
-        members = new ArrayList<>();
-        defaultUserFilter = new OnFilterUser() {
-            @Override
-            public boolean onUserFiltering(User user) {
-                return true;
-            }
-        };
-        onFilterUser = defaultUserFilter;
+        members = manager.getMembers();
+//        defaultUserFilter = new OnFilterUser() {
+//            @Override
+//            public boolean onUserFiltering(User user) {
+//                return true;
+//            }
+//        };
+//        onFilterUser = defaultUserFilter;
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        members.addAll(manager.getMembers());
+//        members.addAll(manager.getMembers());
         friendStatusAdapter = new FriendStatusAdapter();
         friendStatusLiteAdapter = new FriendStatusLiteAdapter();
 
@@ -89,18 +90,19 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
             public void onItemChanged(int position, User data) {
                 friendStatusAdapter.notifyItemChanged(position);
                 friendStatusLiteAdapter.notifyItemChanged(position);
-                Log.d(TAG, "change"+position);
+                Log.d(TAG, "change" + position);
             }
 
             @Override
             public void onItemRemoved(int position, User data) {
                 friendStatusAdapter.notifyItemRemoved(position);
                 friendStatusLiteAdapter.notifyItemRemoved(position);
-                Log.d(TAG, "remove"+position);
+                Log.d(TAG, "remove" + position);
             }
 
             @Override
             public void onDataSetChanged(ArrayList<User> datas) {
+                members = datas;
                 friendStatusAdapter.notifyDataSetChanged();
                 friendStatusLiteAdapter.notifyDataSetChanged();
             }
@@ -148,32 +150,32 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
     @Override
     public void onDetach() {
         super.onDetach();
-        this.removeFilter();
+//        this.removeFilter();
         navigationInterfaces = null;
         onMembersChangedListener = null;
     }
 
-    public void applyFilter(OnFilterUser onFilterUser) {
-        this.onFilterUser = onFilterUser;
-        members.clear();
-        for (User user : manager.getMembers()) {
-            if (onFilterUser.onUserFiltering(user)) {
-                members.add(user);
-            }
-        }
-        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
-        if (this.friendStatusLiteAdapter != null)
-            this.friendStatusLiteAdapter.notifyDataSetChanged();
-    }
-
-    public void removeFilter() {
-        onFilterUser = defaultUserFilter;
-        members.clear();
-        members.addAll(manager.getMembers());
-        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
-        if (this.friendStatusLiteAdapter != null)
-            this.friendStatusLiteAdapter.notifyDataSetChanged();
-    }
+//    public void applyFilter(OnFilterUser onFilterUser) {
+//        this.onFilterUser = onFilterUser;
+//        members.clear();
+//        for (User user : manager.getMembers()) {
+//            if (onFilterUser.onUserFiltering(user)) {
+//                members.add(user);
+//            }
+//        }
+//        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
+//        if (this.friendStatusLiteAdapter != null)
+//            this.friendStatusLiteAdapter.notifyDataSetChanged();
+//    }
+//
+//    public void removeFilter() {
+//        onFilterUser = defaultUserFilter;
+//        members.clear();
+//        members.addAll(manager.getMembers());
+//        if (this.friendStatusAdapter != null) this.friendStatusAdapter.notifyDataSetChanged();
+//        if (this.friendStatusLiteAdapter != null)
+//            this.friendStatusLiteAdapter.notifyDataSetChanged();
+//    }
 
     public void onBottomSheetStateChanged(int newState) {
         if (newState == BottomSheetBehavior.STATE_EXPANDED) {
@@ -208,7 +210,7 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
     }
 
     public class FriendStatusViewHolder extends RecyclerView.ViewHolder {
-        protected TextView tvName, tvLocation, tvCount, tvLastUpdate, tvNameInAvatar;
+        protected TextView tvName, tvLocation, tvCount, tvLastUpdate, tvNameInAvatar, tvOnlineIndicator;
         protected RoundedImageView imgAvatar;
         protected View view;
         protected User currentUser;
@@ -228,11 +230,17 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
             tvLastUpdate = itemView.findViewById(R.id.tv_last_update_item_friend);
             tvLocation = itemView.findViewById(R.id.tv_location_status_item_friend);
             tvCount = itemView.findViewById(R.id.tv_count_status_item_friend);
+            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_friend);
         }
 
         public void update(User user) {
-            if (user.getLastUpdate() != null){
+            if (user.getLastUpdate() != null) {
                 tvLastUpdate.setText(DateFormatter.format(user.getLastUpdate()));
+                if (Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000) { // online in less than 5 mins
+                    tvOnlineIndicator.setSelected(true);// green background
+                } else {
+                    tvOnlineIndicator.setSelected(false);// red background
+                }
             }
             progressBattery.setProgress(user.getBattery());
             tvLocation.setText(user.getCurrentLocation());
@@ -290,6 +298,7 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
         @Override
         public void findView() {
             tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend_status_lite);
+            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_friend_lite);
             imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend_status_lite);
             tvCount = itemView.findViewById(R.id.tv_messages_count_item_friend_status_lite);
         }
@@ -302,16 +311,24 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigable
             } else {
                 tvCount.setVisibility(View.GONE);
             }
+            this.update(user);
         }
 
         @Override
         public void update(User user) {
+            if (user.getLastUpdate() != null && Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000) {
+                // online in less than 5 mins
+                tvOnlineIndicator.setSelected(true);// green background
+            } else {
+                tvOnlineIndicator.setSelected(false);// red background
+            }
         }
     }
 
     public class FriendStatusAdapter extends RecyclerView.Adapter<FriendStatusViewHolder> {
         public FriendStatusAdapter() {
         }
+
         @NonNull
         @Override
         public FriendStatusViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

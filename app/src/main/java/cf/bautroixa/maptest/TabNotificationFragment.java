@@ -30,6 +30,7 @@ import cf.bautroixa.maptest.utils.ImageHelper;
 
 public class TabNotificationFragment extends OneAppbarFragment implements Navigable {
     private MainAppManager manager;
+    ArrayList<Event> events;
 
     private RecyclerView rvNotifications;
     private NotificationAdapter adapter;
@@ -39,6 +40,7 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
 
     public TabNotificationFragment() {
         manager = MainAppManager.getInstance();
+        events = manager.getEventsManager().getData();
         adapter = new NotificationAdapter();
         onEventsChangedListener = new DatasManager.OnDatasChangedListener<Event>() {
             @Override
@@ -58,6 +60,7 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
 
             @Override
             public void onDataSetChanged(ArrayList<Event> datas) {
+                events = datas;
                 adapter.notifyDataSetChanged();
             }
         };
@@ -133,10 +136,8 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
     }
 
     public class NotificationAdapter extends OneRecyclerView.Adapter<NotificationVH> {
-        ArrayList<Event> events;
 
         public NotificationAdapter() {
-            events = manager.getEventsManager().getData();
         }
 
         @NonNull
@@ -162,7 +163,7 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
                         case Event.Type.USER_ADDED:
                         case Event.Type.USER_SOS_ADDED:
                             User user = manager.getMembersManager().get(Objects.requireNonNull(event.getUserRef()).getId());
-                            navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS);
+                            navigationInterfaces.navigate(MainActivity.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
                             break;
                     }
                 }

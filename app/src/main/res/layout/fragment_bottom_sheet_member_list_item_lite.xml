@@ -36,6 +36,16 @@
         app:srcCompat="@drawable/user" />
 
     <TextView
+        android:id="@+id/tv_online_indicator_item_friend_lite"
+        style="@style/TextView.Badge"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginEnd="2dp"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_name_item_friend_status_lite"
+        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_friend_status_lite" />
+
+    <TextView
         android:id="@+id/tv_messages_count_item_friend_status_lite"
         style="@style/TextView.Badge"
         android:text="0"

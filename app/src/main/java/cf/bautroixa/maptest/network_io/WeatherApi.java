@@ -15,7 +15,7 @@ public class WeatherApi {
 
     private WeatherApi() {
         this.retrofit = new Retrofit.Builder()
-                .baseUrl("http://api.openweathermap.org")
+                .baseUrl("https://api.openweathermap.org")
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
         this.weatherService = retrofit.create(WeatherService.class);

@@ -80,8 +80,8 @@ public class TabMapFragment extends Fragment implements Navigable, MapBackground
         manager = MainAppManager.getInstance();
         userOnNewValueListener = new Data.OnNewValueListener<User>() {
             @Override
-            public void onNewData(User user) {
-                if (user.getActiveTrip() != null) {
+            public void onNewData(@Nullable User user) {
+                if (user != null && user.getActiveTrip() != null) {
                     bottomSheet.setVisibility(View.VISIBLE);
                 } else {
                     bottomSheet.setVisibility(View.GONE);

@@ -159,7 +159,7 @@ public class NotificationItem {
 
         public static NotificationItem factory(MainAppManager manager, SosRequest sosRequest) {
             if (sosRequest == null) {
-                Log.w(TAG, "sosRequest not fetched when alert fcm comes");
+                Log.e(TAG, "sosRequest not fetched when alert fcm comes");
                 sosRequest = new SosRequest(SosRequest.SosLever.LOW, "NO DATA", false);
             }
             if (sosRequest.getTime() == null)

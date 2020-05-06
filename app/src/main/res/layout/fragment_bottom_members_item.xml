@@ -58,6 +58,7 @@
         android:text="Near Bau Troi Xa Studio, Ha Noi, Viet Nam\n Duy pro asdasdasd as asd asd ad ad asd asd a"
         android:textColor="@color/colorTextSecondary"
         android:textSize="14sp"
+        android:gravity="center"
         android:drawableStart="@drawable/ic_place_black_24dp"
         android:drawableTint="@color/colorText"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,6 +84,7 @@
             android:layout_weight="1"
             android:drawableTint="@color/colorText"
             android:textColor="@color/colorText"
+            android:gravity="center"
             android:drawableStart="@drawable/ic_assistant_photo_black_24dp"
             android:text="12:11" />
 
@@ -93,6 +95,7 @@
             android:layout_weight="1"
             android:drawableTint="@color/colorText"
             android:textColor="@color/colorText"
+            android:gravity="center"
             android:drawableStart="@drawable/ic_directions_bike_black_24dp"
             android:text="4 km/s" />
 
@@ -103,6 +106,7 @@
             android:layout_weight="1"
             android:drawableTint="@color/colorText"
             android:textColor="@color/colorText"
+            android:gravity="center"
             android:drawableStart="@drawable/ic_battery_50_black_24dp"
             android:text="51%" />
 

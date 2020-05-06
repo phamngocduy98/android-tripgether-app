@@ -11,6 +11,8 @@ import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
+import cf.bautroixa.maptest.utils.LatLngDistance;
+
 public class User extends Data {
     @Exclude
     public static final String DEFAULT_AVATAR = "https://sites.google.com/site/masoibot/user/user.png";
@@ -40,22 +42,22 @@ public class User extends Data {
     public static final String ACTIVE_TRIP = "activeTrip";
     @Exclude
     public static final String LAST_UPDATE = "lastUpdate";
-
-    String name;
-    String avatar;
-
     @Exclude
     public static final String IMAGENAME = "imageName";
-    String imageName;
-    String phoneNumber;
     @Exclude
     public static final String Email = "phoneNumber";
+    String name;
+    String avatar;
+    String imageName;
+    String phoneNumber;
     String email;
 
     GeoPoint currentCoord;
     String currentLocation;
 
     Long speed;
+    @Exclude
+    long estimatedSpeed;
     int battery;
     @Nullable
     DocumentReference activeTrip;
@@ -122,7 +124,8 @@ public class User extends Data {
     }
 
     public Long getSpeed() {
-        return speed;
+        // TODO: testing
+        return estimatedSpeed;
     }
 
     public void setSpeed(Long speed) {
@@ -222,8 +225,20 @@ public class User extends Data {
         this.speed = user.speed;
         this.battery = user.battery;
         this.activeTrip = user.activeTrip;
-        this.lastUpdate = user.lastUpdate;
+//        this.fcmToken = user.fcmToken; TODO: fix here
+
+        LatLng oldLatLng = this.latLng;
         this.latLng = new LatLng(currentCoord.getLatitude(), currentCoord.getLongitude());
+        Timestamp oldLastUpdate = this.lastUpdate;
+        if (user.lastUpdate != null) {
+            this.lastUpdate = user.lastUpdate;
+            if (oldLatLng != null) {
+                double estimatedMetersDistance = LatLngDistance.measureDistance(oldLatLng, this.latLng);
+                long elapsedSeconds = this.lastUpdate.getSeconds() - oldLastUpdate.getSeconds();
+                estimatedSpeed = (long) (estimatedMetersDistance / elapsedSeconds); // m/s
+            }
+        }
+
         if (this.marker != null) {
             marker.setPosition(this.latLng);
         }

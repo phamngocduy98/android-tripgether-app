@@ -131,10 +131,12 @@ public class CreateTripActivity extends OneAppbarActivity {
         btnCreateTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ViewAnim.toggleLoading(CreateTripActivity.this, btnCreateTrip, true, "Tạo chuyến đi");
                 DocumentReference newTripRef = manager.sendCreateTrip(editTripName.getText().toString(), checkpoints, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
+                            ViewAnim.toggleLoading(CreateTripActivity.this, btnCreateTrip, false, "Tạo chuyến đi");
                             renderScreen(1);
                             KeyboardHelper.hideSoftKeyboard(CreateTripActivity.this);
                         }

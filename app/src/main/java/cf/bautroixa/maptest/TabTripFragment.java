@@ -36,7 +36,6 @@ import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.theme.OneDialog;
 import cf.bautroixa.maptest.theme.OnePromptDialog;
-import cf.bautroixa.maptest.utils.UrlParser;
 
 
 public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, Navigable {
@@ -67,7 +66,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         manager = MainAppManager.getInstance();
         tripOnNewValueListener = new Data.OnNewValueListener<Trip>() {
             @Override
-            public void onNewData(Trip trip) {
+            public void onNewData(@Nullable Trip trip) {
                 updateTrip(trip);
             }
         };
@@ -86,18 +85,21 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     }
 
     private void updateTrip(@Nullable Trip trip) {
-        if (currentState != STATE_TRIP && manager.getCurrentTripRef() != null) {
-            if (trip == null) Log.w(TAG, "Trip instance null while tripRef nonNull");
+        if (currentState != STATE_TRIP && trip != null) {
+            if (manager.getCurrentTripRef() == null)
+                Log.e(TAG, "Trip instance nonnull while tripRef Null");
             handleState(STATE_TRIP);
             return;
         }
-        if (currentState != STATE_NO_TRIP && manager.getCurrentTripRef() == null) {
-            if (trip != null) Log.w(TAG, "Trip instance NonNull while tripRef null");
+        if (currentState != STATE_NO_TRIP && trip == null) {
+            if (manager.getCurrentTripRef() != null)
+                Log.e(TAG, "Trip instance Null while tripRef Nonnull");
             handleState(STATE_NO_TRIP);
         }
     }
 
     private void handleState(int state) {
+        setToolbar(); // TODO: this is second time of setToolbar of the same menu, first set in onViewCreated
         if (manager.getCurrentTripRef() != null) {
             btnCreateTrip.setVisibility(View.GONE);
             btnJoinTrip.setVisibility(View.GONE);
@@ -138,13 +140,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                                             @Override
                                             public void onResult(String result) {
                                                 if (getContext() != null) {
-                                                    String tripCode = UrlParser.parseTripCode(getContext(), result);
-                                                    manager.sendJoinTrip(tripCode, new MainAppManager.OnComplete() {
-                                                        @Override
-                                                        public void onComplete(boolean isSuccessful) {
 
-                                                        }
-                                                    });
                                                 }
                                             }
                                         }).show(getChildFragmentManager(), "qr scanner");
@@ -195,7 +191,8 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setToolbarMenu(R.menu.fragment_trip);
+        setBackButtonIcon(R.drawable.ic_menu_black_24dp);
+        setToolbar();
         getToolbar().setOnMenuItemClickListener(this);
 
         adapter = new TabAdapter(this);
@@ -316,6 +313,18 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    void setToolbar() {
+        if (manager.getCurrentTripRef() != null) {
+            if (manager.isTripLeader()) {
+                setToolbarMenu(R.menu.fragment_trip_for_leader);
+            } else {
+                setToolbarMenu(R.menu.fragment_trip_for_members);
+            }
+        } else {
+            setToolbarMenu(R.menu.fragment_trip_no_trip);
         }
     }
 

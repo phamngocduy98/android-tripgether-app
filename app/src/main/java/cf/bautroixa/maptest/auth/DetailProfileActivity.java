@@ -105,7 +105,7 @@ public class DetailProfileActivity extends AppCompatActivity {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
-                    Log.w("abc", "Listen failed.", e);
+                    Log.e("abc", "Listen failed.", e);
                     return;
                 }
 

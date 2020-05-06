@@ -124,8 +124,6 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
 
             @Override
             public void onDataSetChanged(ArrayList<User> datas) {
-                mMap.clear();
-                initFriendMarkers(); // TODO: clear and re init marker
             }
         };
 
@@ -147,8 +145,6 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
 
             @Override
             public void onDataSetChanged(ArrayList<Checkpoint> datas) {
-                mMap.clear();
-                initCheckpointMarker(); // TODO: clear and re init marker
             }
         };
     }
@@ -277,35 +273,29 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
     @Nullable
     protected Marker createFriendMarker(final User user) {
         if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
-        if (user.getMarker() == null) {
-            user.setMarker(mMap.addMarker(new MarkerOptions().position(user.getLatLng())
-                    .title(user.getId())
-                    .snippet(Collections.USERS)
-                    .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
-                        @Override
-                        public void edit(View view) {
-                            ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
-                            TextView tvName = view.findViewById(R.id.tv_name_map_marker_user);
-                            if (user.getAvatar() == null || user.getAvatar().equals(User.DEFAULT_AVATAR)) {
-                                markerImage.setVisibility(View.INVISIBLE);
-                                tvName.setText(user.getShortName());
-                            } else {
-                                ImageHelper.loadCircleImage(user.getAvatar(), markerImage);
-                            }
+        return mMap.addMarker(new MarkerOptions().position(user.getLatLng())
+                .title(user.getId())
+                .snippet(Collections.USERS)
+                .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
+                    @Override
+                    public void edit(View view) {
+                        ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
+                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_user);
+                        if (user.getAvatar() == null || user.getAvatar().equals(User.DEFAULT_AVATAR)) {
+                            markerImage.setVisibility(View.INVISIBLE);
+                            tvName.setText(user.getShortName());
+                        } else {
+                            ImageHelper.loadCircleImage(user.getAvatar(), markerImage);
                         }
-                    })))));
-        }
-        return user.getMarker();
+                    }
+                }))));
     }
 
     @Nullable
     protected Marker createCheckpointMarker(Checkpoint checkpoint) {
         if (!isMapLoaded || checkpoint == null || checkpoint.getLatLng() == null) return null;
-        if (checkpoint.getMarker() == null) {
-            checkpoint.setMarker(mMap.addMarker(new MarkerOptions().position(checkpoint.getLatLng())
-                    .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS)));
-        }
-        return checkpoint.getMarker();
+        return mMap.addMarker(new MarkerOptions().position(checkpoint.getLatLng())
+                .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS));
     }
 
     void targetCamera(boolean includeMyLocation, GoogleMap.CancelableCallback cancelableCallback, LatLng... latLngs) {
@@ -449,10 +439,12 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
     void initFriendMarkers() {
         if (!isMapLoaded) return;
         for (User user : members) {
-            if (user.getMarker() != null) {
-                user.getMarker().remove();
+            if (!user.getId().equals(manager.getCurrentUser().getId())) {
+                if (user.getMarker() != null) {
+                    user.getMarker().remove();
+                }
+                user.setMarker(createFriendMarker(user));
             }
-            user.setMarker(createFriendMarker(user));
         }
     }
 

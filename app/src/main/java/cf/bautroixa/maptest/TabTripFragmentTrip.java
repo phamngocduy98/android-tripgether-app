@@ -33,16 +33,15 @@ public class TabTripFragmentTrip extends Fragment implements Navigable {
     ArrayList<SosRequest> sosRequests;
 
     MainAppManager manager;
+    RecyclerView rvSos;
     private String[] leverStrings = new String[3];
     private NavigationInterfaces navigationInterfaces;
     private DatasManager.OnDatasChangedListener<SosRequest> onSosChangedListener;
-
     /**
      * VIEWS
      */
     // SOS list
     private TextView tvHeaderSos;
-    RecyclerView rvSos;
     private SosAdapter adapter;
     private Button btnAddEditSos;
     // Widget Share Trip
@@ -58,7 +57,7 @@ public class TabTripFragmentTrip extends Fragment implements Navigable {
         manager = MainAppManager.getInstance();
         sosRequests = manager.getSosRequestsManager().getData();
 
-        leverStrings = getResources().getStringArray(R.array.alert_levers_array);
+        leverStrings = getResources().getStringArray(R.array.sos_lever);
 
         adapter = new SosAdapter();
         onSosChangedListener = new DatasManager.OnDatasChangedListener<SosRequest>() {
@@ -83,6 +82,7 @@ public class TabTripFragmentTrip extends Fragment implements Navigable {
 
             @Override
             public void onDataSetChanged(ArrayList<SosRequest> datas) {
+                sosRequests = datas;
                 adapter.notifyDataSetChanged();
                 if (sosRequests.size() > 0 && tvHeaderSos.getVisibility() == View.GONE)
                     tvHeaderSos.setVisibility(View.VISIBLE);
@@ -103,6 +103,7 @@ public class TabTripFragmentTrip extends Fragment implements Navigable {
         super.onViewCreated(view, savedInstanceState);
 
         tvHeaderSos = view.findViewById(R.id.tv_header_sos_request_list);
+        if (sosRequests.size() == 0) tvHeaderSos.setVisibility(View.GONE);
         rvSos = view.findViewById(R.id.rv_sos);
         rvSos.setAdapter(adapter);
         rvSos.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
@@ -194,7 +195,7 @@ public class TabTripFragmentTrip extends Fragment implements Navigable {
             if (sosRequest.isResolved()) {
                 tvLever.setText("Đã giải quyết");
             } else {
-                tvLever.setText(String.format("Mức độ: %s", leverStrings[sosRequest.getLever()]));
+                tvLever.setText(String.format("%s", leverStrings[sosRequest.getLever()]));
             }
             if (user != null) {
                 ImageHelper.loadCircleImage(user.getAvatar(), imgAvatar);
