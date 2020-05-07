@@ -93,14 +93,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             FcmMessage fcmMessage = FcmMessage.fromHashMap(data);
             if (fcmMessage.getPriority().equals(FcmMessage.Priority.HIGH) && fcmMessage.getType() > 0) {
                 // TODO: fcmMessage.getType() > 0 to only handle positive event like add checkpoint, request_check_in, add user (temporary fix)
-                //high priority event => handleNow (within 10 seconds)
+                //high priority fcmMessage => handleNow (within 10 seconds)
                 handleNowIntentToNotificationActivity(data);
             } else {
-                // low priority event => show small notification
-                Event event = manager.getEventsManager().get(fcmMessage.getEventRefId());
+                // low priority fcmMessage => show small notification
+                final Event event = manager.getEventsManager().get(fcmMessage.getEventRefId());
                 if (event != null) {
-                    NotificationItem notificationItem = event.getNotificationItem(manager);
-                    sendNotification(event.getType(), notificationItem.getIntroContent(), notificationItem.getShortContent());
+                    event.getNotificationItem(manager).addOnCompleteListener(new OnCompleteListener<NotificationItem>() {
+                        @Override
+                        public void onComplete(@NonNull Task<NotificationItem> task) {
+                            if (task.isSuccessful()) {
+                                NotificationItem notificationItem = task.getResult();
+                                assert notificationItem != null;
+                                sendNotification(event.getType(), notificationItem.getTitle(), notificationItem.getDescription());
+                            }
+                        }
+                    });
                 }
             }
 

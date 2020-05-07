@@ -41,6 +41,7 @@ public class TabMapFragment extends Fragment implements Navigable, MapBackground
     public static final int STATE_MEMBER_STATUS = 10;
     public static final int STATE_CHECKPOINT = 21;
     public static final int STATE_SEARCH_RESULT = 22;
+    public static final int STATE_SOS_REQUEST = 30;
 
     public static final int SPACE_NONE = -1;
     public static final int SPACE_BOTTOM = 0;
@@ -229,6 +230,12 @@ public class TabMapFragment extends Fragment implements Navigable, MapBackground
                 break;
         }
         Log.d(TAG, "new state= " + state);
+    }
+
+    int getSpaceBottomHeight() {
+        Log.e(TAG, "height = " + bottomSpace.getHeight());
+        Log.e(TAG, "height = " + bottomSpace.getMeasuredHeight());
+        return bottomSpace.getHeight();
     }
 
     void toggleToolbar(boolean show) {

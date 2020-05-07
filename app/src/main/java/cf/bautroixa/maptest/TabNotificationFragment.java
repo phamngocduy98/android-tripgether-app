@@ -12,6 +12,9 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -123,15 +126,22 @@ public class TabNotificationFragment extends OneAppbarFragment implements Naviga
         }
 
         public void bind(Event event) {
-            NotificationItem notificationItem = event.getNotificationItem(manager);
-            tvContent.setText(Html.fromHtml(notificationItem.getContent()));
-            tvTime.setText(notificationItem.getTime());
-            if (notificationItem.getEventType() == Event.Type.USER_SOS_ADDED || notificationItem.getEventType() == Event.Type.USER_SOS_RESOLVED) {
-                imgType.setImageResource(R.drawable.ic_sos_red_24dp);
-            } else {
-                imgType.setImageResource(R.drawable.ic_assistant_photo_black_24dp);
-            }
-            ImageHelper.loadCircleImage(notificationItem.getAvatar(), imgAvatar);
+            event.getNotificationItem(manager).addOnCompleteListener(new OnCompleteListener<NotificationItem>() {
+                @Override
+                public void onComplete(@NonNull Task<NotificationItem> task) {
+                    if (task.isSuccessful()) {
+                        NotificationItem notificationItem = task.getResult();
+                        tvContent.setText(Html.fromHtml(notificationItem.getContent()));
+                        tvTime.setText(notificationItem.getTime());
+                        if (notificationItem.getEventType() == Event.Type.USER_SOS_ADDED || notificationItem.getEventType() == Event.Type.USER_SOS_RESOLVED) {
+                            imgType.setImageResource(R.drawable.ic_sos_red_24dp);
+                        } else {
+                            imgType.setImageResource(R.drawable.ic_assistant_photo_black_24dp);
+                        }
+                        ImageHelper.loadCircleImage(notificationItem.getAvatar(), imgAvatar);
+                    }
+                }
+            });
         }
     }
 

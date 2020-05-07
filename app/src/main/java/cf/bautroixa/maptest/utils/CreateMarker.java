@@ -20,10 +20,8 @@ public class CreateMarker {
     public interface ILayoutEditor {
         void edit(View view);
     }
-    public static Bitmap createBitmapFromLayout(Context context, @LayoutRes int layoutResId, ILayoutEditor editor){
-        View view = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(layoutResId, null);
-        editor.edit(view);
 
+    public static Bitmap createBitmapFromLayout(Context context, View view) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         view.setLayoutParams(new ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -35,6 +33,11 @@ public class CreateMarker {
         view.draw(canvas);
 
         return bitmap;
+    }
+    public static Bitmap createBitmapFromLayout(Context context, @LayoutRes int layoutResId, ILayoutEditor editor){
+        View view = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(layoutResId, null);
+        editor.edit(view);
+        return createBitmapFromLayout(context, view);
     }
 
     public static Bitmap createMarker(Context context, @LayoutRes int layoutResId, @DrawableRes final int avatarRes) {

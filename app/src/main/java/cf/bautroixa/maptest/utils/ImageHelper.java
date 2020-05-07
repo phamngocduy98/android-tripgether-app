@@ -7,10 +7,14 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.firestore.User;
 
 public class ImageHelper {
     /**
@@ -52,18 +56,29 @@ public class ImageHelper {
     }
 
     public static void loadCircleImage(String imageUrl, ImageView target) {
-        loadCircleImage(imageUrl, target, 50, 50);
+        loadCircleImage(imageUrl, target, 50, 50, null);
+    }
+
+    public static void loadCircleImage(String imageUrl, ImageView target, @Nullable Callback callback) {
+        loadCircleImage(imageUrl, target, 50, 50, callback);
     }
 
     public static void loadCircleImage(String imageUrl, ImageView target, int width, int height) {
-        if (imageUrl == null || imageUrl.length() == 0)
-            imageUrl = "https://sites.google.com/site/masoibot/user/user.png";
-        Picasso.get().load(imageUrl).resize(width, height).centerCrop().transform(new CircleImageTransform()).placeholder(R.drawable.user).into(target);
+        loadCircleImage(imageUrl, target, width, height, null);
+    }
+
+    public static void loadCircleImage(String imageUrl, ImageView target, int width, int height, @Nullable Callback callback) {
+        if (imageUrl == null || imageUrl.length() == 0) imageUrl = User.DEFAULT_AVATAR;
+        Picasso.get().load(imageUrl).resize(width, height).centerCrop().transform(new CircleImageTransform()).placeholder(R.drawable.user).into(target, callback);
     }
 
     public static void loadImage(String imageUrl, ImageView target, int width, int height) {
-        if (imageUrl == null || imageUrl.length() == 0)
-            imageUrl = "https://sites.google.com/site/masoibot/user/user.png";
+        if (imageUrl == null || imageUrl.length() == 0) imageUrl = User.DEFAULT_AVATAR;
         Picasso.get().load(imageUrl).resize(width, height).centerCrop().placeholder(R.drawable.user).into(target);
+    }
+
+    public static void loadImage(String imageUrl, ImageView target, int width, int height, @Nullable Callback callback) {
+        if (imageUrl == null || imageUrl.length() == 0) imageUrl = User.DEFAULT_AVATAR;
+        Picasso.get().load(imageUrl).resize(width, height).centerCrop().placeholder(R.drawable.user).into(target, callback);
     }
 }

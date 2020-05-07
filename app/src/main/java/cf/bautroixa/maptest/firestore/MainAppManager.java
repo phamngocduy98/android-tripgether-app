@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -27,7 +28,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cf.bautroixa.maptest.network_io.HttpRequest;
-import cf.bautroixa.maptest.utils.FailedTask;
 import cf.bautroixa.maptest.utils.LatLngDistance;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -166,7 +166,7 @@ public class MainAppManager {
         currentTrip.setListenerRegistration(null, new Data.OnNewValueListener<Trip>() {
             @Override
             public void onNewData(Trip trip) {
-                membersManager.updateRefList(currentTrip.getMembers());
+                membersManager.updateRefList(db.collection(Collections.USERS), currentTrip.getMembers());
 //                increaseInitProgress(false, 2, "join trip", "{name = " + trip.getName() + ", members.size = " + trip.getMembers().size() + "}");
             }
         });
@@ -235,17 +235,18 @@ public class MainAppManager {
         });
     }
 
-    public void sendLeaveTrip(@Nullable WriteBatch batch, OnCompleteListener<Void> onCompleteListener) {
+    public Task<Void> sendLeaveTrip(@Nullable WriteBatch batch) {
         if (getCurrentTripRef() == null || currentUser == null) {
-            onCompleteListener.onComplete(new FailedTask<Void>("User not logged in or user not in any trip"));
-            return;
+            TaskCompletionSource<Void> source = new TaskCompletionSource<Void>();
+            source.setException(new Exception("User not logged in or user not in any trip"));
+            return source.getTask();
         }
         if (batch == null) batch = db.batch();
         currentTrip.sendUpdate(batch, Trip.MEMBERS, FieldValue.arrayRemove(currentUserRef));
         currentUser.sendUpdate(batch, User.ACTIVE_TRIP, null);
         eventsManager.create(batch, new Event(Event.Type.USER_REMOVED, null, getCurrentUserRef(), null));
 
-        batch.commit().addOnCompleteListener(onCompleteListener);
+        return batch.commit();
     }
 
     public void sendAddCheckInLocation(@Nullable WriteBatch batch, DocumentReference checkpointRef, OnCompleteListener<Void> onCompleteListener) {

@@ -18,8 +18,11 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.firestore.DocumentReference;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +37,7 @@ import cf.bautroixa.maptest.firestore.Collections;
 import cf.bautroixa.maptest.firestore.DatasManager;
 import cf.bautroixa.maptest.firestore.Event;
 import cf.bautroixa.maptest.firestore.MainAppManager;
+import cf.bautroixa.maptest.firestore.SosRequest;
 import cf.bautroixa.maptest.firestore.User;
 import cf.bautroixa.maptest.interfaces.MapBackgroundCallbacks;
 import cf.bautroixa.maptest.interfaces.MapBackgroundControllable;
@@ -52,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     // back twice to exit
     Handler backHandler;
     int appbarState = OnAppbarStateChanged.State.EXTENDED;
+    Event receivedEvent;
     // listener
     DatasManager.OnDatasChangedListener<Event> onEventsChangedListener;
     Runnable backCallback;
@@ -141,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
             int eventType = Integer.parseInt(bundle.getString(FcmMessage.EVENT_TYPE, "0"));
             String priority = bundle.getString(FcmMessage.EVENT_PRIORITY, "low");
             if (eventId != null) {
-                // TODO: handle event here
+                receivedEvent = manager.getEventsManager().get(eventId);
             }
         }
     }
@@ -150,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         manager.getEventsManager().addOnDatasChangedListener(onEventsChangedListener);
+        if (receivedEvent != null) handleEvent(receivedEvent);
         shakePhoneHelper.start();
     }
 
@@ -238,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void drawLine(List<LatLng> latlngs) {
-                    mapBackgroundFragment.drawRoute(latlngs);
+                    mapBackgroundFragment.drawRoute(latlngs, tabMapFragment.getSpaceBottomHeight());
                 }
             });
         } else if (fragment instanceof MapBackgroundFragment) {
@@ -263,6 +269,43 @@ public class MainActivity extends AppCompatActivity {
                     tabMapFragment.onMapClick(latLng);
                 }
             });
+        }
+    }
+
+    private void handleEvent(Event event) {
+        Objects.requireNonNull(tabLayout.getTabAt(TAB_MAP)).select();
+        DocumentReference checkpointRef = event.getCheckpointRef(), userRef = event.getUserRef(), sosRef = event.getSosRef();
+        switch (event.getType()) {
+            case Event.Type.CHECKPOINT_ROLL_UP_ADDED:
+                if (checkpointRef == null) {
+                    Log.e(TAG, "invalid CHECKPOINT_ROLL_UP_ADDED event");
+                    return;
+                }
+                manager.getCheckpointsManager().requestGet(checkpointRef.getId()).addOnCompleteListener(new OnCompleteListener<Checkpoint>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Checkpoint> task) {
+                        if (task.isSuccessful()) {
+                            Checkpoint checkpoint = task.getResult();
+                            tabMapFragment.handleState(TabMapFragment.STATE_CHECKPOINT, checkpoint);
+                        }
+                    }
+                });
+                break;
+            case Event.Type.USER_SOS_ADDED:
+                if (sosRef == null) {
+                    Log.e(TAG, "invalid USER_SOS_ADDED event");
+                    return;
+                }
+                manager.getSosRequestsManager().requestGet(sosRef.getId()).addOnCompleteListener(new OnCompleteListener<SosRequest>() {
+                    @Override
+                    public void onComplete(@NonNull Task<SosRequest> task) {
+                        if (task.isSuccessful()) {
+                            SosRequest sosRequest = task.getResult();
+                            tabMapFragment.handleState(TabMapFragment.STATE_SOS_REQUEST, sosRequest);
+                        }
+                    }
+                });
+                break;
         }
     }
 

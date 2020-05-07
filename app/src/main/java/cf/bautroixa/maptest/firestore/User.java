@@ -43,29 +43,28 @@ public class User extends Data {
     @Exclude
     public static final String LAST_UPDATE = "lastUpdate";
     @Exclude
-    public static final String IMAGENAME = "imageName";
-    @Exclude
-    public static final String Email = "phoneNumber";
+    public static final String IMAGE_NAME = "imageName";
     String name;
     String avatar;
     String imageName;
     String phoneNumber;
     String email;
+    String fcmToken;
 
     GeoPoint currentCoord;
     String currentLocation;
 
     Long speed;
-    @Exclude
-    long estimatedSpeed;
     int battery;
-    @Nullable
-    DocumentReference activeTrip;
-    String fcmToken;
 
     @ServerTimestamp
     Timestamp lastUpdate;
 
+    @Nullable
+    DocumentReference activeTrip;
+
+    @Exclude
+    long estimatedSpeed;
     @Exclude
     LatLng latLng;
     @Exclude
@@ -180,7 +179,7 @@ public class User extends Data {
         if (names.length >= 2) {
             return "" + names[0].charAt(0) + names[names.length - 1].charAt(0);
         } else {
-            return getName().substring(0, 2);
+            return getName();
         }
     }
 

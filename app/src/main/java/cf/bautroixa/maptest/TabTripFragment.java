@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,23 +40,21 @@ import cf.bautroixa.maptest.theme.OnePromptDialog;
 
 
 public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, Navigable {
-    private static final String TAG = "TabTripFragment";
     public static final int STATE_NONE = 0;
     public static final int STATE_NO_TRIP = 1;
     public static final int STATE_TRIP = 2;
     public static final int TAB_TRIP = 0;
     public static final int TAB_CHECKPOINTS = 1;
+    private static final String TAG = "TabTripFragment";
     String[] tabNames = {"Chuyến đi", "Điểm đến"};
-
-    private MainAppManager manager;
-    private int currentState = STATE_NONE;
-    private NavigationInterfaces navigationInterfaces = null;
-    private Data.OnNewValueListener<Trip> tripOnNewValueListener;
-
     Button btnCreateTrip, btnJoinTrip;
     ViewPager2 pager;
     TabLayout tabLayout;
     TabAdapter adapter;
+    private MainAppManager manager;
+    private int currentState = STATE_NONE;
+    private NavigationInterfaces navigationInterfaces = null;
+    private Data.OnNewValueListener<Trip> tripOnNewValueListener;
 
     public TabTripFragment() {
     }
@@ -211,12 +210,12 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         switch (item.getItemId()) {
             case R.id.menu_add_frag_trip:
                 if (!manager.isTripLeader()) return false;
-                    DialogCheckpointEditFragment.newInstance(new DialogCheckpointEditFragment.OnCheckpointSetListener() {
-                        @Override
-                        public void onCheckpointSet(Checkpoint checkpoint) {
-                            manager.getCheckpointsManager().create(null, checkpoint);
-                        }
-                    }).show(getChildFragmentManager(), "add checkpoint");
+                DialogCheckpointEditFragment.newInstance(new DialogCheckpointEditFragment.OnCheckpointSetListener() {
+                    @Override
+                    public void onCheckpointSet(Checkpoint checkpoint) {
+                        manager.getCheckpointsManager().create(null, checkpoint);
+                    }
+                }).show(getChildFragmentManager(), "add checkpoint");
                 return true;
             case R.id.menu_send_sos_frag_trip:
             case R.id.menu_send_sos_2_frag_trip:
@@ -297,9 +296,10 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                     public void onClick(final DialogInterface dialog, int which) {
                         if (which == DialogInterface.BUTTON_POSITIVE) {
                             leaveTripConfirmDialog.toggleProgressBar(true);
-                            manager.sendLeaveTrip(null, new OnCompleteListener<Void>() {
+                            manager.sendLeaveTrip(null).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
+                                    Toast.makeText(getContext(), "Rời phòng " + (task.isSuccessful() ? "thành công!" : "thất bại"), Toast.LENGTH_LONG).show();
                                     leaveTripConfirmDialog.toggleProgressBar(false);
                                     leaveTripConfirmDialog.dismiss();
                                 }

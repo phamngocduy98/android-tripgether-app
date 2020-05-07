@@ -2,17 +2,24 @@ package cf.bautroixa.maptest.firestore;
 
 import android.util.Log;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
 
+/**
+ * ArrayRefManager
+ */
 public class MembersManager extends DatasManager<User> {
     private static final String TAG = "MembersManager";
+
     public MembersManager() {
     }
 
-    public void updateRefList(List<DocumentReference> documentReferences){
+    public void updateRefList(CollectionReference userCollectionRef, List<DocumentReference> documentReferences) {
         // clean up removed item
+        ref = userCollectionRef;
         for (int i = 0; i < list.size(); i++) {
             User user = list.get(i);
             if (!documentReferences.contains(user.getRef())) {
@@ -45,5 +52,15 @@ public class MembersManager extends DatasManager<User> {
             user.setMarker(oldUser.getMarker());
         }
         super.update(index, user);
+    }
+
+    @Override
+    public User documentSnapshotToObject(DocumentSnapshot documentSnapshot) {
+        User user = documentSnapshot.toObject(User.class);
+        if (user != null) {
+            return user.withId(documentSnapshot.getId()).withRef(documentSnapshot.getReference());
+        }
+        Log.e(TAG, "documentSnapshotToUser error");
+        return null;
     }
 }

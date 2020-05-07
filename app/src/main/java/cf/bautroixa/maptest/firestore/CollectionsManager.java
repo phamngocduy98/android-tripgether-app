@@ -18,7 +18,6 @@ import com.google.firebase.firestore.WriteBatch;
 public abstract class CollectionsManager<T extends Data> extends DatasManager<T> {
     protected static final String TAG = "CollectionManager";
     protected String parentCollectionId = "";
-    protected CollectionReference ref;
     protected FirebaseFirestore db;
     private ListenerRegistration listenerRegistration;
 
@@ -77,5 +76,7 @@ public abstract class CollectionsManager<T extends Data> extends DatasManager<T>
         if (listenerRegistration != null) listenerRegistration.remove();
     }
 
-    public abstract T documentSnapshotToObject(DocumentSnapshot documentSnapshot);
+    public interface OnRequestGetComplete<T> {
+        void onComplete(T data);
+    }
 }

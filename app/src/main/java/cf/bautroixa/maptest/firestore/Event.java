@@ -1,7 +1,11 @@
 package cf.bautroixa.maptest.firestore;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -94,15 +98,19 @@ public class Event extends Data {
     }
 
     @Exclude
-    public NotificationItem getNotificationItem(MainAppManager manager) {
+    public Task<NotificationItem> getNotificationItem(MainAppManager manager) {
         if (notificationItem == null) {
-            synchronized (this) {
-                if (notificationItem == null) {
-                    notificationItem = NotificationItem.Factory.factory(manager, this);
+            return NotificationItem.Factory.factory(manager, this).continueWithTask(new Continuation<NotificationItem, Task<NotificationItem>>() {
+                @Override
+                public Task<NotificationItem> then(@NonNull Task<NotificationItem> task) throws Exception {
+                    notificationItem = task.getResult();
+                    return task;
                 }
-            }
+            });
         }
-        return notificationItem;
+        TaskCompletionSource<NotificationItem> source = new TaskCompletionSource<>();
+        source.setResult(notificationItem);
+        return source.getTask();
     }
 
     @Exclude

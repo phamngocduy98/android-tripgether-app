@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.location.Location;
@@ -108,12 +109,12 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         onMembersChangedListener = new DatasManager.OnDatasChangedListener<User>() {
             @Override
             public void onItemInserted(int position, User user) {
-                user.setMarker(createFriendMarker(user));
+                user.setMarker(createUserMarker(user));
             }
 
             @Override
             public void onItemChanged(int position, User data) {
-
+                // TODO: update marker user avatar here
             }
 
             @Override
@@ -271,24 +272,38 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
     }
 
     @Nullable
-    protected Marker createFriendMarker(final User user) {
+    protected Marker createUserMarker(final User user) {
+        final Context context = requireContext();
         if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
-        return mMap.addMarker(new MarkerOptions().position(user.getLatLng())
+        final View markerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.map_marker_user, null);
+        final ImageView markerImage = markerView.findViewById(R.id.img_avatar_map_marker_user);
+        TextView tvName = markerView.findViewById(R.id.tv_name_map_marker_user);
+        markerImage.setVisibility(View.INVISIBLE);
+        tvName.setText(user.getShortName());
+        final Marker marker = mMap.addMarker(new MarkerOptions().position(user.getLatLng())
                 .title(user.getId())
                 .snippet(Collections.USERS)
-                .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), R.layout.map_marker_user, new CreateMarker.ILayoutEditor() {
-                    @Override
-                    public void edit(View view) {
-                        ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
-                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_user);
-                        if (user.getAvatar() == null || user.getAvatar().equals(User.DEFAULT_AVATAR)) {
-                            markerImage.setVisibility(View.INVISIBLE);
-                            tvName.setText(user.getShortName());
-                        } else {
-                            ImageHelper.loadCircleImage(user.getAvatar(), markerImage);
-                        }
+                .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(context, markerView))));
+        if (user.getAvatar() != null && !user.getAvatar().equals(User.DEFAULT_AVATAR)) {
+            ImageHelper.loadCircleImage(user.getAvatar(), markerImage, new com.squareup.picasso.Callback() {
+                @Override
+                public void onSuccess() {
+                    try {
+                        markerImage.setVisibility(View.VISIBLE);
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(context, markerView)));
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, e.getMessage());
+                        e.printStackTrace();
                     }
-                }))));
+                }
+
+                @Override
+                public void onError(Exception e) {
+
+                }
+            });
+        }
+        return marker;
     }
 
     @Nullable
@@ -298,7 +313,11 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
                 .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS));
     }
 
-    void targetCamera(boolean includeMyLocation, GoogleMap.CancelableCallback cancelableCallback, LatLng... latLngs) {
+    void targetCamera(boolean includeMyLocation, LatLng... latLngs) {
+        targetCamera(includeMyLocation, 0, latLngs);
+    }
+
+    void targetCamera(boolean includeMyLocation, int bottomSpaceHeight, LatLng... latLngs) {
         if (isMapLoaded) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (LatLng point : latLngs) {
@@ -306,17 +325,22 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
             }
             if (includeMyLocation) builder.include(currentLocation);
             LatLngBounds bounds = builder.build();
-            targetCamera(bounds, cancelableCallback);
+            targetCamera(bounds, bottomSpaceHeight);
         }
     }
 
-    void targetCamera(LatLngBounds bounds, GoogleMap.CancelableCallback cancelableCallback) {
+    /**
+     * Target camera
+     *
+     * @param bounds
+     * @param bottomSpaceHeight set = 0 to use default 300dp
+     */
+    void targetCamera(LatLngBounds bounds, int bottomSpaceHeight) {
         if (isMapLoaded) {
 //            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100), cancelableCallback); // padding 100
             final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, requireContext());
-            // TODO: calculate real bottomSpace height
-            final int bottomSpaceHeight = (int) PixelDPConverter.convertDpToPixel(200, getContext());
-            final int boundHeight = screenHeight - toolbarStatusbarHeight - bottomSpaceHeight;
+            final int bottomSpaceHeightFinal = bottomSpaceHeight > 0 ? bottomSpaceHeight : (int) PixelDPConverter.convertDpToPixel(300, requireContext());
+            final int boundHeight = screenHeight - toolbarStatusbarHeight - bottomSpaceHeightFinal;
             Log.d(TAG, "tbheight = " + toolbarStatusbarHeight);
             Log.d(TAG, "boundHei=" + boundHeight);
             Log.d(TAG, "screenHe=" + screenHeight);
@@ -335,10 +359,6 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         }
     }
 
-    void targetCamera(boolean includeMyLocation, LatLng... latLngs) {
-        targetCamera(includeMyLocation, null, latLngs);
-    }
-
     void targetSearchResult(SearchResult searchResult) {
         tempMarker = mMap.addMarker(new MarkerOptions().position(searchResult.getCoordinate())
                 .title(searchResult.getPlaceName())
@@ -352,18 +372,29 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
             Log.d(TAG, "targeting...");
             targetCamera(true, checkpoint.getLatLng());
             if (activeMarker != null) {
-//                activeMarker.setIcon(null);
+                try {
+                    activeMarker.setIcon(null);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, e.getMessage());
+                    e.printStackTrace();
+                }
             }
             activeMarker = checkpoint.getMarker();
             // TODO: ( java.lang.IllegalArgumentException: Unmanaged descriptor ) bellow this line : setIcon on removed marker
-//            if (activeMarker != null)
-//                activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
-//                    @Override
-//                    public void edit(View view) {
-//                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
-//                        tvName.setText(String.valueOf(checkpointIndex));
-//                    }
-//                }))));
+            if (activeMarker != null)
+                try {
+                    activeMarker.setIcon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(getContext(), R.layout.map_marker_checkpoint_selected, new CreateMarker.ILayoutEditor() {
+                        @Override
+                        public void edit(View view) {
+                            TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
+                            tvName.setText(String.valueOf(checkpointIndex));
+                        }
+                    }))));
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, e.getMessage());
+                    e.printStackTrace();
+                }
+
         }
     }
 
@@ -374,7 +405,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         }
     }
 
-    void drawRoute(List<LatLng> latLngs) {
+    void drawRoute(List<LatLng> latLngs, int bottomSpaceHeight) {
         final LatLngBounds.Builder bounds = new LatLngBounds.Builder();
         PolylineOptions line = new PolylineOptions().clickable(true).addAll(latLngs);
         clearRoute();
@@ -383,7 +414,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
         for (LatLng latLng : latLngs) {
             bounds.include(latLng);
         }
-        targetCamera(bounds.build(), null);
+        targetCamera(bounds.build(), bottomSpaceHeight);
     }
 
     public void clearRoute() {
@@ -415,7 +446,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
                                     for (Point coord : coords) {
                                         latLngs.add(new LatLng(coord.latitude(), coord.longitude()));
                                     }
-                                    drawRoute(latLngs);
+                                    drawRoute(latLngs, 0);
                                 }
                             }
                         }
@@ -443,7 +474,7 @@ public class MapBackgroundFragment extends Fragment implements OnMapReadyCallbac
                 if (user.getMarker() != null) {
                     user.getMarker().remove();
                 }
-                user.setMarker(createFriendMarker(user));
+                user.setMarker(createUserMarker(user));
             }
         }
     }

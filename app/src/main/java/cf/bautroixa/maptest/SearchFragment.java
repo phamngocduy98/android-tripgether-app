@@ -210,14 +210,13 @@ public class SearchFragment extends Fragment implements Navigable {
     }
 
     public void handleState(int state) {
-        if (getContext() == null) return; //TODO: for testing, do real fix here
         this.currentState = state;
-        int _50dp = (int) PixelDPConverter.convertDpToPixel(50, getContext());
+        int _50dp = (int) PixelDPConverter.convertDpToPixel(50, requireContext());
         switch (state) {
             case STATE_COLLAPSED:
                 showHideToolbar(showToolbar);
                 btnBack.setVisibility(View.GONE);
-                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(24, getContext()), 0, _50dp, 0);
+                editSearch.setPadding((int) PixelDPConverter.convertDpToPixel(24, requireContext()), 0, _50dp, 0);
                 ViewAnim.toggleHideShow(rvSearchResult, false, ViewAnim.HIDE_DIRECTION_UP);
                 editSearch.clearFocus();
                 KeyboardHelper.hideSoftKeyboard(editSearch);

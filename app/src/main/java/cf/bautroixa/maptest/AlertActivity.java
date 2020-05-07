@@ -12,10 +12,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.gauravbhola.ripplepulsebackground.RipplePulseLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import cf.bautroixa.maptest.data.FcmMessage;
 import cf.bautroixa.maptest.data.NotificationItem;
@@ -71,7 +74,6 @@ public class AlertActivity extends AppCompatActivity {
             btnAction.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: intent to main activity with data
                     vibrator.cancel();
                     Intent intent = new Intent(AlertActivity.this, MainActivity.class);
                     intent.putExtras(bundle);
@@ -83,11 +85,16 @@ public class AlertActivity extends AppCompatActivity {
             if (eventId != null && eventTime != null) {
                 Event event = manager.getEventsManager().get(eventId);
                 if (event != null) {
-                    NotificationItem notificationItem = event.getNotificationItem(manager);
-                    if (notificationItem != null) {
-                        tvType.setText(notificationItem.getIntroContent());
-                        tvContent.setText(notificationItem.getShortContent());
-                    }
+                    event.getNotificationItem(manager).addOnCompleteListener(new OnCompleteListener<NotificationItem>() {
+                        @Override
+                        public void onComplete(@NonNull Task<NotificationItem> task) {
+                            if (task.isSuccessful()) {
+                                NotificationItem notificationItem = task.getResult();
+                                tvType.setText(notificationItem.getTitle());
+                                tvContent.setText(notificationItem.getDescription());
+                            }
+                        }
+                    });
                 }
             }
         }

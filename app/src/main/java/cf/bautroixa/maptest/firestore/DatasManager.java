@@ -1,11 +1,22 @@
 package cf.bautroixa.maptest.firestore;
 
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class DatasManager<T extends Data> {
+public abstract class DatasManager<T extends Data> {
+    private static final String TAG = "DatasManager";
+    protected CollectionReference ref;
     protected HashMap<String, Integer> mapIdWithIndex;
     protected ArrayList<T> list;
     protected ArrayList<OnDatasChangedListener<T>> onDatasChangedListeners;
@@ -41,6 +52,26 @@ public class DatasManager<T extends Data> {
             return list.get(index);
         }
         return null;
+    }
+
+    public Task<T> requestGet(String id) {
+        T data = get(id);
+        TaskCompletionSource<T> source = new TaskCompletionSource<T>();
+        if (data != null) {
+            source.setResult(data);
+            return source.getTask();
+        }
+        return ref.document(id).get().continueWith(new Continuation<DocumentSnapshot, T>() {
+            @Override
+            @Nullable
+            public T then(@NonNull Task<DocumentSnapshot> task) throws Exception {
+                if (task.isSuccessful()) {
+                    return documentSnapshotToObject(task.getResult());
+                }
+                Log.e(TAG, "requestGet task failed, return value is NULL");
+                return null;
+            }
+        });
     }
 
     public void update(int index, T data) {
@@ -96,6 +127,8 @@ public class DatasManager<T extends Data> {
     public void onClear() {
 
     }
+
+    public abstract T documentSnapshotToObject(DocumentSnapshot documentSnapshot);
 
     public DatasManager<T> addOnDatasChangedListener(OnDatasChangedListener<T> listener) {
         this.onDatasChangedListeners.add(listener);
