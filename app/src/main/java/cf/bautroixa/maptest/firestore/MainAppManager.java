@@ -180,6 +180,7 @@ public class MainAppManager {
 
     private void leaveTrip() {
         Log.d(TAG, "leave trip");
+        tripRef = null;
         membersManager.clear();
         checkpointsManager.clear();
         sosRequestsManager.clear();

@@ -68,7 +68,7 @@ public abstract class Data {
     public void addOnNewValueListener(OnNewValueListener listener) {
         this.onNewValueListeners.add(listener);
         if (this.listenerRegistration == null)
-            Log.e(TAG, "addOnNewValueListener before setListenerRegistration");
+            Log.e(TAG, "(this is not an error) addOnNewValueListener before setListenerRegistration (it show that an activity or fragment attach listener before setListenerRegistration)");
         listener.onNewData(this);
     }
 

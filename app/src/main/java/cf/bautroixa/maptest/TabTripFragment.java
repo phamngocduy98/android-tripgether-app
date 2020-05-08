@@ -84,30 +84,45 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     }
 
     private void updateTrip(@Nullable Trip trip) {
-        if (currentState != STATE_TRIP && trip != null) {
-            if (manager.getCurrentTripRef() == null)
+        if (trip != null) {
+            if (manager.getCurrentTripRef() == null) {
+                // this happen when user leave trip
+                // first user was remove from Trip.members list, so a trip update is triggered (THIS ERROR HAPPENS HERE)
+                // then user trip is null so a new trip update is triggered with both trip and tripRef is null
                 Log.e(TAG, "Trip instance nonnull while tripRef Null");
-            handleState(STATE_TRIP);
-            return;
-        }
-        if (currentState != STATE_NO_TRIP && trip == null) {
+            }
+            if (currentState != STATE_TRIP) { // this check prevent re_handle state that hasn't changed yet
+                handleState(STATE_TRIP);
+            } else {
+                updateState();
+            }
+        } else {
             if (manager.getCurrentTripRef() != null)
                 Log.e(TAG, "Trip instance Null while tripRef Nonnull");
-            handleState(STATE_NO_TRIP);
+            if (currentState != STATE_NO_TRIP) { // this check prevent re_handle state that hasn't changed yet
+                handleState(STATE_NO_TRIP);
+            } else {
+                updateState();
+            }
+        }
+    }
+
+    private void updateState() {
+        if (currentState == STATE_TRIP) {
+            setSubtitle(String.format("%d thành viên, %d điểm đến", manager.getMembers().size(), manager.getCheckpoints().size()));
         }
     }
 
     private void handleState(int state) {
+        currentState = state;
         setToolbar(); // TODO: this is second time of setToolbar of the same menu, first set in onViewCreated
-        if (manager.getCurrentTripRef() != null) {
+        if (state == STATE_TRIP) {
             btnCreateTrip.setVisibility(View.GONE);
             btnJoinTrip.setVisibility(View.GONE);
             tabLayout.setVisibility(View.VISIBLE);
             pager.setVisibility(View.VISIBLE);
             setTitle(manager.getCurrentTrip().getName());
-            setSubtitle(String.format("%d thành viên, %d điểm đến", manager.getMembers().size(), manager.getCheckpoints().size()));
         } else {
-            currentState = STATE_NO_TRIP;
             tabLayout.setVisibility(View.GONE);
             pager.setVisibility(View.GONE);
 
@@ -169,6 +184,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                 }
             });
         }
+        updateState();
     }
 
     @Override
@@ -302,6 +318,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                                     Toast.makeText(getContext(), "Rời phòng " + (task.isSuccessful() ? "thành công!" : "thất bại"), Toast.LENGTH_LONG).show();
                                     leaveTripConfirmDialog.toggleProgressBar(false);
                                     leaveTripConfirmDialog.dismiss();
+
                                 }
                             });
                         } else {

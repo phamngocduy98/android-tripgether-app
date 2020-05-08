@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_radius_full_white_with_border"
+    android:background="@drawable/bg_radius_full_white_fill_bot"
     tools:context=".BottomMembersFragment">
 
     <cf.bautroixa.maptest.theme.RoundedImageView

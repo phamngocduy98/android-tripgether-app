@@ -44,6 +44,7 @@ public class NotificationItem {
         this.eventType = eventType;
         this.avatar = avatar;
         this.content = content;
+        if (title.length() == 0) title = "Tripgether";
         this.title = title;
         this.description = description;
         if (time != null) {
@@ -129,7 +130,7 @@ public class NotificationItem {
                                 User user = task.getResult();
                                 String actionName = event.getType() == Event.Type.USER_ADDED ? "tham gia" : "rời";
                                 String message = String.format("<b>%s</b> đã %s nhóm!", user.getName(), actionName);
-                                return new NotificationItem(event.getType(), user.getAvatar(), message, "", "", event.getTime(), userRef.getId());
+                                return new NotificationItem(event.getType(), user.getAvatar(), message, "", message, event.getTime(), userRef.getId());
                             }
                             return errorNotificationItem;
                         }
@@ -169,7 +170,7 @@ public class NotificationItem {
                                 String actionName = event.getType() == Event.Type.CHECKPOINT_ADDED ? "thêm" : "xóa";
                                 String message = String.format("Trưởng nhóm đã %s địa điểm <b>%s</b> tại vị trí %s", actionName, checkpoint.getName(), checkpoint.getLocation());
                                 // TODO: get avatar of leader
-                                return new NotificationItem(event.getType(), User.DEFAULT_AVATAR, message, "", "", event.getTime(), checkpointRef.getId());
+                                return new NotificationItem(event.getType(), User.DEFAULT_AVATAR, message, "", message, event.getTime(), checkpointRef.getId());
                             }
                             return errorNotificationItem;
                         }
