@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_radius_full_white_fill_bot"
+    android:gravity="center"
+    android:paddingVertical="8dp"
+    tools:context=".ui.map.bottomspace.BottomCreateJoinTripFragment">
+
+    <LinearLayout
+        android:id="@+id/linear_create_trip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <ImageView
+            android:id="@+id/ic_item_tool"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_tool_button"
+            android:paddingVertical="8dp"
+            android:tint="@color/icon_tool_button"
+            app:srcCompat="@drawable/ic_add_black_24dp" />
+
+        <TextView
+            android:id="@+id/tv_title_item_tool"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_radius_full_white"
+            android:gravity="center"
+            android:lines="1"
+            android:paddingHorizontal="8dp"
+            android:text="Tạo chuyến đi" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_join_trip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_weight="0"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <ImageView
+            android:id="@+id/ic_item_tool"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_tool_button"
+            android:paddingVertical="8dp"
+            android:tint="@color/icon_tool_button"
+            app:srcCompat="@drawable/ic_person_add_black_24dp" />
+
+        <TextView
+            android:id="@+id/tv_title_item_tool"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_radius_full_white"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:text="Tham gia chuyến đi" />
+    </LinearLayout>
+</LinearLayout>

@@ -8,6 +8,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
+
 /**
  * CompassHelper class from compass app project below:
  * https://github.com/iutinvg/compass
@@ -66,6 +71,21 @@ public class CompassHelper implements SensorEventListener {
 
     public void setListener(CompassListener l) {
         listener = l;
+    }
+
+    public void attachLister(LifecycleOwner lifecycleOwner, CompassListener listener) {
+        this.listener = listener;
+        lifecycleOwner.getLifecycle().addObserver(new LifecycleObserver() {
+            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            public void connectListener() {
+                start();
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            public void disconnectListener() {
+                stop();
+            }
+        });
     }
 
     @Override

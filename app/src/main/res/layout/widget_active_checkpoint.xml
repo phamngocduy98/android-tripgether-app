@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_radius_full_white"
-    tools:context=".widgets.ActiveCheckpointWidget">
+    tools:context=".ui.map.bottomspace.ActiveCheckpointWidget">
 
     <TextView
         android:id="@+id/tv_time_remain_widget_active_checkpoint"

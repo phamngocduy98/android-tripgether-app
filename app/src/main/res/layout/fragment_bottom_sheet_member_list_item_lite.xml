@@ -1,55 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="70dp"
+    android:layout_height="70dp"
+    android:layout_marginHorizontal="12dp"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_name_item_friend_status_lite"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/bg_radius_full_color"
-        android:fontFamily="sans-serif-light"
-        android:gravity="center"
-        android:text="TV"
-        android:textColor="@color/white"
-        android:textSize="26dp"
-        app:layout_constraintBottom_toBottomOf="@+id/img_avatar_item_friend_status_lite"
-        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_friend_status_lite"
-        app:layout_constraintStart_toStartOf="@+id/img_avatar_item_friend_status_lite"
-        app:layout_constraintTop_toTopOf="@+id/img_avatar_item_friend_status_lite" />
-
-    <cf.bautroixa.maptest.theme.RoundedImageView
-        android:id="@+id/img_avatar_item_friend_status_lite"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="12dp"
-        app:borderRadius="25dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/user" />
-
-    <TextView
-        android:id="@+id/tv_online_indicator_item_friend_lite"
-        style="@style/TextView.Badge"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginBottom="2dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_name_item_friend_status_lite"
-        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_friend_status_lite" />
-
-    <TextView
-        android:id="@+id/tv_messages_count_item_friend_status_lite"
-        style="@style/TextView.Badge"
-        android:text="0"
-        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_friend_status_lite"
-        app:layout_constraintTop_toTopOf="@+id/img_avatar_item_friend_status_lite" />
+    <include layout="@layout/item_user_avatar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

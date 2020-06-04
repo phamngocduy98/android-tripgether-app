@@ -5,9 +5,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -23,14 +22,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Map;
 
-import cf.bautroixa.maptest.AlertActivity;
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.SplashScreenActivity;
-import cf.bautroixa.maptest.data.FcmMessage;
-import cf.bautroixa.maptest.data.NotificationItem;
-import cf.bautroixa.maptest.firestore.Event;
-import cf.bautroixa.maptest.firestore.MainAppManager;
-import cf.bautroixa.maptest.firestore.User;
+import cf.bautroixa.maptest.model.firestore.ModelManager;
+import cf.bautroixa.maptest.model.firestore.Notification;
+import cf.bautroixa.maptest.model.firestore.TripNotification;
+import cf.bautroixa.maptest.model.firestore.User;
+import cf.bautroixa.maptest.model.types.FcmNotification;
+import cf.bautroixa.maptest.ui.AlertActivity;
+import cf.bautroixa.maptest.ui.SplashScreenActivity;
 
 /**
  * NOTE: There can only be one service in each app that receives FCM messages. If multiple
@@ -46,16 +45,16 @@ import cf.bautroixa.maptest.firestore.User;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
-    private MainAppManager manager;
+    private ModelManager manager;
 
     public MyFirebaseMessagingService() {
-        manager = MainAppManager.getInstance();
+        manager = ModelManager.getInstance();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        manager = MainAppManager.getInstance();
+        manager = ModelManager.getInstance();
     }
 
     /**
@@ -90,26 +89,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         if (data.size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-            FcmMessage fcmMessage = FcmMessage.fromHashMap(data);
-            if (fcmMessage.getPriority().equals(FcmMessage.Priority.HIGH) && fcmMessage.getType() > 0) {
+            FcmNotification fcmNotification = FcmNotification.fromHashMap(data);
+            if (fcmNotification.getPriority().equals(FcmNotification.Priority.HIGH)) {
                 // TODO: fcmMessage.getType() > 0 to only handle positive event like add checkpoint, request_check_in, add user (temporary fix)
                 //high priority fcmMessage => handleNow (within 10 seconds)
-                handleNowIntentToNotificationActivity(data);
+                handleViaAlertActivity(data);
             } else {
                 // low priority fcmMessage => show small notification
-                final Event event = manager.getEventsManager().get(fcmMessage.getEventRefId());
-                if (event != null) {
-                    event.getNotificationItem(manager).addOnCompleteListener(new OnCompleteListener<NotificationItem>() {
-                        @Override
-                        public void onComplete(@NonNull Task<NotificationItem> task) {
-                            if (task.isSuccessful()) {
-                                NotificationItem notificationItem = task.getResult();
-                                assert notificationItem != null;
-                                sendNotification(event.getType(), notificationItem.getTitle(), notificationItem.getDescription());
-                            }
+                manager.getCurrentTrip().getTripNotificationsManager().requestGet(fcmNotification.getNotiRefId()).addOnCompleteListener(new OnCompleteListener<TripNotification>() {
+                    @Override
+                    public void onComplete(@NonNull Task<TripNotification> task) {
+                        if (task.isSuccessful()) {
+                            TripNotification tripNotification = task.getResult();
+                            sendNotification(Notification.TripType.tripTypes.indexOf(tripNotification.getType()), "Tripgether", tripNotification.getRenderedMessage(MyFirebaseMessagingService.this, false));
                         }
-                    });
-                }
+                    }
+                });
             }
 
         }
@@ -163,7 +158,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * handleNowIntentToNotificationActivity
      * TODO: Undeleted note from Google: Handle time allotted to BroadcastReceivers.
      */
-    private void handleNowIntentToNotificationActivity(Map<String, String> data) {
+    private void handleViaAlertActivity(Map<String, String> data) {
+        wakeLock();
         Intent intent = new Intent(this, AlertActivity.class);
         Iterator<Map.Entry<String, String>> it = data.entrySet().iterator();
         while (it.hasNext()) {
@@ -190,27 +186,37 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT);
 
         String channelId = getString(R.string.default_notification_channel_id);
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+//        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.ic_tripgether)
+                        .setSmallIcon(R.drawable.ic_tripgether_vector)
                         .setContentTitle(title)
                         .setContentText(messageBody)
                         .setAutoCancel(true)
-                        .setSound(defaultSoundUri)
+//                        .setSound(defaultSoundUri)
+                        .setDefaults(NotificationCompat.DEFAULT_SOUND | NotificationCompat.DEFAULT_VIBRATE)
+                        .setPriority(android.app.Notification.PRIORITY_MAX)
                         .setContentIntent(pendingIntent);
-
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
-                    "Thông báo tập hợp và cảnh báo SOS",
-                    NotificationManager.IMPORTANCE_DEFAULT);
+                    "Thông báo quan trọng (tập hợp, SOS)",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("Thông báo quan trọng cần được hiển thị ngay tới người dùng (head-up notifications");
+            channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
             notificationManager.createNotificationChannel(channel);
         }
-
         notificationManager.notify(notificationId, notificationBuilder.build());
+        wakeLock();
+    }
+
+    private void wakeLock() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        boolean isScreenOn = Build.VERSION.SDK_INT >= 20 ? pm.isInteractive() : pm.isScreenOn(); // check if screen is on
+        if (!isScreenOn) {
+            PowerManager.WakeLock screenOn = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "example");
+            screenOn.acquire(5000);
+        }
     }
 }

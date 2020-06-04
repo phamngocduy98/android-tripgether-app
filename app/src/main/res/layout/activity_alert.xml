@@ -9,7 +9,7 @@
     android:background="@drawable/bg_gradient_activity_alert"
     android:paddingHorizontal="40dp"
     android:paddingVertical="40dp"
-    tools:context=".AlertActivity">
+    tools:context=".ui.AlertActivity">
 
     <TextView
         android:id="@+id/tv_app_name_activity_notify"

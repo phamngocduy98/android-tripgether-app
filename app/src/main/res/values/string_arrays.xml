@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="sos_lever">
-        <item>@string/sos_lever_high</item>
-        <item>@string/sos_lever_medium</item>
         <item>@string/sos_lever_low</item>
+        <item>@string/sos_lever_medium</item>
+        <item>@string/sos_lever_high</item>
     </string-array>
     <string-array name="setting_dark_mode">
         <item>@string/setting_dark_system_mode</item>
@@ -11,7 +11,7 @@
         <item>@string/setting_dark_dark_mode</item>
         <item>@string/setting_dark_auto_mode</item>
     </string-array>
-    <string name="sos_lever_high">Khẩn cấp</string>
-    <string name="sos_lever_medium">Thường</string>
-    <string name="sos_lever_low">Thấp</string>
+    <string name="sos_lever_high">khẩn cấp</string>
+    <string name="sos_lever_medium">ngay</string>
+    <string name="sos_lever_low">sớm</string>
 </resources>

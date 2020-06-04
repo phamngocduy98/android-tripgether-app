@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_radius_full_white_fill_bot"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="8dp"
+    tools:context=".ui.map.bottomspace.BottomRouteFragment">
+
+    <TextView
+        android:id="@+id/tv_distance_frag_bottom_route"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:paddingVertical="16dp"
+        android:text="Khoảng cách 1000 KM"
+        android:textSize="22sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_radius_full_color"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đi xe"
+                android:textColor="@color/colorTextDarkBg" />
+
+            <TextView
+                android:id="@+id/tv_drive_duration_frag_bottom_route"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1 phút"
+                android:textColor="@color/colorTextDarkBg"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/btn_flat_with_border"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đi bộ" />
+
+            <TextView
+                android:id="@+id/tv_walk_duration_frag_bottom_route"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="N/A"
+                android:textSize="22sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/tv_navigate_gg_map_bottom_route"
+        style="@style/Button.FlatButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Bắt đầu" />
+</LinearLayout>

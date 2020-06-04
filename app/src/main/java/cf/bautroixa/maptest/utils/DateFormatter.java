@@ -79,4 +79,13 @@ public class DateFormatter {
         if (deltaDay == 1) return "Ngày mai";
         return String.format("%d ngày sau", deltaDay);
     }
+
+    public static String formatTimeLeft(long millis) {
+        long seconds = millis / 1000, minutes = seconds / 60, hours = minutes / 60;
+        if (hours > 0) {
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format("%02d:%02d", minutes, seconds);
+        }
+    }
 }

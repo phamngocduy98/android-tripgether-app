@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="4dp">
+
+    <ImageView
+        android:id="@+id/ic_item_tool"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_tool_button"
+        android:paddingVertical="8dp"
+        android:tint="@color/icon_tool_button"
+        app:srcCompat="@drawable/ic_people_white_24dp" />
+
+    <TextView
+        android:id="@+id/tv_title_item_tool"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bg_radius_full_white"
+        android:gravity="center"
+        android:paddingHorizontal="8dp"
+        android:text="Thành viên nhóm" />
+</LinearLayout>

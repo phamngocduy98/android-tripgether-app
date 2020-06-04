@@ -21,10 +21,10 @@ public class CreateMarker {
         void edit(View view);
     }
 
-    public static Bitmap createBitmapFromLayout(Context context, View view) {
+    public static Bitmap createBitmapFromLayout(Context context, View view, int width) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        view.setLayoutParams(new ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.setLayoutParams(new ViewGroup.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT));
         view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
         view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
         view.buildDrawingCache();
@@ -34,14 +34,15 @@ public class CreateMarker {
 
         return bitmap;
     }
-    public static Bitmap createBitmapFromLayout(Context context, @LayoutRes int layoutResId, ILayoutEditor editor){
+
+    public static Bitmap createBitmapFromLayout(Context context, @LayoutRes int layoutResId, int width, ILayoutEditor editor) {
         View view = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(layoutResId, null);
         editor.edit(view);
-        return createBitmapFromLayout(context, view);
+        return createBitmapFromLayout(context, view, width);
     }
 
-    public static Bitmap createMarker(Context context, @LayoutRes int layoutResId, @DrawableRes final int avatarRes) {
-        return createBitmapFromLayout(context, layoutResId, new ILayoutEditor() {
+    public static Bitmap createMarker(Context context, @LayoutRes int layoutResId, @DrawableRes final int avatarRes, int width) {
+        return createBitmapFromLayout(context, layoutResId, width, new ILayoutEditor() {
             @Override
             public void edit(View view) {
                 ImageView markerImage = view.findViewById(R.id.img_avatar_map_marker_user);
@@ -50,7 +51,7 @@ public class CreateMarker {
         });
     }
 
-    public static Bitmap createMarker(Context context, @DrawableRes final int iconRes, int width, int height){
+    public static Bitmap createScaledMarker(Context context, @DrawableRes final int iconRes, int width, int height) {
         BitmapDrawable bitmapdraw = (BitmapDrawable)context.getResources().getDrawable(iconRes);
         Bitmap b = bitmapdraw.getBitmap();
         return Bitmap.createScaledBitmap(b, width, height, false);

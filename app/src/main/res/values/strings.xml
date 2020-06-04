@@ -19,7 +19,7 @@
     <string name="tv_step_activity_create_trip">Tạo chuyến đi (Bước %d của %d)</string>
     <string name="btn_leave_trip">Leave trip</string>
     <string name="dialog_message_leave_trip">Bạn có chắc chắn muốn rời chuyến đi này không?</string>
-    <string name="server_host">www.example.com</string>
+    <string name="server_host">us-central1-tripgether-b135a.cloudfunctions.net</string>
 
     <string name="detail_personal_information"><u>Thông tin cá nhân chi tiết</u></string>
     <string name="avatar"><u>Ảnh đại diện</u></string>
@@ -80,5 +80,31 @@
     <string name="title_setting">Cài đặt</string>
     <string name="btn_on">Bật</string>
     <string name="btn_off">Tắt</string>
+    <string name="dialog_edit_hint">Nhập giá trị</string>
+    <string name="dialog_title_enter_user_name">Nhập email</string>
+    <string name="user_notification_add_friend">%s đã gửi lời mời kết bạn với bạn</string>
+    <string name="user_notification_friend_accepted">%s đã đồng ý kết bạn.</string>
+    <string name="user_notification_invite_to_trip">%s đã mời bạn tham gia chuyến đi %s</string>
+    <string name="user_notification_trip_join_request">%s đã yêu cầu tham gia chuyến đi %s của bạn</string>
+    <string name="user_notification_trip_join_accepted">Yêu cầu tham gia chuyến đi %s của bạn đã được chấp thuận</string>
+    <string name="user_notification_trip_join_rejected">Yêu cầu tham gia chuyến đi %s của bạn chưa được chấp thuận!</string>
+    <string name="trip_notification_user_added">%s đã tham gia nhóm</string>
+    <string name="trip_notification_user_removed">%s đã rời nhóm</string>
+    <string name="trip_notification_user_sos_added">%s đang cần trợ giúp %s: %s</string>
+    <string name="trip_notification_user_sos_resolved">Yêu cầu trợ giúp của %s đã được giải quyết</string>
+    <string name="trip_notification_checkpoint_added">Trưởng nhóm đã thêm địa điểm mới %s tại %s</string>
+    <string name="trip_notification_checkpoint_removed">Trưởng nhóm đã xóa địa điểm %s</string>
+    <string name="trip_notification_checkpoint_gather_request">Trưởng nhóm yêu cầu tập trung tại %s ở gần %s</string>
+    <string name="user_notification_you_get_lost">\"Bạn đang ở xa các thành viên khác\"</string>
+    <string name="btn_accept">Chấp nhận</string>
+    <string name="btn_reject">Từ chối</string>
+    <string name="dialog_title_confirm_add_friend">Kết bạn?</string>
+    <string name="dialog_message_confirm_add_friend">Bạn có đồng ý kết bạn với người này?</string>
+    <string name="user_notification_friend_rejected">%s đã từ chối kết bạn.</string>
+    <string name="dialog_title_enter_phone_num">Nhập số điện thoại</string>
+    <string name="dialog_title_permission_read_contact">Truy cập danh bạ</string>
+    <string name="dialog_message_permission_read_contact">Ứng dụng cần quyền truy cập danh bạ</string>
+    <string name="dialog_title_permission_camera">Truy cập máy ảnh</string>
+    <string name="dialog_message_permission_camera">Ứng dụng cần quyền truy cập máy ảnh để có thể quét mã QR</string>
 
 </resources>

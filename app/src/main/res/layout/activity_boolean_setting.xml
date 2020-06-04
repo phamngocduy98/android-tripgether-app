@@ -1,34 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/appbar_root"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/appbar_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layoutDescription="@xml/appbar_scene"
     android:background="@color/colorBackground"
-    app:motionProgress="1.0"
-    tools:context=".settings.DarkModeSettingActivity">
+    app:layoutDescription="@xml/appbar_scene"
+    tools:context=".ui.settings.DarkModeSettingActivity">
 
-    <include layout="@layout/appbar" />
+    <include layout="@layout/theme_appbar" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <RadioGroup
             android:id="@+id/rg_activity_boolean_setting"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_radius_full_white"
             android:divider="?android:attr/dividerHorizontal"
             android:paddingHorizontal="8dp"
             android:paddingVertical="8dp"
-            android:showDividers="middle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:showDividers="middle">
 
             <RadioButton
                 android:id="@+id/radio_on"
@@ -45,5 +41,5 @@
                 android:layout_height="wrap_content"
                 android:text="Tắt" />
         </RadioGroup>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.motion.widget.MotionLayout>

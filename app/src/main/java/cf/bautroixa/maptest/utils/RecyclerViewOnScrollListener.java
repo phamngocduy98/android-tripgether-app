@@ -29,12 +29,12 @@ public class RecyclerViewOnScrollListener extends RecyclerView.OnScrollListener 
     public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
         super.onScrollStateChanged(recyclerView, newState);
         if (mode == ScrollMode.SCROLL_IDLE && newState == RecyclerView.SCROLL_STATE_IDLE) handleNewPosition(recyclerView);
-        final int newHeight = recyclerView.getMeasuredHeight();
-        if (0 != newHeight && minHeight < newHeight) {
-            // keep track the height and prevent recycler view optimizing by resizing
-            minHeight = newHeight;
-            recyclerView.setMinimumHeight(minHeight);
-        }
+//        final int newHeight = recyclerView.getMeasuredHeight();
+//        if (0 != newHeight && minHeight < newHeight) {
+//            // keep track the height and prevent recycler view optimizing by resizing
+//            minHeight = newHeight;
+//            recyclerView.setMinimumHeight(minHeight);
+//        }
     }
 
     @Override

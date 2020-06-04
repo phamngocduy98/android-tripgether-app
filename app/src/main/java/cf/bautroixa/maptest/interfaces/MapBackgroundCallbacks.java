@@ -7,4 +7,6 @@ public interface MapBackgroundCallbacks {
     boolean onMarkerClick(Marker marker);
 
     void onMapClick(LatLng latLng);
+
+    void onMapLongClick(LatLng latLng);
 }

@@ -8,23 +8,26 @@ import java.util.List;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.firestore.Trip;
+import cf.bautroixa.maptest.model.firestore.Trip;
 
 public class UrlParser {
     private static final String TAG = "UrlParser";
 
-    public static String parseTripCode(Context context, String url){
+    public static String[] parseTripCode(Context context, String url) {
         Uri uri = Uri.parse(url);
-        Log.d(TAG, "host="+uri.getHost());
+        Log.d(TAG, "host=" + uri.getHost());
         if (Objects.equals(uri.getHost(), context.getString(R.string.server_host))) {
             List<String> paths = uri.getPathSegments();
-            for (String path: paths){
-                Log.d(TAG, "path="+path);
+            for (String path : paths) {
+                Log.d(TAG, "path=" + path);
             }
-            if (paths.size() >= 2 && "trips".equals(paths.get(0))){
-                return paths.get(1);
+            if (paths.size() >= 2 && "trips".equals(paths.get(0))) {
+                if (paths.size() == 2) return new String[]{paths.get(1), ""};
+                if (paths.size() >= 4 && "join".equals(paths.get(2))) {
+                    return new String[]{paths.get(1), paths.get(3)};
+                }
             }
         }
-        return Trip.NO_TRIP;
+        return new String[]{Trip.NO_TRIP, ""};
     }
 }

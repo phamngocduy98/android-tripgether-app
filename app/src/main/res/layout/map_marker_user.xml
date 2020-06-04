@@ -40,6 +40,15 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/user" />
+        app:srcCompat="@android:color/transparent" />
+
+    <cf.bautroixa.maptest.ui.theme.RoundedImageView
+        android:id="@+id/img_sos_map_marker_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_sos_red_24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
