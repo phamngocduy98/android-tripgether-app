@@ -5,7 +5,7 @@ android {
     compileSdkVersion 28
     buildToolsVersion "29.0.0"
     defaultConfig {
-        applicationId "cf.bautroixa.maptest"
+        applicationId 'cf.bautroixa.tripgether'
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
@@ -32,25 +32,25 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
 //    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta6'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta7'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // GG play services
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
-    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
 
     // HTTP square Library
-    implementation('com.squareup.retrofit2:retrofit:2.6.4')
-    implementation('com.squareup.retrofit2:converter-jackson:2.6.4')
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+    implementation('com.squareup.retrofit2:retrofit:2.9.0')
+    implementation('com.squareup.retrofit2:converter-jackson:2.9.0')
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     // QR
@@ -58,13 +58,13 @@ dependencies {
     implementation 'me.dm7.barcodescanner:zxing:1.9.13'
 
     // firebase
-    implementation 'com.google.firebase:firebase-firestore:21.4.2'
+    implementation 'com.google.firebase:firebase-firestore:21.4.3'
     implementation 'com.google.firebase:firebase-storage:19.1.1'
-    implementation 'com.google.firebase:firebase-messaging:20.1.4'
-    implementation 'com.google.firebase:firebase-auth:19.3.0'
+    implementation 'com.google.firebase:firebase-messaging:20.2.1'
+    implementation 'com.google.firebase:firebase-auth:19.3.1'
 
     // mapbox
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.42.6'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.43.0-alpha.1'
 
     // ui library
     implementation 'com.r0adkll:slidableactivity:2.1.0'
@@ -79,7 +79,7 @@ dependencies {
     implementation "androidx.work:work-runtime:2.3.4"
     implementation 'com.github.judemanutd:autostarter:1.0.8'
     implementation "androidx.work:work-runtime:2.3.4"
-    implementation 'com.google.guava:guava:27.0.1-android'
+    implementation 'com.google.guava:guava:29.0-jre'
 
     implementation 'ch.hsr:geohash:1.4.0'
     implementation 'uk.co.mgbramwell.geofire:geofire-android:0.0.2'
@@ -87,8 +87,8 @@ dependencies {
     // deprecated ui
     implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
     // deprecated library
-    implementation "androidx.room:room-runtime:2.2.4"
-    annotationProcessor "androidx.room:room-compiler:2.2.4"
+    implementation 'androidx.room:room-runtime:2.2.5'
+    annotationProcessor 'androidx.room:room-compiler:2.2.5'
     implementation('io.socket:socket.io-client:1.0.0') {
         exclude group: 'org.json', module: 'json'
     }

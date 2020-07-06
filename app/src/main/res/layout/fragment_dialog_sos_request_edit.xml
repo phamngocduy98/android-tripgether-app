@@ -6,7 +6,7 @@
     android:background="@color/colorBackground"
     android:fitsSystemWindows="true">
 
-    <cf.bautroixa.maptest.ui.theme.RoundedImageView
+    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
         android:id="@+id/img_sos_frag_send_sos"
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -66,7 +66,7 @@
         android:text="Điện thoại hết pin rồi"
         android:textSize="16dp" />
 
-    <cf.bautroixa.maptest.ui.theme.RoundedImageView
+    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
         android:id="@+id/img_images_dialog_sos_request_view"
         android:layout_width="match_parent"
         android:layout_height="300dp"

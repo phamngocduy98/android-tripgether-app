@@ -20,7 +20,7 @@
 
         <fragment
             android:id="@+id/frag_map_background"
-            android:name="cf.bautroixa.maptest.ui.map.MapBackgroundFragment"
+            android:name="cf.bautroixa.tripgether.ui.map.MapBackgroundFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -91,5 +91,3 @@
         app:menu="@menu/navigation_view_activity_main" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
-
-
