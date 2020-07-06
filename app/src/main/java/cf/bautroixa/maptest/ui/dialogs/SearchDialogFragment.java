@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest.ui.dialogs;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,12 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
 import cf.bautroixa.maptest.model.types.GeocodingResult;
 import cf.bautroixa.maptest.model.types.SearchResult;
-import cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.ui.adapter.viewholder.PlaceVH;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
 import cf.bautroixa.maptest.ui.theme.FullScreenDialogFragment;
 import cf.bautroixa.maptest.ui.theme.OneRecyclerView;
@@ -48,7 +49,7 @@ public class SearchDialogFragment extends FullScreenDialogFragment implements Na
     private static final String TAG = "SearchFragment";
 
     private ModelManager manager;
-    private NavigationInterfaces navigationInterfaces;
+    private NavigationInterface navigationInterface;
 
     private String avatarUrl = "";
     private boolean showToolbar = true;
@@ -61,7 +62,12 @@ public class SearchDialogFragment extends FullScreenDialogFragment implements Na
     private SearchResultAdapter searchResultAdapter;
 
     public SearchDialogFragment() {
-        manager = ModelManager.getInstance();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        manager = ModelManager.getInstance(context);
     }
 
     @Override
@@ -128,7 +134,7 @@ public class SearchDialogFragment extends FullScreenDialogFragment implements Na
                     mapboxGeocoding.enqueueCall(new Callback<GeocodingResponse>() {
                         @Override
                         public void onResponse(@NotNull Call<GeocodingResponse> call, @NotNull Response<GeocodingResponse> response) {
-                            if (response.isSuccessful() && response.body() != null) {
+                            if (response.body() != null) {
                                 List<CarmenFeature> results = response.body().features();
                                 if (results.size() > 0) {
                                     ArrayList<SearchResult> newSearchResults = new ArrayList<>();
@@ -172,7 +178,7 @@ public class SearchDialogFragment extends FullScreenDialogFragment implements Na
     @Override
     public void onDetach() {
         super.onDetach();
-        this.navigationInterfaces = null;
+        this.navigationInterface = null;
     }
 
     public void showHideCompletely(boolean isShown) {
@@ -185,39 +191,11 @@ public class SearchDialogFragment extends FullScreenDialogFragment implements Na
     }
 
     @Override
-    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
-        this.navigationInterfaces = navigationInterfaces;
+    public void setNavigationInterface(NavigationInterface navigationInterface) {
+        this.navigationInterface = navigationInterface;
     }
 
-    public class SearchResultViewHolder extends OneRecyclerView.ViewHolder {
-
-        TextView tvName, tvTime, tvLocation;
-        View view;
-
-        public SearchResultViewHolder(@NonNull View itemView, int viewType) {
-            super(itemView, viewType);
-            view = itemView;
-            tvName = itemView.findViewById(R.id.tv_name_item_checkpoint);
-            tvLocation = itemView.findViewById(R.id.tv_location_item_checkpoint);
-            tvTime = itemView.findViewById(R.id.tv_time_item_checkpoint);
-        }
-
-        public void bind(final SearchResult searchResult) {
-            tvName.setText(searchResult.getPlaceName());
-            tvLocation.setText(searchResult.getPlaceAddress());
-            tvTime.setText("");
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editSearch.setText(searchResult.getPlaceName());
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_SEARCH_RESULT, searchResult);
-                    dismiss();
-                }
-            });
-        }
-    }
-
-    public class SearchResultAdapter extends OneRecyclerView.Adapter<SearchResultViewHolder> {
+    public class SearchResultAdapter extends OneRecyclerView.Adapter<PlaceVH> {
         ArrayList<SearchResult> searchResults;
 
         public SearchResultAdapter() {
@@ -231,13 +209,21 @@ public class SearchDialogFragment extends FullScreenDialogFragment implements Na
 
         @NonNull
         @Override
-        public SearchResultViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new SearchResultViewHolder(getLayoutInflater().inflate(R.layout.item_checkpoint, parent, false), viewType);
+        public PlaceVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new PlaceVH(getLayoutInflater().inflate(R.layout.item_place, parent, false), viewType);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull SearchResultViewHolder holder, int position) {
-            holder.bind(searchResults.get(position));
+        public void onBindViewHolder(@NonNull PlaceVH holder, int position) {
+            SearchResult searchResult = searchResults.get(position);
+            holder.bind(searchResult, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editSearch.setText(searchResult.getPlaceName());
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_SEARCH_RESULT, searchResult);
+                    dismiss();
+                }
+            });
         }
 
         @Override

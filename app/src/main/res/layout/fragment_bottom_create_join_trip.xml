@@ -7,7 +7,7 @@
     android:background="@drawable/bg_radius_full_white_fill_bot"
     android:gravity="center"
     android:paddingVertical="8dp"
-    tools:context=".ui.map.bottomspace.BottomCreateJoinTripFragment">
+    tools:context=".ui.bottomspace.BottomCreateJoinTripFragment">
 
     <LinearLayout
         android:id="@+id/linear_create_trip"
@@ -67,5 +67,33 @@
             android:gravity="center"
             android:paddingHorizontal="8dp"
             android:text="Tham gia chuyến đi" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_notifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_weight="0"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_tool_button"
+            android:paddingVertical="8dp"
+            android:tint="@color/icon_tool_button"
+            app:srcCompat="@drawable/ic_notifications_black_24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_radius_full_white"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:text="Thông báo" />
     </LinearLayout>
 </LinearLayout>

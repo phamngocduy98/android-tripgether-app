@@ -1,100 +1,159 @@
 package cf.bautroixa.maptest.model.http;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.types.UserPublicData;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import cf.bautroixa.maptest.model.repo.objects.UserPublic;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public class UserHttpService {
-    public static Task<UserPublicData> getUserPublicData(String userId) {
-        final TaskCompletionSource<UserPublicData> taskCompletionSource = new TaskCompletionSource<>();
-        HttpRequest.getInstance().getUserService().getUserPublicData(userId).enqueue(new retrofit2.Callback<HttpRequest.APIResponse<UserPublicData>>() {
+    public static Task<UserPublic> getUserPublicData(final String userId) {
+        return HttpService.getToken().continueWithTask(new Continuation<String, Task<UserPublic>>() {
             @Override
-            public void onResponse(retrofit2.Call<HttpRequest.APIResponse<UserPublicData>> call, retrofit2.Response<HttpRequest.APIResponse<UserPublicData>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    HttpRequest.APIResponse<UserPublicData> resBody = response.body();
-                    if (resBody.success) {
-                        taskCompletionSource.setResult(response.body().data);
-                    } else {
-                        taskCompletionSource.setException(new Exception(resBody.reason));
+            public Task<UserPublic> then(@NonNull Task<String> task) throws Exception {
+                final TaskCompletionSource<UserPublic> taskCompletionSource = new TaskCompletionSource<>();
+                HttpService.getInstance().getUserService().getUserPublicData("Bearer " + task.getResult(), userId).enqueue(new retrofit2.Callback<HttpService.APIResponse<UserPublic>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<HttpService.APIResponse<UserPublic>> call, retrofit2.Response<HttpService.APIResponse<UserPublic>> response) {
+                        if (response.body() != null) {
+                            HttpService.APIResponse<UserPublic> resBody = response.body();
+                            if (resBody.success) {
+                                taskCompletionSource.setResult(response.body().data);
+                            } else {
+                                taskCompletionSource.setException(new Exception(resBody.reason));
+                            }
+                        } else {
+                            taskCompletionSource.setException(new Exception("Network error"));
+                        }
                     }
-                } else {
-                    taskCompletionSource.setException(new Exception("Network error"));
-                }
-            }
 
-            @Override
-            public void onFailure(retrofit2.Call<HttpRequest.APIResponse<UserPublicData>> call, Throwable t) {
-                taskCompletionSource.setException(new Exception(t.getMessage()));
+                    @Override
+                    public void onFailure(retrofit2.Call<HttpService.APIResponse<UserPublic>> call, Throwable t) {
+                        taskCompletionSource.setException(new Exception(t.getMessage()));
+                    }
+                });
+                return taskCompletionSource.getTask();
             }
         });
-        return taskCompletionSource.getTask();
     }
 
-    public static Task<UserPublicData> findUser(String email, String phoneNum) {
-        final TaskCompletionSource<UserPublicData> taskCompletionSource = new TaskCompletionSource<>();
-        HttpRequest.getInstance().getUserService().findUser(email, phoneNum).enqueue(new retrofit2.Callback<HttpRequest.APIResponse<UserPublicData>>() {
+    public static Task<List<UserPublic>> getBatchUserPublicData(final Set<String> uidSet) {
+        if (uidSet.size() > 1024) throw new RuntimeException("uidSet size exceeded");
+        return HttpService.getToken().continueWithTask(new Continuation<String, Task<List<UserPublic>>>() {
             @Override
-            public void onResponse(retrofit2.Call<HttpRequest.APIResponse<UserPublicData>> call, retrofit2.Response<HttpRequest.APIResponse<UserPublicData>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    HttpRequest.APIResponse<UserPublicData> resBody = response.body();
-                    if (resBody.success) {
-                        taskCompletionSource.setResult(response.body().data);
-                    } else {
-                        taskCompletionSource.setException(new Exception(resBody.reason));
+            public Task<List<UserPublic>> then(@NonNull Task<String> task) throws Exception {
+                final TaskCompletionSource<List<UserPublic>> taskCompletionSource = new TaskCompletionSource<>();
+                ArrayList<String> uidList = new ArrayList<>(uidSet);
+                HttpService.getInstance().getUserService().getAllUser("Bearer " + task.getResult(), uidList).enqueue(new retrofit2.Callback<HttpService.APIResponse<List<UserPublic>>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<HttpService.APIResponse<List<UserPublic>>> call, retrofit2.Response<HttpService.APIResponse<List<UserPublic>>> response) {
+                        if (response.body() != null) {
+                            HttpService.APIResponse<List<UserPublic>> resBody = response.body();
+                            if (resBody.success) {
+                                taskCompletionSource.setResult(response.body().data);
+                            } else {
+                                taskCompletionSource.setException(new Exception(resBody.reason));
+                            }
+                        } else {
+                            taskCompletionSource.setException(new Exception("Network error"));
+                        }
                     }
-                } else {
-                    taskCompletionSource.setException(new Exception("Network error"));
-                }
-            }
 
-            @Override
-            public void onFailure(retrofit2.Call<HttpRequest.APIResponse<UserPublicData>> call, Throwable t) {
-                taskCompletionSource.setException(new Exception(t.getMessage()));
+                    @Override
+                    public void onFailure(retrofit2.Call<HttpService.APIResponse<List<UserPublic>>> call, Throwable t) {
+                        taskCompletionSource.setException(new Exception(t.getMessage()));
+                    }
+                });
+                return taskCompletionSource.getTask();
             }
         });
-        return taskCompletionSource.getTask();
     }
 
-    public static Task<HttpRequest.APIResponse> sendAddFriend(User currentUser, String friendId, String addFriendAction) {
-        final TaskCompletionSource<HttpRequest.APIResponse> taskCompletionSource = new TaskCompletionSource<>();
-        HttpRequest.getInstance().getUserService().addFriend(currentUser.getId(), friendId, addFriendAction).enqueue(new retrofit2.Callback<HttpRequest.APIResponse>() {
+    public static Task<UserPublic> findUser(final String email, final String phoneNum) {
+        return HttpService.getToken().continueWithTask(new Continuation<String, Task<UserPublic>>() {
             @Override
-            public void onResponse(retrofit2.Call<HttpRequest.APIResponse> call, retrofit2.Response<HttpRequest.APIResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    taskCompletionSource.setResult(response.body());
-                } else {
-                    taskCompletionSource.setException(new Exception("Network error"));
-                }
-            }
+            public Task<UserPublic> then(@NonNull Task<String> task) throws Exception {
+                final TaskCompletionSource<UserPublic> taskCompletionSource = new TaskCompletionSource<>();
+                HttpService.getInstance().getUserService().findUser("Bearer " + task.getResult(), email, phoneNum).enqueue(new retrofit2.Callback<HttpService.APIResponse<UserPublic>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<HttpService.APIResponse<UserPublic>> call, retrofit2.Response<HttpService.APIResponse<UserPublic>> response) {
+                        if (response.body() != null) {
+                            HttpService.APIResponse<UserPublic> resBody = response.body();
+                            if (resBody.success) {
+                                taskCompletionSource.setResult(response.body().data);
+                            } else {
+                                taskCompletionSource.setException(new Exception(resBody.reason));
+                            }
+                        } else {
+                            taskCompletionSource.setException(new Exception("Network error"));
+                        }
+                    }
 
-            @Override
-            public void onFailure(retrofit2.Call<HttpRequest.APIResponse> call, Throwable t) {
-                taskCompletionSource.setException(new Exception(t.getMessage()));
+                    @Override
+                    public void onFailure(retrofit2.Call<HttpService.APIResponse<UserPublic>> call, Throwable t) {
+                        taskCompletionSource.setException(new Exception(t.getMessage()));
+                    }
+                });
+                return taskCompletionSource.getTask();
             }
         });
-        return taskCompletionSource.getTask();
+    }
+
+    public static Task<HttpService.APIResponse> sendAddFriend(final String friendId, final String addFriendAction) {
+        return HttpService.getToken().continueWithTask(new Continuation<String, Task<HttpService.APIResponse>>() {
+            @Override
+            public Task<HttpService.APIResponse> then(@NonNull Task<String> task) throws Exception {
+                final TaskCompletionSource<HttpService.APIResponse> taskCompletionSource = new TaskCompletionSource<>();
+                HttpService.getInstance().getUserService().addFriend("Bearer " + task.getResult(), friendId, addFriendAction).enqueue(new retrofit2.Callback<HttpService.APIResponse>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<HttpService.APIResponse> call, retrofit2.Response<HttpService.APIResponse> response) {
+                        if (response.body() != null) {
+                            taskCompletionSource.setResult(response.body());
+                        } else {
+                            taskCompletionSource.setException(new Exception("Network error"));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<HttpService.APIResponse> call, Throwable t) {
+                        taskCompletionSource.setException(new Exception(t.getMessage()));
+                    }
+                });
+                return taskCompletionSource.getTask();
+            }
+        });
     }
 
     public interface UserService {
         @FormUrlEncoded
-        @POST("/getUser")
-        Call<HttpRequest.APIResponse<UserPublicData>> getUserPublicData(@Field("uid") String userId);
+        @POST("user/getUser")
+        Call<HttpService.APIResponse<UserPublic>> getUserPublicData(@Header("Authorization") String auth, @Field("uid") String userId);
 
         @FormUrlEncoded
-        @POST("/findUser")
-        Call<HttpRequest.APIResponse<UserPublicData>> findUser(@Field("email") @Nullable String email, @Field("phoneNum") @Nullable String phoneNum);
+        @POST("user/findUser")
+        Call<HttpService.APIResponse<UserPublic>> findUser(@Header("Authorization") String auth, @Field("email") @Nullable String email, @Field("phoneNum") @Nullable String phoneNum);
 
         @FormUrlEncoded
-        @POST("/addFriend")
-        Call<HttpRequest.APIResponse> addFriend(@Field("uid") String userId, @Field("friendId") String friendId, @Field("action") String action);
+        @POST("user/getAllUser")
+        Call<HttpService.APIResponse<List<UserPublic>>> getAllUser(@Header("Authorization") String auth, @Field("uids[]") List<String> uids);
+
+        @FormUrlEncoded
+        @POST("user/addFriend")
+        Call<HttpService.APIResponse> addFriend(@Header("Authorization") String auth, @Field("friendId") String friendId, @Field("action") String action);
+
+
     }
 
     public interface AddFriendActions {

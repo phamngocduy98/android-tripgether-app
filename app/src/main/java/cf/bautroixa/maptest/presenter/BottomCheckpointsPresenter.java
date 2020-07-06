@@ -6,14 +6,13 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
 import cf.bautroixa.maptest.ui.adapter.BottomCheckpointsAdapter;
 
 public interface BottomCheckpointsPresenter {
-    void initAdapter(LifecycleOwner lifecycleOwner, NavigationInterfaces navigationInterfaces);
+    void initAdapter(LifecycleOwner lifecycleOwner, NavigationInterface navigationInterface);
 
     boolean isTripLeader();
 
@@ -21,12 +20,10 @@ public interface BottomCheckpointsPresenter {
 
     boolean isReadyToCheckIn(Checkpoint checkpoint);
 
+    Task<Void> setActiveCheckpoint(Context context, @Nullable Checkpoint checkpoint);
     @Nullable
     BottomCheckpointsAdapter.UpdateVisitCountPayload getUpdateVisitCountPayload(Checkpoint checkpoint);
-
     Task<Void> sendCheckIn();
-
-    Task<Void> setActiveCheckpoint(Context context, DocumentReference checkpointRef);
 
     void onScrollNewPosition(int position);
 
@@ -36,10 +33,6 @@ public interface BottomCheckpointsPresenter {
         void setUpTimeLineString(Checkpoint currentCheckpoint, Checkpoint nextCheckpoint);
 
         void scrollToPosition(int position);
-
-        void onNoActiveTrip();
-
-        void onInTrip();
 
         void onTargetCheckpoint(Checkpoint checkpoint);
     }

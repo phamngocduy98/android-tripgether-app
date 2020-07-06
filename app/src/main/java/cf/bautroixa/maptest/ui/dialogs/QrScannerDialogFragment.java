@@ -1,29 +1,28 @@
 package cf.bautroixa.maptest.ui.dialogs;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.zxing.Result;
 
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.model.constant.RequestCodes;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.http.HttpRequest;
 import cf.bautroixa.maptest.ui.theme.FullScreenDialogFragment;
-import cf.bautroixa.maptest.ui.theme.LoadingDialogFragment;
 import cf.bautroixa.maptest.ui.theme.OneDialog;
+import cf.bautroixa.maptest.ui.trip_view.TripActivity;
 import cf.bautroixa.maptest.utils.UrlParser;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
@@ -32,11 +31,17 @@ public class QrScannerDialogFragment extends FullScreenDialogFragment implements
 
     ModelManager manager;
     private ZXingScannerView mScannerView;
-    private OnQrResultListener onResult;
+//    private OnQrResultListener onResult;
 
-    public QrScannerDialogFragment(OnQrResultListener onResult) {
-        manager = ModelManager.getInstance();
-        this.onResult = onResult;
+    public QrScannerDialogFragment() {
+
+//        this.onResult = onResult;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        manager = ModelManager.getInstance(context);
     }
 
     @Nullable
@@ -94,39 +99,58 @@ public class QrScannerDialogFragment extends FullScreenDialogFragment implements
     @Override
     public void onDetach() {
         super.onDetach();
-        onResult = null;
+//        onResult = null;
     }
 
     @Override
     public void handleResult(Result rawResult) {
         Log.v(TAG, "result = " + rawResult.getText() + ", TYPE = " + rawResult.getBarcodeFormat().toString()); // Prints the scan format (qrcode, pdf417 etc.)
         String[] codes = UrlParser.parseTripCode(requireContext(), rawResult.getText());
-        String tripCode = codes[0], joinCode = codes[1];
-        final LoadingDialogFragment loadingDialog = new LoadingDialogFragment();
-        loadingDialog.show(getChildFragmentManager(), "loading...");
-        manager.sendJoinTrip(tripCode, joinCode).addOnCompleteListener(requireActivity(), new OnCompleteListener<HttpRequest.APIResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                if (task.isSuccessful()) {
-                    HttpRequest.APIResponse apiResponse = task.getResult();
-                    if (apiResponse != null && apiResponse.success) {
-                        Toast.makeText(getContext(), "Đã tham gia chuyến đi thành công!", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(getContext(), "Chưa thể tham gia chuyến đi", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Chưa thể tham gia chuyến đi", Toast.LENGTH_LONG).show();
-                }
-                loadingDialog.dismiss();
-                dismiss();
-            }
-        });
+        String tripId = codes[0], joinCode = codes[1];
+        Intent intent = new Intent(requireContext(), TripActivity.class);
+        intent.putExtra(TripActivity.ARG_TRIP_ID, tripId);
+        intent.putExtra(TripActivity.ARG_JOIN_CODE, joinCode);
+        requireActivity().startActivityForResult(intent, RequestCodes.QR_JOIN_TRIP);
+        dismiss();
+//        final LoadingDialogFragment loadingDialog = LoadingDialogHelper.create(getChildFragmentManager());
+
+//        TripHttpService.joinTrip(manager.getCurrentUser().getId(), tripId, joinCode).addOnCompleteListener(requireActivity(), new OnCompleteListener<HttpService.APIResponse>() {
+//            @Override
+//            public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+//                if (task.isSuccessful()) {
+//                    HttpService.APIResponse apiResponse = task.getResult();
+//                    if (apiResponse != null && apiResponse.success) {
+//                        Toast.makeText(getContext(), "Đã tham gia chuyến đi thành công!", Toast.LENGTH_LONG).show();
+//                        loadingDialog.dismiss();
+//                        dismiss();
+//                    } else {
+//                        Toast.makeText(getContext(), "Chưa thể tham gia chuyến đi", Toast.LENGTH_LONG).show();
+//                    }
+//                } else {
+//                    Toast.makeText(getContext(), "Chưa thể tham gia chuyến đi", Toast.LENGTH_LONG).show();
+//                }
+//
+//            }
+//        });
 
         // If you would like to resume scanning, call this method below:
         //mScannerView.resumeCameraPreview(this);
     }
 
-    public interface OnQrResultListener {
-        void onResult(String result);
+//    public interface OnQrResultListener {
+//        void onResult(String result);
+//    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RequestCodes.QR_JOIN_TRIP) {
+            if (resultCode == Activity.RESULT_OK) {
+                dismiss();
+            } else {
+                mScannerView.resumeCameraPreview(this);
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@
 
         <fragment
             android:id="@+id/widget_weather"
-            android:name="cf.bautroixa.maptest.ui.map.bottomspace.BottomWeatherFragment"
+            android:name="cf.bautroixa.maptest.ui.bottomspace.BottomWeatherFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="8dp" />
@@ -40,7 +40,7 @@
         <fragment
             android:id="@+id/widget_active_checkpoint"
             android:layout_marginVertical="8dp"
-            android:name="cf.bautroixa.maptest.ui.map.bottomspace.ActiveCheckpointWidget"
+            android:name="cf.bautroixa.maptest.ui.bottomspace.ActiveCheckpointWidget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

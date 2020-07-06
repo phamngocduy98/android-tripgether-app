@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.trip.TripInvitationFriendsFragment">
+    tools:context=".ui.trip_invite.TripInvitationFriendsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_friends_frag_trip_invitation_friends"

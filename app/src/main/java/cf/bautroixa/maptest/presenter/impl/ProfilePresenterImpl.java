@@ -8,124 +8,60 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 
-import cf.bautroixa.maptest.model.firestore.Collections;
+import cf.bautroixa.maptest.model.constant.Collections;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.http.HttpRequest;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.http.HttpService;
 import cf.bautroixa.maptest.model.http.UserHttpService;
-import cf.bautroixa.maptest.model.types.UserPublicData;
+import cf.bautroixa.maptest.model.repo.RepositoryManager;
+import cf.bautroixa.maptest.model.repo.objects.UserPublic;
 import cf.bautroixa.maptest.presenter.ProfilePresenter;
 
 public class ProfilePresenterImpl implements ProfilePresenter {
     Context context;
     View view;
     ModelManager manager;
+    RepositoryManager repositoryManager;
 
     public ProfilePresenterImpl(Context context, View view) {
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
+        this.repositoryManager = RepositoryManager.getInstance(context);
         this.context = context;
         this.view = view;
     }
 
     @Override
-    public void OnRequestAddFriend(UserPublicData user) {
-        view.onAddFriendSending();
-        UserHttpService.sendAddFriend(manager.getCurrentUser(), user.getId(), UserHttpService.AddFriendActions.REQUEST).addOnCompleteListener(new OnCompleteListener<HttpRequest.APIResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                if (task.isSuccessful()) {
-                    view.onAddFriendSent();
-                } else {
-                    view.onAddFriendFailed(task.getException().getMessage());
-                }
-            }
-        });
-    }
-
-    @Override
-    public void OnCancelAddFriendRequest(final UserPublicData user) {
-        view.onAddFriendSending();
-        UserHttpService.sendAddFriend(manager.getCurrentUser(), user.getId(), UserHttpService.AddFriendActions.CANCEL).addOnCompleteListener(new OnCompleteListener<HttpRequest.APIResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                if (task.isSuccessful()) {
-                    view.onRemoveAddFriendSent();
-                } else {
-                    view.onAddFriendFailed(task.getException().getMessage());
-                }
-            }
-        });
-    }
-
-    @Override
-    public void OnRemoveFriend(UserPublicData user) {
-        view.onAddFriendSending();
-        UserHttpService.sendAddFriend(manager.getCurrentUser(), user.getId(), UserHttpService.AddFriendActions.REMOVE).addOnCompleteListener(new OnCompleteListener<HttpRequest.APIResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                if (task.isSuccessful()) {
-                    view.onRemoveFriendSent();
-                } else {
-                    view.onAddFriendFailed(task.getException().getMessage());
-                }
-            }
-        });
-    }
-
-    @Override
-    public void OnAcceptAddFriend(UserPublicData user) {
-        view.onAddFriendSending();
-        UserHttpService.sendAddFriend(manager.getCurrentUser(), user.getId(), UserHttpService.AddFriendActions.ACCEPT).addOnCompleteListener(new OnCompleteListener<HttpRequest.APIResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                if (task.isSuccessful()) {
-                    view.onAcceptAddFriendSent();
-                } else {
-                    view.onAddFriendFailed(task.getException().getMessage());
-                }
-            }
-        });
-    }
-
-    @Override
-    public void OnRejectAddFriend(UserPublicData user) {
-        view.onAddFriendSending();
-        UserHttpService.sendAddFriend(manager.getCurrentUser(), user.getId(), UserHttpService.AddFriendActions.REJECT).addOnCompleteListener(new OnCompleteListener<HttpRequest.APIResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                if (task.isSuccessful()) {
-                    view.onRejectAddFriendSent();
-                } else {
-                    view.onAddFriendFailed(task.getException().getMessage());
-                }
-            }
-        });
-    }
-
-    @Override
-    public void init(UserPublicData userPublicData) {
-        view.onAddFriendSending();
-        String userId = userPublicData.getId();
+    public void init(UserPublic userPublic) {
+        view.onLoading();
+        String userId = userPublic.getId();
+        if (userId.equals(manager.getCurrentUser().getId())) {
+            view.onFailed("Đây là bạn!", true);
+            return;
+        }
         DocumentReference friendRef = manager.getDb().collection(Collections.USERS).document(userId);
         if (manager.getCurrentUser().getFriends().contains(friendRef)) {
-            view.setUpView(userPublicData, User.FriendStatus.BE_FRIEND);
+            view.setUpView(userPublic, User.FriendStatus.BE_FRIEND);
         } else if (manager.getCurrentUser().getFriendRequests().contains(friendRef)) {
-            view.setUpView(userPublicData, User.FriendStatus.RECEIVED);
+            view.setUpView(userPublic, User.FriendStatus.RECEIVED);
         } else if (manager.getCurrentUser().getSentFriendRequests().contains(friendRef)) {
-            view.setUpView(userPublicData, User.FriendStatus.SENT);
+            view.setUpView(userPublic, User.FriendStatus.SENT);
         } else {
-            view.setUpView(userPublicData, User.FriendStatus.NONE);
+            view.setUpView(userPublic, User.FriendStatus.NONE);
         }
     }
 
     @Override
     public void init(final String userId) {
-        view.onAddFriendSending();
+        if (userId.equals(manager.getCurrentUser().getId())) {
+            view.onFailed("Đây là bạn!", true);
+            return;
+        }
+        view.onLoading();
         DocumentReference friendRef = manager.getDb().collection(Collections.USERS).document(userId);
         if (manager.getCurrentUser().getFriends().contains(friendRef)) {
             initWithGettableUser(userId, User.FriendStatus.BE_FRIEND);
         } else if (manager.getCurrentUser().getFriendRequests().contains(friendRef)) {
-            initWithGettableUser(userId, User.FriendStatus.RECEIVED);
+            initWithNonGettableUser(userId, User.FriendStatus.RECEIVED);
         } else if (manager.getCurrentUser().getSentFriendRequests().contains(friendRef)) {
             initWithNonGettableUser(userId, User.FriendStatus.SENT);
         } else {
@@ -133,27 +69,107 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         }
     }
 
-    void initWithGettableUser(String userId, final int status) {
+    private void initWithGettableUser(String userId, final int status) {
         manager.getBaseUsersManager().requestGet(userId).addOnCompleteListener(new OnCompleteListener<User>() {
             @Override
             public void onComplete(@NonNull Task<User> task) {
                 if (task.isSuccessful() && task.getResult() != null) {
                     User friend = task.getResult();
-                    view.setUpView(new UserPublicData(friend), status);
+                    view.setUpView(new UserPublic(friend), status);
+                } else {
+                    view.onFailed(task.getException().getMessage(), true);
                 }
             }
         });
     }
 
-    void initWithNonGettableUser(String userId, final int status) {
-        UserHttpService.getUserPublicData(userId).addOnCompleteListener(new OnCompleteListener<UserPublicData>() {
+    private void initWithNonGettableUser(String userId, final int status) {
+        repositoryManager.getUserRepository().requestGet(userId).addOnCompleteListener(new OnCompleteListener<UserPublic>() {
             @Override
-            public void onComplete(@NonNull Task<UserPublicData> task) {
+            public void onComplete(@NonNull Task<UserPublic> task) {
                 if (task.isSuccessful() && task.getResult() != null) {
-                    UserPublicData friend = task.getResult();
+                    UserPublic friend = task.getResult();
                     view.setUpView(friend, status);
+                } else {
+                    view.onFailed(task.getException().getMessage(), true);
                 }
             }
         });
     }
+
+    @Override
+    public void requestAddFriend(UserPublic user) {
+        view.onLoading();
+        UserHttpService.sendAddFriend(user.getId(), UserHttpService.AddFriendActions.REQUEST).addOnCompleteListener(new OnCompleteListener<HttpService.APIResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+                if (task.isSuccessful()) {
+                    view.onAddFriendSent();
+                } else {
+                    view.onFailed(task.getException().getMessage(), false);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void cancelAddFriendRequest(final UserPublic user) {
+        view.onLoading();
+        UserHttpService.sendAddFriend(user.getId(), UserHttpService.AddFriendActions.CANCEL).addOnCompleteListener(new OnCompleteListener<HttpService.APIResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+                if (task.isSuccessful()) {
+                    view.onRemoveAddFriendSent();
+                } else {
+                    view.onFailed(task.getException().getMessage(), false);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void removeFriend(UserPublic user) {
+        view.onLoading();
+        UserHttpService.sendAddFriend(user.getId(), UserHttpService.AddFriendActions.REMOVE).addOnCompleteListener(new OnCompleteListener<HttpService.APIResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+                if (task.isSuccessful()) {
+                    view.onRemoveFriendSent();
+                } else {
+                    view.onFailed(task.getException().getMessage(), false);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void acceptAddFriend(UserPublic user) {
+        view.onLoading();
+        UserHttpService.sendAddFriend(user.getId(), UserHttpService.AddFriendActions.ACCEPT).addOnCompleteListener(new OnCompleteListener<HttpService.APIResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+                if (task.isSuccessful()) {
+                    view.onAcceptAddFriendSent();
+                } else {
+                    view.onFailed(task.getException().getMessage(), false);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void rejectAddFriend(UserPublic user) {
+        view.onLoading();
+        UserHttpService.sendAddFriend(user.getId(), UserHttpService.AddFriendActions.REJECT).addOnCompleteListener(new OnCompleteListener<HttpService.APIResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+                if (task.isSuccessful()) {
+                    view.onRejectAddFriendSent();
+                } else {
+                    view.onFailed(task.getException().getMessage(), false);
+                }
+            }
+        });
+    }
+
 }

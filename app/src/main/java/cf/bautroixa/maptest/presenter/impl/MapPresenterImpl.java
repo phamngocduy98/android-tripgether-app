@@ -1,6 +1,7 @@
 package cf.bautroixa.maptest.presenter.impl;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
@@ -8,47 +9,48 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import cf.bautroixa.maptest.interfaces.LatLngOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.Collections;
-import cf.bautroixa.maptest.model.firestore.Document;
-import cf.bautroixa.maptest.model.firestore.DocumentsManager;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
+import cf.bautroixa.maptest.model.constant.Collections;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.http.AppRequest;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.model.firestore.core.DocumentsManager;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.http.MapboxHttpService;
+import cf.bautroixa.maptest.model.sharedpref.SharedPrefHelper;
 import cf.bautroixa.maptest.presenter.MapPresenter;
-import cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.services.tasks.LocationBaseTask;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.map.MapBackgroundFragment;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
 import cf.bautroixa.maptest.utils.CompassHelper;
 import cf.bautroixa.maptest.utils.LocationHelper;
 
-import static cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter.Tabs.TAB_MAP;
+import static cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter.Tabs.TAB_MAP;
 
 public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener {
     protected final String TAG = getClass().getSimpleName();
     private final ModelManager manager;
-    private final NavigationInterfaces navigationInterfaces;
+    private final NavigationInterface navigationInterface;
     private LifecycleOwner lifecycleOwner;
     private Context context;
     private View view;
     private LocationHelper locationHelper;
+    private SharedPreferences sharedPref;
 
     private LatLng currentLocation;
     private ArrayList<User> members;
@@ -56,18 +58,19 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
     private CompassHelper compass;
     private GoogleMap mMap;
 
-    public MapPresenterImpl(LifecycleOwner lifecycleOwner, Context context, final View view, NavigationInterfaces navigationInterfaces) {
+    public MapPresenterImpl(LifecycleOwner lifecycleOwner, Context context, final View view, NavigationInterface navigationInterface) {
         this.lifecycleOwner = lifecycleOwner;
         this.context = context;
         this.view = view;
-        this.manager = ModelManager.getInstance();
-        this.navigationInterfaces = navigationInterfaces;
+        this.manager = ModelManager.getInstance(context);
+        this.navigationInterface = navigationInterface;
+        this.sharedPref = SharedPrefHelper.getSharedPreferences(context);
 
         this.currentLocation = manager.getCurrentUser().getLatLng();
         this.members = new ArrayList<>();
         this.checkpoints = new ArrayList<>();
 
-        if (manager.getCurrentTrip().isAvailable()) {
+        if (manager.getCurrentTrip().isSubManagerAvailable()) {
             assert manager.getCurrentTrip().getMembersManager() != null;
             assert manager.getCurrentTrip().getCheckpointsManager() != null;
 
@@ -75,6 +78,8 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
 
                 @Override
                 public void onItemInserted(int position, User user) {
+                    if (user.getId().equals(manager.getCurrentUser().getId()))
+                        return; // currentUser has no marker
                     view.createUserMarker(user);
                 }
 
@@ -88,14 +93,16 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
                         marker.setPosition(user.getLatLng());
                     }
                     MapBackgroundFragment.MarkerViewHolder markerViewHolder = view.getMarkerView(user);
-                    markerViewHolder.bind(user);
-                    view.updateMarker(marker, markerViewHolder);
+                    if (markerViewHolder != null) {
+                        markerViewHolder.bind(user);
+                        view.updateMarker(marker, markerViewHolder);
+                    }
                 }
 
                 @Override
                 public void onItemRemoved(int position, User user) {
-                    view.getMarker(user).remove();
-
+                    Marker marker = view.getMarker(user);
+                    if (marker != null) marker.remove();
                 }
 
                 @Override
@@ -112,6 +119,7 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
                 @Override
                 public void onItemChanged(int position, Checkpoint checkpoint) {
                     Marker marker = view.getMarker(checkpoint);
+                    if (marker == null) view.createCheckpointMarker(checkpoint, position + 1);
                     if (!marker.getPosition().equals(checkpoint.getLatLng())) {
                         marker.setPosition(checkpoint.getLatLng());
                     }
@@ -149,16 +157,13 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
 
     @Override
     public void initLocationService() {
-        this.locationHelper = new LocationHelper(context);
-        locationHelper.attachListener(this.lifecycleOwner, new LocationCallback() {
+        this.locationHelper = LocationHelper.getInstance(context);
+        locationHelper.attachListener(this.lifecycleOwner, new LocationHelper.OnLocationChangedListener() {
             @Override
-            public void onLocationResult(LocationResult locationResult) {
-                Location lastLocation = locationResult.getLastLocation();
-                currentLocation = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                manager.getCurrentUser().sendUpdate(null,
-                        User.COORD, new GeoPoint(currentLocation.latitude, currentLocation.longitude),
-                        User.LAST_UPDATE, FieldValue.serverTimestamp()
-                );
+            public void newLocation(int state, @Nullable Location lastAccurateLocation) {
+                if (lastAccurateLocation == null) return;
+                currentLocation = new LatLng(lastAccurateLocation.getLatitude(), lastAccurateLocation.getLongitude());
+                LocationBaseTask.onNewLocation(context, sharedPref, lastAccurateLocation);
                 view.onMyLocationChanged(currentLocation);
             }
         });
@@ -194,12 +199,12 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
 
     @Override
     public void onMapClick(LatLng latLng) {
-        navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_HIDE);
+        navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_HIDE);
     }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_SEARCH_RESULT, latLng);
+        navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_SEARCH_RESULT, latLng);
     }
 
     @Override
@@ -212,10 +217,10 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
         String type = marker.getSnippet(), id = marker.getTitle();
         Log.d(TAG, "marker click" + type + "id=" + id);
         if (type.equals(Collections.CHECKPOINTS)) {
-            navigationInterfaces.navigate(TAB_MAP, TabMapFragment.STATE_CHECKPOINT, manager.getCurrentTrip().getCheckpointsManager().get(id));
+            navigationInterface.navigate(TAB_MAP, TabMapFragment.STATE_CHECKPOINT, manager.getCurrentTrip().getCheckpointsManager().get(id));
             return true;
         } else if (type.equals(Collections.USERS)) {
-            navigationInterfaces.navigate(TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, manager.getCurrentTrip().getMembersManager().get(id));
+            navigationInterface.navigate(TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, manager.getCurrentTrip().getMembersManager().get(id));
             return true;
         }
         return false; // return false to show marker title and snippet normally
@@ -227,17 +232,21 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
 
     @Override
     public void targetMyLocation() {
+        view.lockFocusMyLocation(true);
+        CameraPosition cameraPos = mMap.getCameraPosition();
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(cameraPos.target).bearing(0).zoom(cameraPos.zoom).build()));
         view.targetPoint(currentLocation, 0);
     }
 
     @Override
     public void target(Object data) {
+        cleanUpTempMarkerAndRoute();
+        view.lockFocusMyLocation(false);
         if (data instanceof Document) {
             Marker marker = view.getMarker((Document) data);
             if (marker != null) {
                 view.targetMarker(marker);
             }
-
         }
         if (data instanceof LatLngOwner) {
             targetCamera(0, false, ((LatLngOwner) data).getLatLng());
@@ -271,7 +280,7 @@ public class MapPresenterImpl implements MapPresenter, MapPresenter.CallableMask
         final LatLng from = (fromN != null) ? fromN : currentLocation;
         bounds.include(from);
         bounds.include(to);
-        AppRequest.getRouteLines(this.context, from.latitude, from.longitude, to.latitude, to.longitude).addOnCompleteListener(new OnCompleteListener<ArrayList<LatLng>>() {
+        MapboxHttpService.getRouteLines(this.context, from.latitude, from.longitude, to.latitude, to.longitude).addOnCompleteListener(new OnCompleteListener<ArrayList<LatLng>>() {
             @Override
             public void onComplete(@NonNull Task<ArrayList<LatLng>> task) {
                 if (task.isSuccessful()) {

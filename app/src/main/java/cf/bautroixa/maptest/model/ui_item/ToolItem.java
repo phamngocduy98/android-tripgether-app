@@ -16,6 +16,8 @@ public class ToolItem implements LifecycleObserver {
     @DrawableRes
     int icon;
     String text;
+    @Nullable
+    Integer badgeNumber;
     OnToolItemClicked onToolItemClicked;
 
     public ToolItem() {
@@ -28,7 +30,7 @@ public class ToolItem implements LifecycleObserver {
         this.text = text;
         this.onToolItemClicked = onToolItemClicked;
         lifecycleOwner.getLifecycle().addObserver(this);
-        onCreate();
+        onCreate(this);
     }
 
     public ToolItem(int id, LifecycleOwner lifecycleOwner, boolean activated, @DrawableRes int icon, String text, OnToolItemClicked onToolItemClicked) {
@@ -37,9 +39,19 @@ public class ToolItem implements LifecycleObserver {
         this.icon = icon;
         this.text = text;
         this.onToolItemClicked = onToolItemClicked;
+        lifecycleOwner.getLifecycle().addObserver(this);
     }
 
-    protected void onCreate() {
+    public ToolItem(int id, LifecycleOwner lifecycleOwner, @DrawableRes int icon, String text, int badgeNumber, OnToolItemClicked onToolItemClicked) {
+        this.id = id;
+        this.activated = Activated.LOCKED;
+        this.icon = icon;
+        this.text = text;
+        this.badgeNumber = badgeNumber;
+        this.onToolItemClicked = onToolItemClicked;
+    }
+
+    protected void onCreate(ToolItem toolItem) {
 
     }
 
@@ -73,6 +85,15 @@ public class ToolItem implements LifecycleObserver {
         this.text = text;
     }
 
+    @Nullable
+    public Integer getBadgeNumber() {
+        return badgeNumber;
+    }
+
+    public void setBadgeNumber(@Nullable Integer badgeNumber) {
+        this.badgeNumber = badgeNumber;
+    }
+
     public boolean isActivated() {
         return activated == Activated.ACTIVATED || activated == Activated.LOCKED_ACTIVATED;
     }
@@ -83,7 +104,7 @@ public class ToolItem implements LifecycleObserver {
      * @param activated
      * @return true if activated value changed
      */
-    public boolean setActivated(@Nullable boolean activated) {
+    public boolean setActivated(boolean activated) {
         if (isActivated() == activated) return false;
         this.activated = (activated ? 2 : 1) * (this.activated > 0 ? 1 : -1); // ACTIVATED = 2 or -2, DEACTIVATED = 1 or -1; negative value for locked, positive value for unlocked
         return true;

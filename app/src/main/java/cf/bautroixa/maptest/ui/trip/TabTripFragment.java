@@ -25,13 +25,14 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.Document;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Trip;
-import cf.bautroixa.maptest.model.http.HttpRequest;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Trip;
+import cf.bautroixa.maptest.model.http.HttpService;
+import cf.bautroixa.maptest.model.http.TripHttpService;
 import cf.bautroixa.maptest.ui.dialogs.CheckpointEditDialogFragment;
 import cf.bautroixa.maptest.ui.dialogs.SelectCheckpointDialogFragment;
 import cf.bautroixa.maptest.ui.dialogs.SosRequestEditDialogFragment;
@@ -39,14 +40,10 @@ import cf.bautroixa.maptest.ui.map.bottomsheet.BottomSheetCheckpointListFragment
 import cf.bautroixa.maptest.ui.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.ui.theme.OneDialog;
 import cf.bautroixa.maptest.ui.theme.OnePromptDialog;
+import cf.bautroixa.maptest.ui.trip_invite.TripInvitationActivity;
 
 
 public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, NavigationInterfaceOwner {
-    public static final int STATE_NONE = 0;
-    public static final int STATE_NO_TRIP = 1;
-    public static final int STATE_TRIP = 2;
-    public static final int TAB_TRIP = 0;
-    public static final int TAB_CHECKPOINTS = 1;
     private static final String TAG = "TabTripFragment";
     String[] tabNames = {"Chuyến đi", "Hành trình"};
     Button btnCreateTrip, btnJoinTrip;
@@ -54,8 +51,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     TabLayout tabLayout;
     TabAdapter adapter;
     private ModelManager manager;
-    private int currentState = STATE_NONE;
-    private NavigationInterfaces navigationInterfaces = null;
+    private NavigationInterface navigationInterface = null;
     private Document.OnValueChangedListener<Trip> tripOnNewValueListener;
 
     public TabTripFragment() {
@@ -64,7 +60,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        manager = ModelManager.getInstance();
+        manager = ModelManager.getInstance(context);
         tripOnNewValueListener = new Document.OnValueChangedListener<Trip>() {
             @Override
             public void onValueChanged(@Nullable Trip trip) {
@@ -93,47 +89,15 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                 // then user trip is null so a new trip update is triggered with both trip and tripRef is null
                 Log.e(TAG, "Trip instance nonnull while tripRef Null");
             }
-            if (currentState != STATE_TRIP) { // this check prevent re_handle state that hasn't changed yet
-                handleState(STATE_TRIP);
-            } else {
-                updateState();
-            }
-        } else {
-            if (manager.getCurrentTripRef() != null)
-                Log.e(TAG, "Trip instance Null while tripRef Nonnull");
-            if (currentState != STATE_NO_TRIP) { // this check prevent re_handle state that hasn't changed yet
-                handleState(STATE_NO_TRIP);
-            } else {
-                updateState();
-            }
         }
     }
 
     private void updateState() {
-        if (currentState == STATE_TRIP) {
-            //setSubtitle(String.format("%d thành viên, %d điểm đến", manager.getCurrentTrip().getMembersManager().getData().size(), manager.getCurrentTrip().getCheckpointsManager().getData().size()));
-        }
+
     }
 
     private void handleState(int state) {
-        currentState = state;
-        setToolbar(); // TODO: this is second time of setToolbar of the same menu, first set in onViewCreated
-        if (state == STATE_TRIP) {
-            btnCreateTrip.setVisibility(View.GONE);
-            btnJoinTrip.setVisibility(View.GONE);
-            tabLayout.setVisibility(View.VISIBLE);
-            pager.setVisibility(View.VISIBLE);
-            setTitle(manager.getCurrentTrip().getName());
-        } else {
-            tabLayout.setVisibility(View.GONE);
-            pager.setVisibility(View.GONE);
 
-            setTitle("Chuyến đi");
-            setSubtitle("Bạn chưa tham gia chuyến đi nào");
-
-            btnCreateTrip.setVisibility(View.VISIBLE);
-            btnJoinTrip.setVisibility(View.VISIBLE);
-        }
         updateState();
     }
 
@@ -141,8 +105,6 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tab_trip, container, false);
-
-        currentState = STATE_NONE;
         // no trip
         btnCreateTrip = view.findViewById(R.id.btn_create_trip_dialog_no_trip);
         btnJoinTrip = view.findViewById(R.id.btn_join_trip_dialog_no_trip);
@@ -204,14 +166,14 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                                 @Override
                                 public void onCheckpointSelected(Checkpoint checkpoint) {
                                     selectCheckpointDialogFragment.toggleProgressBar(true);
-                                    manager.sendAddCheckInLocation(requireContext(), null, checkpoint.getRef()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            selectCheckpointDialogFragment.toggleProgressBar(false);
-                                            selectCheckpointDialogFragment.dismiss();
-                                            dialog.dismiss();
-                                        }
-                                    });
+//                                    manager.sendAddCheckInLocation(requireContext(), null, checkpoint.getRef()).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                        @Override
+//                                        public void onComplete(@NonNull Task<Void> task) {
+//                                            selectCheckpointDialogFragment.toggleProgressBar(false);
+//                                            selectCheckpointDialogFragment.dismiss();
+//                                            dialog.dismiss();
+//                                        }
+//                                    });
                                 }
                             });
                             selectCheckpointDialogFragment.setButtonClickListener(new DialogInterface.OnClickListener() {
@@ -228,14 +190,14 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                                 public void onDialogResult(final OnePromptDialog enterCheckpointNameDialog, boolean isCanceled, String value) {
                                     if (!isCanceled) {
                                         enterCheckpointNameDialog.toggleProgressBar(true);
-                                        manager.sendAddCheckInLocation(requireContext(), value).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                enterCheckpointNameDialog.toggleProgressBar(false);
-                                                enterCheckpointNameDialog.dismiss();
-                                                dialog.dismiss();
-                                            }
-                                        });
+//                                        manager.sendAddCheckInLocation(requireContext(), value).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                            @Override
+//                                            public void onComplete(@NonNull Task<Void> task) {
+//                                                enterCheckpointNameDialog.toggleProgressBar(false);
+//                                                enterCheckpointNameDialog.dismiss();
+//                                                dialog.dismiss();
+//                                            }
+//                                        });
                                     } else {
                                         enterCheckpointNameDialog.dismiss();
                                     }
@@ -249,7 +211,7 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                 return true;
             case R.id.menu_share_frag_trip:
                 Intent intent = new Intent(getContext(), TripInvitationActivity.class);
-                intent.putExtra(Trip.ID, manager.getCurrentUser().getActiveTrip().getId());
+                intent.putExtra(Trip.ID, manager.getCurrentUser().getActiveTripRef().getId());
                 startActivity(intent);
                 return true;
             case R.id.menu_leave_trip_frag_trip:
@@ -262,10 +224,10 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
                     public void onClick(final DialogInterface dialog, int which) {
                         if (which == DialogInterface.BUTTON_POSITIVE) {
                             leaveTripConfirmDialog.toggleProgressBar(true);
-                            manager.sendLeaveTrip().addOnCompleteListener(new OnCompleteListener<HttpRequest.APIResponse>() {
+                            TripHttpService.leaveTrip().addOnCompleteListener(new OnCompleteListener<HttpService.APIResponse>() {
                                 @Override
-                                public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                                    HttpRequest.APIResponse apiResponse = task.getResult();
+                                public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+                                    HttpService.APIResponse apiResponse = task.getResult();
                                     Toast.makeText(getContext(), "Rời phòng " + (task.isSuccessful() && apiResponse != null && apiResponse.success ? "thành công!" : "thất bại"), Toast.LENGTH_LONG).show();
                                     leaveTripConfirmDialog.toggleProgressBar(false);
                                     leaveTripConfirmDialog.dismiss();
@@ -296,17 +258,17 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         }
     }
 
-    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
-        this.navigationInterfaces = navigationInterfaces;
+    public void setNavigationInterface(NavigationInterface navigationInterface) {
+        this.navigationInterface = navigationInterface;
     }
 
     @Override
     public void onAttachFragment(@NonNull Fragment childFragment) {
         super.onAttachFragment(childFragment);
         if (childFragment instanceof BottomSheetCheckpointListFragment) {
-            ((BottomSheetCheckpointListFragment) childFragment).setNavigationInterfaces(navigationInterfaces);
+            ((BottomSheetCheckpointListFragment) childFragment).setNavigationInterface(navigationInterface);
         } else if (childFragment instanceof TabTripFragmentTrip) {
-            ((TabTripFragmentTrip) childFragment).setNavigationInterfaces(navigationInterfaces);
+            ((TabTripFragmentTrip) childFragment).setNavigationInterface(navigationInterface);
         }
     }
 

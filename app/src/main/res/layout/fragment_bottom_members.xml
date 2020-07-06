@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".ui.map.bottomspace.BottomMembersFragment">
+    tools:context=".ui.bottomspace.BottomMembersFragment">
 
     <TextView
         android:id="@+id/tv_count_frag_friend"

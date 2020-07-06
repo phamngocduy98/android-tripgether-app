@@ -12,19 +12,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gauravbhola.ripplepulsebackground.RipplePulseLayout;
+import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.Discussion;
-import cf.bautroixa.maptest.model.firestore.Message;
-import cf.bautroixa.maptest.model.firestore.User;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Discussion;
+import cf.bautroixa.maptest.model.firestore.objects.Message;
+import cf.bautroixa.maptest.model.firestore.objects.User;
 import cf.bautroixa.maptest.ui.chat.ChatActivity;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
-import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.DiscussionVH> {
     Context context;
@@ -67,10 +68,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.Discus
         public DiscussionVH(@NonNull View itemView) {
             super(itemView);
 //            progressBattery = itemView.findViewById(R.id.progress_battery_item_friend);
-            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend);
-            imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend);
+            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_avatar);
+            imgAvatar = itemView.findViewById(R.id.img_avatar_item_avatar);
 //            imgIsLeader = itemView.findViewById(R.id.img_is_leader_item_friend);
-            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_friend);
+            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_avatar);
 
             ripplePulseSos = itemView.findViewById(R.id.ripple_pulse_sos);
 
@@ -109,7 +110,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.Discus
                 if (latestMessage.getTime() != null) {
                     tvLastUpdate.setText(DateFormatter.format(latestMessage.getTime()));
                 } else {
-                    tvLastUpdate.setText("Đang gửi...");
+                    tvLastUpdate.setText("");
                 }
             } else {
                 tvLastChat.setText("Không có tin nhắn");
@@ -118,12 +119,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.Discus
         }
 
         public void bindUser(User user) {
-            assert user.getLastUpdate() != null;
             // name
             tvName.setText(user.getName());
             // online
-            boolean isOnline = Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000; // online in less than 5 mins
-            tvOnlineIndicator.setSelected(isOnline); // green background / red background
+            Timestamp lastUpdate = user.getLastUpdate();
+            if (lastUpdate != null) {
+                boolean isOnline = Calendar.getInstance().getTimeInMillis() - lastUpdate.toDate().getTime() < 5 * 60 * 1000; // online in less than 5 mins
+                tvOnlineIndicator.setSelected(isOnline); // green background / red background
+            }
             // avatar
             ImageHelper.loadUserAvatar(imgAvatar, tvNameInAvatar, user);
         }

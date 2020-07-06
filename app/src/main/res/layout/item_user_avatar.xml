@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/tv_name_item_friend"
+        android:id="@+id/tv_name_item_avatar"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="2dp"
@@ -21,13 +21,13 @@
         android:text="TV"
         android:textColor="@color/white"
         android:textSize="26dp"
-        app:layout_constraintBottom_toBottomOf="@+id/img_avatar_item_friend"
-        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_friend"
-        app:layout_constraintStart_toStartOf="@+id/img_avatar_item_friend"
-        app:layout_constraintTop_toTopOf="@+id/img_avatar_item_friend" />
+        app:layout_constraintBottom_toBottomOf="@+id/img_avatar_item_avatar"
+        app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_avatar"
+        app:layout_constraintStart_toStartOf="@+id/img_avatar_item_avatar"
+        app:layout_constraintTop_toTopOf="@+id/img_avatar_item_avatar" />
 
     <cf.bautroixa.maptest.ui.theme.RoundedImageView
-        android:id="@+id/img_avatar_item_friend"
+        android:id="@+id/img_avatar_item_avatar"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="2dp"
@@ -43,10 +43,11 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tv_online_indicator_item_friend"
+        android:id="@+id/tv_online_indicator_item_avatar"
         style="@style/TextView.Badge"
         android:layout_width="12dp"
         android:layout_height="12dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/guideline_hor"
         app:layout_constraintEnd_toStartOf="@+id/guideline_ver"
         app:layout_constraintStart_toStartOf="@+id/guideline_ver"

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,31 +24,33 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 import java.util.List;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.SosRequest;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.firestore.Visit;
-import cf.bautroixa.maptest.model.types.UserPublicData;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.SosRequest;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.firestore.objects.Visit;
+import cf.bautroixa.maptest.model.repo.objects.UserPublic;
 import cf.bautroixa.maptest.presenter.impl.BottomMembersPresenterImpl;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.ui.chat.ChatActivity;
 import cf.bautroixa.maptest.ui.dialogs.SosRequestViewDialogFragment;
 import cf.bautroixa.maptest.ui.friends.ProfileActivity;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
-import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdapter.MemberViewHolder> {
     BottomMembersPresenterImpl bottomMembersPresenter;
-    NavigationInterfaces navigationInterfaces;
+    NavigationInterface navigationInterface;
     FragmentManager fragmentManager;
 
     SortedList<User> members;
     Checkpoint activeCheckpoint;
 
-    public BottomMembersAdapter(BottomMembersPresenterImpl bottomMembersPresenter, NavigationInterfaces navigationInterfaces, FragmentManager fm) {
+    public BottomMembersAdapter(BottomMembersPresenterImpl bottomMembersPresenter, NavigationInterface navigationInterface, FragmentManager fm) {
         this.bottomMembersPresenter = bottomMembersPresenter;
-        this.navigationInterfaces = navigationInterfaces;
+        this.navigationInterface = navigationInterface;
         this.fragmentManager = fm;
     }
 
@@ -100,7 +103,7 @@ public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdap
         TextView tvName, tvLocation, tvStatus, tvSos, tvBattery;
         CircularProgressBar progressBattery;
         RoundedImageView imgSos;
-        ImageView imgAvatar, imgCheckedIn, imgMoving, imgLocation;
+        ImageView imgAvatar, imgCheckedIn, imgMoving, imgLocation, imgInAccurateLocation;
         LinearLayout linearSos, linearLocation;
         String currentAvatar = "";
 
@@ -120,6 +123,7 @@ public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdap
             imgSos = itemView.findViewById(R.id.img_sos_item_member);
             imgMoving = itemView.findViewById(R.id.img_moving_item_member);
             imgLocation = itemView.findViewById(R.id.img_location_item_member);
+            imgInAccurateLocation = itemView.findViewById(R.id.img_inaccurate_location_item_member);
 
             linearSos = itemView.findViewById(R.id.linear_sos_message_item_member);
             linearLocation = itemView.findViewById(R.id.linear_location_item_member);
@@ -131,7 +135,7 @@ public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdap
 
         public void bind(final User user) {
             final Context context = itemView.getContext();
-            final UserPublicData userPublicData = new UserPublicData(user);
+            final UserPublic userPublic = new UserPublic(user);
             if (!currentAvatar.equals(user.getAvatar())) {
                 ImageHelper.loadCircleImage(user.getAvatar(), imgAvatar, 100, 100);
                 currentAvatar = user.getAvatar();
@@ -142,22 +146,37 @@ public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdap
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, ProfileActivity.class);
-                    intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, userPublicData);
+                    intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, (Parcelable) userPublic);
                     context.startActivity(intent);
                 }
             };
             imgAvatar.setOnClickListener(avatarNameOnClick);
             tvName.setOnClickListener(avatarNameOnClick);
-            // icon
-            if (user.getSpeed() > 0) {
-                imgLocation.setImageResource(R.drawable.ic_directions_bike_black_24dp);
-                tvLocation.setText(String.format("Đang di chuyển %d m/s gần %s", user.getSpeed(), user.getCurrentLocation()));
-                imgMoving.setVisibility(View.VISIBLE);
-            } else {
-                imgLocation.setImageResource(R.drawable.ic_place_black_24dp);
-                tvLocation.setText(user.getCurrentLocation());
+
+            // Location
+            if (user.getLocationAccuracy() > 50f) { // > accuracy > 50m
+                imgLocation.setImageResource(R.drawable.ic_no_gps);
+                tvLocation.setText(String.format("Vị trí ước tính gần %s", user.getCurrentLocation()));
+                imgInAccurateLocation.setVisibility(View.VISIBLE);
                 imgMoving.setVisibility(View.GONE);
+            } else if (user.getLastUpdate() != null && System.currentTimeMillis() - user.getLastUpdate().toDate().getTime() > 10L * 60 * 1000) { // lastUpdate > 10 min ago
+                imgLocation.setImageResource(R.drawable.ic_no_gps);
+                tvLocation.setText(String.format("Vị trí cuối cùng %s gần %s", DateFormatter.format(user.getLastUpdate()), user.getCurrentLocation()));
+                imgInAccurateLocation.setVisibility(View.VISIBLE);
+                imgMoving.setVisibility(View.GONE);
+            } else {
+                imgInAccurateLocation.setVisibility(View.GONE);
+                if (user.getSpeed() > 0) {
+                    imgLocation.setImageResource(R.drawable.ic_directions_bike_black_24dp);
+                    tvLocation.setText(String.format("Đang di chuyển %d m/s gần %s", user.getSpeed(), user.getCurrentLocation()));
+                    imgMoving.setVisibility(View.VISIBLE);
+                } else {
+                    imgLocation.setImageResource(R.drawable.ic_place_black_24dp);
+                    tvLocation.setText(user.getCurrentLocation());
+                    imgMoving.setVisibility(View.GONE);
+                }
             }
+
             tvBattery.setText(String.format("%d%%", user.getBattery()));
             progressBattery.setProgress(user.getBattery());
             if (user.getBattery() <= 20) {
@@ -212,14 +231,15 @@ public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdap
             btnDirection.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_ROUTE, user.getLatLng());
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_ROUTE, user.getLatLng());
                 }
             });
             btnMessage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: when chat one to one ready, use navigationInterfaces to navigate to chat
-                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", user.getPhoneNumber(), null)));
+                    Intent intent = new Intent(context, ChatActivity.class);
+                    intent.putExtra(ChatActivity.ARG_TO_USER_ID, user.getId());
+                    context.startActivity(intent);
                 }
             });
         }

@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest.ui.dialogs;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,10 +16,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
 import cf.bautroixa.maptest.ui.theme.OneDialog;
-import cf.bautroixa.maptest.utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
 
 public class SelectCheckpointDialogFragment extends OneDialog {
     RecyclerView rv;
@@ -28,13 +29,18 @@ public class SelectCheckpointDialogFragment extends OneDialog {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        manager = ModelManager.getInstance();
         setButtonClickListener(new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        manager = ModelManager.getInstance(context);
     }
 
     @Nullable
@@ -96,7 +102,7 @@ public class SelectCheckpointDialogFragment extends OneDialog {
         @NonNull
         @Override
         public CheckPointViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new CheckPointViewHolder(getLayoutInflater().inflate(R.layout.item_checkpoint, parent, false));
+            return new CheckPointViewHolder(getLayoutInflater().inflate(R.layout.item_place, parent, false));
         }
 
         @Override

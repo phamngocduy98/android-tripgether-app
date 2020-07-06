@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group android:id="@+id/group_menu_1">
         <item
-            android:id="@+id/menu_my_trip"
-            android:title="Chuyến đi của bạn" />
-        <item android:title="Trợ giúp" />
+            android:id="@+id/menu_join_request"
+            android:icon="@drawable/ic_person_add_black_24dp"
+            android:title="Yêu cầu tham gia" />
+        <item
+            android:id="@+id/menu_notification"
+            android:icon="@drawable/ic_notifications_black_24dp"
+            android:title="Thông báo" />
+        <item
+            android:id="@+id/menu_friend_list"
+            android:icon="@drawable/ic_people_white_24dp"
+            android:title="Danh sách bạn bè" />
+    </group>
+    <group android:id="@+id/group_menu_2">
         <item
             android:id="@+id/menu_leave_trip"
+            android:icon="@drawable/ic_logout"
             android:title="Rời chuyến đi" />
+    </group>
+    <group android:id="@+id/group_menu_3">
+        <item
+            android:icon="@drawable/ic_info_black_24dp"
+            android:title="Về ứng dụng" />
+        <item
+            android:id="@+id/menu_setting"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="Cài đặt" />
+
     </group>
 </menu>

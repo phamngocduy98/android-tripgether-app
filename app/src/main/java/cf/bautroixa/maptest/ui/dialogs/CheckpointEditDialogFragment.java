@@ -51,16 +51,15 @@ import java.util.Calendar;
 import java.util.List;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.http.AppRequest;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
 import cf.bautroixa.maptest.model.http.HttpRequest;
+import cf.bautroixa.maptest.model.http.MapboxHttpService;
 import cf.bautroixa.maptest.model.types.APILocation;
 import cf.bautroixa.maptest.model.types.GeocodingResult;
 import cf.bautroixa.maptest.ui.theme.FullScreenDialogFragment;
 import cf.bautroixa.maptest.ui.theme.OneDialog;
-import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.NoFilterArrayAdapter;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.NoFilterArrayAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -85,14 +84,13 @@ public class CheckpointEditDialogFragment extends FullScreenDialogFragment imple
     private AutoCompleteTextView editLocation;
     private Button btnCancel, btnOk;
     private MapView mapView;
-    private ImageButton btnClearLocation;
+    private ImageButton btnClearLocation, btnBack, btnMyLocation;
 
     public interface OnCheckpointSetListener {
         void onCheckpointSet(Checkpoint checkpoint);
     }
 
     public CheckpointEditDialogFragment(OnCheckpointSetListener onCheckpointSetListener, @Nullable OnDeleteCheckpointListener onDeleteCheckpointListener) {
-        ModelManager manager = ModelManager.getInstance();
         this.onCheckpointSetListener = onCheckpointSetListener;
         this.onDeleteCheckpointListener = onDeleteCheckpointListener;
     }
@@ -121,62 +119,6 @@ public class CheckpointEditDialogFragment extends FullScreenDialogFragment imple
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        if (getArguments() != null) {
-            String checkpointId = getArguments().getString(ARG_CHECKPOINT_ID, "");
-            if (checkpointId.length() > 0) {
-                btnOk.setText(R.string.btn_update);
-                btnCancel.setText(R.string.btn_delete);
-                btnCancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new OneDialog.Builder().title(R.string.dialog_title_confirm_delete_checkpoint)
-                                .message(R.string.dialog_message_confirm_delete_checkpoint)
-                                .enableNegativeButton(true)
-                                .buttonClickListener(new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if (which == DialogInterface.BUTTON_POSITIVE) {
-                                            onDeleteCheckpointListener.onCheckpointDeleted();
-                                        }
-                                        dialog.dismiss();
-                                        dismiss();
-                                    }
-                                }).show(getChildFragmentManager(), "delete checkpoint");
-                    }
-                });
-            }
-
-            double lat = getArguments().getDouble(ARG_CHECKPOINT_LATITUDE, selectedLatLng.latitude);
-            double lng = getArguments().getDouble(ARG_CHECKPOINT_LONGITUDE, selectedLatLng.longitude);
-            selectedLatLng = new LatLng(lat, lng);
-            if (isMapLoaded) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLatLng, 12));
-
-            Timestamp time = getArguments().getParcelable(ARG_CHECKPOINT_TIME);
-            if (time != null) selectedTime.setTime(time.toDate());
-
-            editName.setText(getArguments().getString(ARG_CHECKPOINT_NAME, ""));
-            editLocation.setHint(getArguments().getString(ARG_CHECKPOINT_LOCATION, ""));
-            editTime.setText(DateFormatter.format(selectedTime));
-        }
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_dialog_create_checkpoint, container, false);
-        mapView = view.findViewById(R.id.map_checkpoint_select);
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
-
-        editLocation = view.findViewById(R.id.edit_search_location_checkpoint);
-        btnClearLocation = view.findViewById(R.id.btn_clear_edit_search);
-        ImageButton btnBack = view.findViewById(R.id.btn_back_dialog_create_checkpoint);
-        ImageButton btnMyLocation = view.findViewById(R.id.btn_my_location_dialog_create_checkpoint);
-        editName = view.findViewById(R.id.edit_name_dialog_checkpoint_trip_create);
-        editTime = view.findViewById(R.id.edit_time_checkpoint);
-        btnCancel = view.findViewById(R.id.btn_cancel_checkpoint);
-        btnOk = view.findViewById(R.id.btn_add_checkpoint);
-
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -216,7 +158,7 @@ public class CheckpointEditDialogFragment extends FullScreenDialogFragment imple
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 String query = editLocation.getText().toString();
-                AppRequest.getGeocodingLatLng(getContext(), query, new HttpRequest.Callback<APILocation>() {
+                MapboxHttpService.getGeocodingLatLng(getContext(), query, new HttpRequest.Callback<APILocation>() {
                     @Override
                     public void onResponse(final APILocation response) {
                         getActivity().runOnUiThread(new Runnable() {
@@ -332,6 +274,62 @@ public class CheckpointEditDialogFragment extends FullScreenDialogFragment imple
                 dismiss();
             }
         });
+        if (getArguments() != null) {
+            String checkpointId = getArguments().getString(ARG_CHECKPOINT_ID, "");
+            if (checkpointId.length() > 0) {
+                btnOk.setText(R.string.btn_update);
+                btnCancel.setText(R.string.btn_delete);
+                btnCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new OneDialog.Builder().title(R.string.dialog_title_confirm_delete_checkpoint)
+                                .message(R.string.dialog_message_confirm_delete_checkpoint)
+                                .enableNegativeButton(true)
+                                .buttonClickListener(new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (which == DialogInterface.BUTTON_POSITIVE) {
+                                            onDeleteCheckpointListener.onCheckpointDeleted();
+                                        }
+                                        dialog.dismiss();
+                                        dismiss();
+                                    }
+                                }).show(getChildFragmentManager(), "delete checkpoint");
+                    }
+                });
+            }
+
+            double lat = getArguments().getDouble(ARG_CHECKPOINT_LATITUDE, selectedLatLng.latitude);
+            double lng = getArguments().getDouble(ARG_CHECKPOINT_LONGITUDE, selectedLatLng.longitude);
+            selectedLatLng = new LatLng(lat, lng);
+            if (isMapLoaded) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLatLng, 12));
+
+            Timestamp time = getArguments().getParcelable(ARG_CHECKPOINT_TIME);
+            if (time != null) selectedTime.setTime(time.toDate());
+
+            editName.setText(getArguments().getString(ARG_CHECKPOINT_NAME, ""));
+            editLocation.setHint(getArguments().getString(ARG_CHECKPOINT_LOCATION, ""));
+            editTime.setText(DateFormatter.format(selectedTime));
+        }
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_dialog_create_checkpoint, container, false);
+        mapView = view.findViewById(R.id.map_checkpoint_select);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
+
+        editLocation = view.findViewById(R.id.edit_search_location_checkpoint);
+        btnClearLocation = view.findViewById(R.id.btn_clear_edit_search);
+        btnBack = view.findViewById(R.id.btn_back_dialog_create_checkpoint);
+        btnMyLocation = view.findViewById(R.id.btn_my_location_dialog_create_checkpoint);
+        editName = view.findViewById(R.id.edit_name_dialog_checkpoint_trip_create);
+        editTime = view.findViewById(R.id.edit_time_checkpoint);
+        btnCancel = view.findViewById(R.id.btn_cancel_checkpoint);
+        btnOk = view.findViewById(R.id.btn_add_checkpoint);
+
 
         return view;
     }
@@ -366,7 +364,7 @@ public class CheckpointEditDialogFragment extends FullScreenDialogFragment imple
             public void onCameraIdle() {
                 LatLng midLatLng = mMap.getCameraPosition().target;
                 selectedLatLng = midLatLng;
-                AppRequest.getGeocodingAddress(requireContext(), midLatLng).addOnCompleteListener(new OnCompleteListener<GeocodingResult>() {
+                MapboxHttpService.getGeocodingAddress(requireContext(), midLatLng.latitude, midLatLng.longitude).addOnCompleteListener(new OnCompleteListener<GeocodingResult>() {
                     @Override
                     public void onComplete(@NonNull Task<GeocodingResult> task) {
                         if (task.isSuccessful()) {

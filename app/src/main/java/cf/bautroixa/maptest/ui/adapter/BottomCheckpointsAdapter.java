@@ -18,25 +18,26 @@ import com.google.android.gms.tasks.Task;
 import java.util.List;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.DocumentsManager;
-import cf.bautroixa.maptest.model.firestore.Visit;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
+import cf.bautroixa.maptest.model.firestore.core.DocumentsManager;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Visit;
 import cf.bautroixa.maptest.presenter.impl.BottomCheckpointsPresenterImpl;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
 import cf.bautroixa.maptest.ui.theme.ViewAnim;
-import cf.bautroixa.maptest.utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
 
 public class BottomCheckpointsAdapter extends RecyclerView.Adapter<BottomCheckpointsAdapter.ViewHolder> {
     private static final String TAG = "BottomCheckpointsAdapter";
     BottomCheckpointsPresenterImpl bottomCheckpointsPresenter;
-    NavigationInterfaces navigationInterfaces;
+    NavigationInterface navigationInterface;
     SortedList<Checkpoint> checkpoints;
     private DocumentsManager.OnListChangedListener<Visit> onVisitsChangedListener;
 
-    public BottomCheckpointsAdapter(BottomCheckpointsPresenterImpl bottomCheckpointsPresenter, NavigationInterfaces navigationInterfaces) {
+    public BottomCheckpointsAdapter(BottomCheckpointsPresenterImpl bottomCheckpointsPresenter, NavigationInterface navigationInterface) {
         this.bottomCheckpointsPresenter = bottomCheckpointsPresenter;
-        this.navigationInterfaces = navigationInterfaces;
+        this.navigationInterface = navigationInterface;
     }
 
     @NonNull
@@ -150,7 +151,7 @@ public class BottomCheckpointsAdapter extends RecyclerView.Adapter<BottomCheckpo
                     @Override
                     public void onClick(View v) {
                         ViewAnim.toggleLoading(bottomCheckpointsPresenter.getContext(), btnGatherHere, true, "Đang xử lí");
-                        bottomCheckpointsPresenter.setActiveCheckpoint(bottomCheckpointsPresenter.getContext(), isActiveCheckpoint ? null : holdenCheckpoint.getRef()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        bottomCheckpointsPresenter.setActiveCheckpoint(bottomCheckpointsPresenter.getContext(), isActiveCheckpoint ? null : holdenCheckpoint).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 btnGatherHere.setEnabled(true);
@@ -213,14 +214,14 @@ public class BottomCheckpointsAdapter extends RecyclerView.Adapter<BottomCheckpo
             btnRoute.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_ROUTE, checkpoint.getLatLng());
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_ROUTE, checkpoint.getLatLng());
                 }
             });
             // Bạn va n khác đã có mặt
             tvVisitCount.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
                 }
             });
             handleState(state, bottomCheckpointsPresenter.getUpdateVisitCountPayload(checkpoint));

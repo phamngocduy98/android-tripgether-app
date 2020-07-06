@@ -19,7 +19,7 @@ import java.util.List;
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
 import cf.bautroixa.maptest.presenter.BottomRoutePresenter;
-import cf.bautroixa.maptest.utils.Formater;
+import cf.bautroixa.maptest.utils.ui_utils.Formater;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,7 +32,7 @@ public class BottomRoutePresenterImpl implements BottomRoutePresenter {
     public BottomRoutePresenterImpl(Context context, View view) {
         this.context = context;
         this.view = view;
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
     }
 
     @Override

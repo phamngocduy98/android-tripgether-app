@@ -18,12 +18,12 @@ import androidx.recyclerview.widget.SnapHelper;
 import java.util.ArrayList;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.DocumentsManager;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.ui.trip.TripInvitationActivity;
+import cf.bautroixa.maptest.model.firestore.core.DocumentsManager;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.ui.trip_invite.TripInvitationActivity;
 
 public class BottomSheetMemberListFragment extends Fragment implements NavigationInterfaceOwner {
     private static final String TAG = "FriendListStatusFrag";
@@ -34,7 +34,7 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigatio
 
     // listener
     private DocumentsManager.OnListChangedListener<User> onMembersChangedListener;
-    private NavigationInterfaces navigationInterfaces;
+    private NavigationInterface navigationInterface;
 //    private OnFilterUser onFilterUser, defaultUserFilter;
 
     // view
@@ -45,7 +45,13 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigatio
     private MemberListRecyclerView.MembersAdapter membersAdapter, membersLiteAdapter;
 
     public BottomSheetMemberListFragment() {
-        manager = ModelManager.getInstance();
+
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        manager = ModelManager.getInstance(context);
         members = manager.getCurrentTrip().getMembersManager().getList();
 //        defaultUserFilter = new OnFilterUser() {
 //            @Override
@@ -54,11 +60,6 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigatio
 //            }
 //        };
 //        onFilterUser = defaultUserFilter;
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigatio
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        membersAdapter = new MemberListRecyclerView(manager, navigationInterfaces).getAdapter();
+        membersAdapter = new MemberListRecyclerView(manager, navigationInterface).getAdapter();
 
         rvFriendList = view.findViewById(R.id.rv_friend_list);
         rvFriendList.setAdapter(membersAdapter);
@@ -95,7 +96,7 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigatio
     public void onDetach() {
         super.onDetach();
 //        this.removeFilter();
-        navigationInterfaces = null;
+        navigationInterface = null;
     }
 
 //    public void applyFilter(OnFilterUser onFilterUser) {
@@ -120,8 +121,8 @@ public class BottomSheetMemberListFragment extends Fragment implements Navigatio
 //            this.friendStatusLiteAdapter.notifyDataSetChanged();
 //    }
 
-    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
-        this.navigationInterfaces = navigationInterfaces;
+    public void setNavigationInterface(NavigationInterface navigationInterface) {
+        this.navigationInterface = navigationInterface;
     }
 
     public interface OnFilterUser {

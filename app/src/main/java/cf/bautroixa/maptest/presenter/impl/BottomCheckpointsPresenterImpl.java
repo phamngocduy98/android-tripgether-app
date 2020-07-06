@@ -11,25 +11,27 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.SortedList;
-import androidx.recyclerview.widget.SortedListAdapterCallback;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.CollectionManager;
-import cf.bautroixa.maptest.model.firestore.Document;
-import cf.bautroixa.maptest.model.firestore.DocumentsManager;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Trip;
-import cf.bautroixa.maptest.model.firestore.Visit;
+import cf.bautroixa.maptest.model.firestore.core.CollectionManager;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.model.firestore.core.DocumentsManager;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Notification;
+import cf.bautroixa.maptest.model.firestore.objects.Trip;
+import cf.bautroixa.maptest.model.firestore.objects.TripNotification;
+import cf.bautroixa.maptest.model.firestore.objects.Visit;
 import cf.bautroixa.maptest.presenter.BottomCheckpointsPresenter;
 import cf.bautroixa.maptest.ui.adapter.BottomCheckpointsAdapter;
+import cf.bautroixa.maptest.ui.sortedlist.CheckpointSortedListAdapterCallback;
 
 import static cf.bautroixa.maptest.presenter.BottomCheckpointsPresenter.SavedStateKeys.SAVED_ACTIVE_POS;
 
@@ -46,7 +48,7 @@ public class BottomCheckpointsPresenterImpl implements BottomCheckpointsPresente
     public BottomCheckpointsPresenterImpl(Context context, LifecycleOwner lifecycleOwner, View view) {
         this.context = context;
         this.view = view;
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
         lifecycleOwner.getLifecycle().addObserver(new LifecycleObserver() {
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
             public void connectListener() {
@@ -56,24 +58,9 @@ public class BottomCheckpointsPresenterImpl implements BottomCheckpointsPresente
     }
 
     @Override
-    public void initAdapter(LifecycleOwner lifecycleOwner, NavigationInterfaces navigationInterfaces) {
-        this.adapter = new BottomCheckpointsAdapter(this, navigationInterfaces);
-        this.checkpoints = new SortedList<>(Checkpoint.class, new SortedListAdapterCallback<Checkpoint>(adapter) {
-            @Override
-            public int compare(Checkpoint o1, Checkpoint o2) {
-                return o1.getTime().compareTo(o2.getTime());
-            }
-
-            @Override
-            public boolean areContentsTheSame(Checkpoint oldItem, Checkpoint newItem) {
-                return oldItem.equals(newItem);
-            }
-
-            @Override
-            public boolean areItemsTheSame(Checkpoint item1, Checkpoint item2) {
-                return item1.getId().equals(item2.getId());
-            }
-        });
+    public void initAdapter(LifecycleOwner lifecycleOwner, NavigationInterface navigationInterface) {
+        this.adapter = new BottomCheckpointsAdapter(this, navigationInterface);
+        this.checkpoints = new SortedList<>(Checkpoint.class, new CheckpointSortedListAdapterCallback(adapter));
         adapter.setCheckpoints(checkpoints);
         manager.getCurrentTrip().getCheckpointsManager().attachSortedList(lifecycleOwner, checkpoints);
         checkpoints.addAll(manager.getCurrentTrip().getCheckpointsManager().getList());
@@ -113,17 +100,14 @@ public class BottomCheckpointsPresenterImpl implements BottomCheckpointsPresente
         manager.getCurrentTrip().attachListener(lifecycleOwner, new Document.OnValueChangedListener<Trip>() {
             @Override
             public void onValueChanged(@NonNull Trip trip) {
-                if (!trip.isAvailable()) {
-                    view.onNoActiveTrip();
-                } else {
-                    view.onInTrip();
+                if (trip.isAvailable()) {
                     manager.getCurrentTrip().getActiveCheckpoint().addOnCompleteListener(new OnCompleteListener<Checkpoint>() {
                         @Override
                         public void onComplete(@NonNull Task<Checkpoint> task) {
                             Checkpoint newActiveCheckpoint = task.getResult();
                             if (Objects.equals(activeCheckpoint, newActiveCheckpoint)) return;
                             if (activeCheckpoint != null)
-                                activeCheckpoint.getVisitsManager().removeOnDatasChangedListener(visitListener);
+                                activeCheckpoint.getVisitsManager().removeOnListChangedListener(visitListener);
                             activeCheckpoint = newActiveCheckpoint;
                             if (activeCheckpoint != null) {
                                 activeCheckpoint.getVisitsManager().attachListener(lifecycleOwner, visitListener);
@@ -165,8 +149,18 @@ public class BottomCheckpointsPresenterImpl implements BottomCheckpointsPresente
     }
 
     @Override
-    public Task<Void> setActiveCheckpoint(Context context, @Nullable DocumentReference checkpointRef) {
-        return manager.getCurrentTrip().sendUpdate(null, Trip.ACTIVE_CHECKPOINT_REF, checkpointRef);
+    public Task<Void> setActiveCheckpoint(Context context, @Nullable Checkpoint checkpoint) {
+        if (checkpoint != null) {
+            WriteBatch batch = manager.newWriteBatch();
+            manager.getCurrentTrip().sendUpdate(batch, Trip.ACTIVE_CHECKPOINT_REF, checkpoint.getRef());
+            manager.getCurrentTrip().getTripNotificationsManager().create(batch, new TripNotification(context, Notification.TripType.CHECKPOINT_GATHER_REQUEST, manager.getCurrentUser(), checkpoint, Notification.Priority.HIGH));
+            return batch.commit();
+        } else {
+            WriteBatch batch = manager.newWriteBatch();
+            manager.getCurrentTrip().sendUpdate(batch, Trip.ACTIVE_CHECKPOINT_REF, null);
+//            manager.getCurrentTrip().getTripNotificationsManager().create(batch, new TripNotification(context, Notification.TripType.CHECKPOINT_GATHER_REQUEST_END, manager.getCurrentUser(), checkpoint, Notification.Priority.NORMAL));
+            return batch.commit();
+        }
     }
 
     @Nullable
@@ -192,7 +186,7 @@ public class BottomCheckpointsPresenterImpl implements BottomCheckpointsPresente
                     Checkpoint checkpoint = task.getResult();
                     if (checkpoint != null) {
                         activePos = checkpoints.indexOf(checkpoint);
-                        view.scrollToPosition(activePos);
+                        if (activePos != -1) view.scrollToPosition(activePos);
                     }
                 }
             }

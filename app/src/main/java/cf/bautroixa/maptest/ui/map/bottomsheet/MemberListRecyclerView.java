@@ -19,27 +19,27 @@ import java.util.List;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.SosRequest;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.firestore.Visit;
-import cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.SosRequest;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.firestore.objects.Visit;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
-import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class MemberListRecyclerView {
-    protected NavigationInterfaces navigationInterfaces;
+    protected NavigationInterface navigationInterface;
     protected ArrayList<User> users;
     protected MembersAdapter adapter;
     ModelManager manager;
 
-    public MemberListRecyclerView(ModelManager manager, NavigationInterfaces navigationInterfaces) {
+    public MemberListRecyclerView(ModelManager manager, NavigationInterface navigationInterface) {
         this.manager = manager;
-        this.navigationInterfaces = navigationInterfaces;
+        this.navigationInterface = navigationInterface;
         this.users = manager.getCurrentTrip().getMembersManager().getList();
         this.adapter = new MembersAdapter();
     }
@@ -66,9 +66,9 @@ public class MemberListRecyclerView {
         }
 
         public void findView() {
-            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend);
-            imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend);
-            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_friend);
+            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_avatar);
+            imgAvatar = itemView.findViewById(R.id.img_avatar_item_avatar);
+            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_avatar);
 
             ripplePulseSos = itemView.findViewById(R.id.ripple_pulse_sos);
 
@@ -146,7 +146,7 @@ public class MemberListRecyclerView {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, currentUser);
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, currentUser);
                 }
             });
             tvName.setText(currentUser.getName());
@@ -183,7 +183,7 @@ public class MemberListRecyclerView {
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
+                        navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
                     }
                 });
             } else {

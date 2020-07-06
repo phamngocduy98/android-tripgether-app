@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Document;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
+import cf.bautroixa.maptest.model.firestore.core.Document;
 import cf.bautroixa.maptest.ui.MainActivity;
 
 public class NavigableHelper {
@@ -38,7 +38,16 @@ public class NavigableHelper {
         return intent;
     }
 
-    public static void handleNavigation(Intent intent, NavigationInterfaces navigationInterfaces) {
+    public static Intent getNavigableResultIntent(int tab, int state, String klassName, String documentId) {
+        Intent intent = new Intent();
+        intent.putExtra(ARG_TAB, tab);
+        intent.putExtra(ARG_STATE, state);
+        intent.putExtra(ARG_DATA_CLASS_NAME, klassName);
+        intent.putExtra(ARG_DATA_ID, documentId);
+        return intent;
+    }
+
+    public static void handleNavigation(Intent intent, NavigationInterface navigationInterface) {
         Bundle extras = intent.getExtras();
         if (extras != null) {
             int tab = extras.getInt(ARG_TAB, -999);
@@ -46,7 +55,7 @@ public class NavigableHelper {
             int state = extras.getInt(ARG_STATE);
             String dataClassName = extras.getString(ARG_DATA_CLASS_NAME, "");
             String dataId = extras.getString(ARG_DATA_ID, "");
-            navigationInterfaces.navigate(tab, state, dataClassName, dataId);
+            navigationInterface.navigate(tab, state, dataClassName, dataId);
         }
     }
 }

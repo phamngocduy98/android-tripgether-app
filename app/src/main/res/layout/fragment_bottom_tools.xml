@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_radius_full_white_fill_bot"
     android:orientation="vertical"
-    tools:context=".ui.map.bottomspace.BottomToolsFragment">
+    tools:context=".ui.bottomspace.BottomToolsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_tools"

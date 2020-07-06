@@ -17,19 +17,21 @@ import androidx.recyclerview.widget.SortedListAdapterCallback;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterface;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterfaceOwner;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.UserNotification;
+import cf.bautroixa.maptest.model.firestore.objects.UserNotification;
 import cf.bautroixa.maptest.ui.adapter.UserNotificationAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class UserNotificationFragment extends Fragment implements NotificationActivity.ActivityNavigationInterfaceOwner {
+public class UserNotificationFragment extends Fragment implements ActivityNavigationInterfaceOwner {
     private ModelManager manager;
     private RecyclerView rvNotifications;
     private UserNotificationAdapter adapter;
     private SortedList<UserNotification> userNotifications;
-    private NotificationActivity.ActivityNavigationInterface activityNavigationInterface;
+    private ActivityNavigationInterface activityNavigationInterface;
 
     public UserNotificationFragment() {
     }
@@ -37,7 +39,7 @@ public class UserNotificationFragment extends Fragment implements NotificationAc
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        manager = ModelManager.getInstance();
+        manager = ModelManager.getInstance(context);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class UserNotificationFragment extends Fragment implements NotificationAc
 
     // Called On Attach
     @Override
-    public void setActivityNavigationInterface(NotificationActivity.ActivityNavigationInterface activityNavigationInterface) {
+    public void setActivityNavigationInterface(ActivityNavigationInterface activityNavigationInterface) {
         this.activityNavigationInterface = activityNavigationInterface;
         adapter = new UserNotificationAdapter(requireContext(), activityNavigationInterface);
         userNotifications = new SortedList<>(UserNotification.class, new SortedListAdapterCallback<UserNotification>(adapter) {

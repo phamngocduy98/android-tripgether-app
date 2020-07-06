@@ -12,24 +12,25 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.SortedList;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterface;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Notification;
-import cf.bautroixa.maptest.model.firestore.UserNotification;
+import cf.bautroixa.maptest.model.firestore.objects.Notification;
+import cf.bautroixa.maptest.model.firestore.objects.UserNotification;
 import cf.bautroixa.maptest.ui.friends.ProfileActivity;
-import cf.bautroixa.maptest.ui.notifications.NotificationActivity;
 import cf.bautroixa.maptest.ui.theme.OneRecyclerView;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
-import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.ui.trip_view.TripActivity;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class UserNotificationAdapter extends OneRecyclerView.Adapter<UserNotificationAdapter.NotificationVH> {
     ModelManager manager;
     Context context;
-    NotificationActivity.ActivityNavigationInterface navigationInterface;
+    ActivityNavigationInterface navigationInterface;
     private SortedList<UserNotification> userNotifications;
 
-    public UserNotificationAdapter(Context context, NotificationActivity.ActivityNavigationInterface navigationInterface) {
-        this.manager = ModelManager.getInstance();
+    public UserNotificationAdapter(Context context, ActivityNavigationInterface navigationInterface) {
+        this.manager = ModelManager.getInstance(context);
         this.context = context;
         this.navigationInterface = navigationInterface;
     }
@@ -89,20 +90,21 @@ public class UserNotificationAdapter extends OneRecyclerView.Adapter<UserNotific
                 @Override
                 public void onClick(View v) {
                     updateSeen(userNotification);
+                    Intent intent;
                     switch (userNotification.getType()) {
                         case UserNotification.UserType.ADD_FRIEND:
                         case UserNotification.UserType.FRIEND_ACCEPTED:
-                            Intent intent = new Intent(context, ProfileActivity.class);
+                            intent = new Intent(context, ProfileActivity.class);
                             intent.putExtra(ProfileActivity.ARG_USER_ID, userNotification.getUserRef().getId());
                             context.startActivity(intent);
                             break;
                         case UserNotification.UserType.INVITE_TO_TRIP:
-
+                        case UserNotification.UserType.TRIP_JOIN_REJECTED:
+                            intent = new Intent(context, TripActivity.class);
+                            intent.putExtra(TripActivity.ARG_TRIP_ID, userNotification.getTripRef().getId());
+                            context.startActivity(intent);
                             break;
                         case UserNotification.UserType.TRIP_JOIN_ACCEPTED:
-                            break;
-                        case UserNotification.UserType.TRIP_JOIN_REJECTED:
-
                             break;
                     }
 

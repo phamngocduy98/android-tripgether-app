@@ -12,9 +12,11 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Document;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterface;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterfaceOwner;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.ui.adapter.NotificationActivityPagerAdapter;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.NotificationActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.theme.OneAppbarActivity;
 import cf.bautroixa.maptest.utils.NavigableHelper;
 
@@ -25,7 +27,6 @@ public class NotificationActivity extends OneAppbarActivity {
     private TabLayout tabLayout;
 
     public NotificationActivity() {
-        manager = ModelManager.getInstance();
     }
 
     @Override
@@ -33,6 +34,8 @@ public class NotificationActivity extends OneAppbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_tab_notification);
         setTitle("Thông báo");
+
+        manager = ModelManager.getInstance(this);
 
         tabLayout = findViewById(R.id.tab_layout_activity_notification);
         pager = findViewById(R.id.pager_activity_notification);
@@ -73,20 +76,18 @@ public class NotificationActivity extends OneAppbarActivity {
                 public void navigate(int tab, int state, Document data) {
                     // TODO: do testing to make sure it works
                     setResult(Activity.RESULT_OK, NavigableHelper.getNavigableResultIntent(tab, state, data));
-                    NavigableHelper.navigate(NotificationActivity.this, tab, state, data);
+//                    NavigableHelper.navigate(NotificationActivity.this, tab, state, data);
+                    finish();
+                }
+
+                @Override
+                public void navigate(int tab, int state, String klassName, String documentId) {
+                    setResult(Activity.RESULT_OK, NavigableHelper.getNavigableResultIntent(tab, state, klassName, documentId));
+//                    NavigableHelper.navigate(NotificationActivity.this, tab, state, klassName, documentId);
                     finish();
                 }
             });
         }
-    }
-
-
-    public interface ActivityNavigationInterface {
-        void navigate(int tab, int state, Document data);
-    }
-
-    public interface ActivityNavigationInterfaceOwner {
-        void setActivityNavigationInterface(ActivityNavigationInterface activityNavigationInterface);
     }
 }
 

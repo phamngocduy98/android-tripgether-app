@@ -18,8 +18,8 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
 import cf.bautroixa.maptest.ui.theme.ViewAnim;
 
@@ -28,7 +28,7 @@ public class BottomSheetFragment extends Fragment implements NavigationInterface
 
     // data and state
     private ModelManager manager;
-    private NavigationInterfaces navigationInterfaces;
+    private NavigationInterface navigationInterface;
     // view
     private TextView dragMark;
     private TabLayout tabLayout;
@@ -36,12 +36,12 @@ public class BottomSheetFragment extends Fragment implements NavigationInterface
     private String[] tabNames = {"Thành viên", "Địa điểm"};
 
     public BottomSheetFragment() {
-        manager = ModelManager.getInstance();
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        manager = ModelManager.getInstance(context);
     }
 
     @Override
@@ -99,12 +99,12 @@ public class BottomSheetFragment extends Fragment implements NavigationInterface
     public void onAttachFragment(@NonNull Fragment childFragment) {
         super.onAttachFragment(childFragment);
         if (childFragment instanceof NavigationInterfaceOwner) {
-            ((NavigationInterfaceOwner) childFragment).setNavigationInterfaces(navigationInterfaces);
+            ((NavigationInterfaceOwner) childFragment).setNavigationInterface(navigationInterface);
         }
     }
 
-    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
-        this.navigationInterfaces = navigationInterfaces;
+    public void setNavigationInterface(NavigationInterface navigationInterface) {
+        this.navigationInterface = navigationInterface;
     }
 
     static class TabAdapter extends FragmentStateAdapter {

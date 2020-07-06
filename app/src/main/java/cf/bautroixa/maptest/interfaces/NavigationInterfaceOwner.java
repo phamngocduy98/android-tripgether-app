@@ -1,5 +1,5 @@
 package cf.bautroixa.maptest.interfaces;
 
 public interface NavigationInterfaceOwner {
-    void setNavigationInterfaces(NavigationInterfaces navigationInterfaces);
+    void setNavigationInterface(NavigationInterface navigationInterface);
 }

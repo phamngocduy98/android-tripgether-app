@@ -6,11 +6,15 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.WriteBatch;
 
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Notification;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.firestore.UserNotification;
+import cf.bautroixa.maptest.model.firestore.objects.Notification;
+import cf.bautroixa.maptest.model.firestore.objects.Trip;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.firestore.objects.UserNotification;
+import cf.bautroixa.maptest.presenter.TripInvitationFriendsPresenter;
 
 public class TripInvitationFriendsPresenterImpl implements TripInvitationFriendsPresenter {
     ModelManager manager;
@@ -18,7 +22,7 @@ public class TripInvitationFriendsPresenterImpl implements TripInvitationFriends
     View view;
 
     public TripInvitationFriendsPresenterImpl(Context context, View view) {
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
         this.context = context;
         this.view = view;
     }
@@ -26,16 +30,18 @@ public class TripInvitationFriendsPresenterImpl implements TripInvitationFriends
     @Override
     public void inviteFriend(User user) {
         view.onInviting();
-        user.getUserNotificationsManager().create(new UserNotification(context, Notification.UserType.INVITE_TO_TRIP, manager.getCurrentUser(), manager.getCurrentTrip()))
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            view.onInvited();
-                        } else {
-                            view.onInviteFailed();
-                        }
-                    }
-                });
+        WriteBatch batch = manager.newWriteBatch();
+        manager.getCurrentTrip().sendUpdate(batch, Trip.INVITE_ROOM, FieldValue.arrayUnion(user.getRef()));
+        user.getUserNotificationsManager().create(batch, new UserNotification(context, Notification.UserType.INVITE_TO_TRIP, manager.getCurrentUser(), manager.getCurrentTrip()));
+        batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    view.onInvited();
+                } else {
+                    view.onInviteFailed();
+                }
+            }
+        });
     }
 }

@@ -1,6 +1,7 @@
 package cf.bautroixa.maptest.ui;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.WindowInsets;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
@@ -29,26 +31,31 @@ import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.interfaces.MapBackgroundControllable;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
 import cf.bautroixa.maptest.interfaces.OnAppbarStateChanged;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.http.HttpRequest;
+import cf.bautroixa.maptest.model.constant.RequestCodes;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.http.HttpService;
 import cf.bautroixa.maptest.presenter.MainActivityPresenter;
 import cf.bautroixa.maptest.presenter.impl.MainActivityPresenterImpl;
-import cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.ui.friends.FriendListActivity;
 import cf.bautroixa.maptest.ui.map.MapBackgroundFragment;
+import cf.bautroixa.maptest.ui.notifications.NotificationActivity;
+import cf.bautroixa.maptest.ui.settings.SettingActivity;
 import cf.bautroixa.maptest.ui.theme.OneAppbarFragment;
 import cf.bautroixa.maptest.ui.theme.OneDialog;
+import cf.bautroixa.maptest.ui.trip.WaitingRoomActivity;
 import cf.bautroixa.maptest.utils.HandlerHelper;
 import cf.bautroixa.maptest.utils.NavigableHelper;
 
-import static cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter.Tabs.STATE_OPEN_DRAWER;
-import static cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter.Tabs.TAB_ANY;
-import static cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter.Tabs.TAB_MAP;
+import static cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter.Tabs.STATE_OPEN_DRAWER;
+import static cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter.Tabs.TAB_ANY;
+import static cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter.Tabs.TAB_MAP;
 
-public class MainActivity extends AppCompatActivity implements MainActivityPresenter.View, NavigationInterfaces {
+public class MainActivity extends AppCompatActivity implements MainActivityPresenter.View, NavigationInterface {
     private static final String TAG = "MainActivity";
     // back twice to exit
     HandlerHelper backHandlerHelper;
@@ -105,8 +112,20 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
+                        Intent intent;
                         switch (menuItem.getItemId()) {
+                            case R.id.menu_join_request:
+                                startActivity(new Intent(MainActivity.this, WaitingRoomActivity.class));
+                                break;
+                            case R.id.menu_notification:
+                                startActivityForResult(new Intent(MainActivity.this, NotificationActivity.class), RequestCodes.TOOL_NOTIFICATION);
+                                break;
+                            case R.id.menu_friend_list:
+                                startActivity(new Intent(MainActivity.this, FriendListActivity.class));
+                                break;
+                            case R.id.menu_setting:
+                                startActivity(new Intent(MainActivity.this, SettingActivity.class));
+                                break;
                             case R.id.menu_leave_trip:
                                 final OneDialog leaveTripConfirmDialog = new OneDialog.Builder().title(R.string.dialog_title_leave_trip)
                                         .message(R.string.dialog_message_leave_trip)
@@ -117,14 +136,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
                                     public void onClick(final DialogInterface dialog, int which) {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {
                                             leaveTripConfirmDialog.toggleProgressBar(true);
-                                            mainActivityPresenter.sendLeaveTrip().addOnCompleteListener(new OnCompleteListener<HttpRequest.APIResponse>() {
+                                            mainActivityPresenter.sendLeaveTrip().addOnCompleteListener(MainActivity.this, new OnCompleteListener<HttpService.APIResponse>() {
                                                 @Override
-                                                public void onComplete(@NonNull Task<HttpRequest.APIResponse> task) {
-                                                    HttpRequest.APIResponse apiResponse = task.getResult();
-                                                    Toast.makeText(MainActivity.this, "Rời phòng " + (task.isSuccessful() && apiResponse != null && apiResponse.success ? "thành công!" : "thất bại"), Toast.LENGTH_LONG).show();
+                                                public void onComplete(@NonNull Task<HttpService.APIResponse> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Toast.makeText(MainActivity.this, "Rời phòng thành công!", Toast.LENGTH_LONG).show();
+                                                    } else {
+                                                        Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                                    }
                                                     leaveTripConfirmDialog.toggleProgressBar(false);
                                                     leaveTripConfirmDialog.dismiss();
-
                                                 }
                                             });
                                         } else {
@@ -175,10 +196,18 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
             });
         }
         if (fragment instanceof NavigationInterfaceOwner) {
-            ((NavigationInterfaceOwner) fragment).setNavigationInterfaces(this);
+            ((NavigationInterfaceOwner) fragment).setNavigationInterface(this);
         }
         if (fragment instanceof MapBackgroundControllable) {
-            ((MapBackgroundControllable) fragment).setMapBackgroundInterfaces(mapBackgroundFragment.getMapPresenter());
+            ((MapBackgroundControllable) fragment).setMapBackgroundInterface(mapBackgroundFragment.getMapPresenter());
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RequestCodes.TOOL_NOTIFICATION && data != null) {
+            NavigableHelper.handleNavigation(data, this);
         }
     }
 

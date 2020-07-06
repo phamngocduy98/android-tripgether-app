@@ -9,7 +9,7 @@
     android:paddingHorizontal="16dp"
     android:paddingTop="24dp"
     android:paddingBottom="8dp"
-    tools:context=".ui.map.bottomspace.BottomMembersFragment">
+    tools:context=".ui.bottomspace.BottomMembersFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -68,6 +68,16 @@
             android:src="@drawable/ic_directions_bike_black_24dp"
             android:tint="@color/colorText"
             android:tooltipText="Đang di chuyển trên đường" />
+
+        <ImageView
+            android:id="@+id/img_inaccurate_location_item_member"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="2dp"
+            android:src="@drawable/ic_no_gps"
+            android:tint="@color/colorText"
+            android:tooltipText="Vị trí không chính xác" />
 
     </LinearLayout>
 

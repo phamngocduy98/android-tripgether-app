@@ -1,28 +1,28 @@
 package cf.bautroixa.maptest.presenter;
 
-import cf.bautroixa.maptest.model.types.UserPublicData;
+import cf.bautroixa.maptest.model.repo.objects.UserPublic;
 
 public interface ProfilePresenter {
-    void init(UserPublicData userPublicData);
+    void init(UserPublic userPublic);
 
     void init(String userId);
 
-    void OnRequestAddFriend(UserPublicData user);
+    void requestAddFriend(UserPublic user);
 
-    void OnCancelAddFriendRequest(UserPublicData user);
+    void cancelAddFriendRequest(UserPublic user);
 
-    void OnRemoveFriend(UserPublicData user);
+    void removeFriend(UserPublic user);
 
-    void OnAcceptAddFriend(UserPublicData user);
+    void acceptAddFriend(UserPublic user);
 
-    void OnRejectAddFriend(UserPublicData user);
+    void rejectAddFriend(UserPublic user);
 
     interface View {
-        void setUpView(UserPublicData user, int friendStatus);
+        void setUpView(UserPublic user, int friendStatus);
 
-        void onAddFriendSending();
+        void onLoading();
 
-        void onAddFriendFailed(String reason);
+        void onFailed(String reason, boolean finished);
 
         void onAddFriendSent();
 

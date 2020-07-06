@@ -63,20 +63,20 @@
                 android:textSize="18sp" />
 
             <ImageView
-                android:id="@+id/img_is_leader_item_friend"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                app:srcCompat="@drawable/ic_stars_black_24dp" />
-
-            <ImageView
                 android:id="@+id/img_ticker_item_friend"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_ticker" />
+
+            <ImageView
+                android:id="@+id/img_is_leader_item_friend"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_stars_black_24dp" />
         </LinearLayout>
 
         <LinearLayout

@@ -75,7 +75,12 @@ public class OnePromptDialog extends OneDialog {
         }
 
         public Builder iconTitle(@DrawableRes int iconRes) {
-            instance.setIconRes(iconRes);
+            instance.setIconTitleRes(iconRes);
+            return this;
+        }
+
+        public Builder iconBody(@DrawableRes int iconRes) {
+            instance.setIconBodyRes(iconRes);
             return this;
         }
 

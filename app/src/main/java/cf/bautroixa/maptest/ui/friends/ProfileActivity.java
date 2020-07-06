@@ -3,6 +3,7 @@ package cf.bautroixa.maptest.ui.friends;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,21 +11,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.types.UserPublicData;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.repo.objects.UserPublic;
 import cf.bautroixa.maptest.presenter.ProfilePresenter;
 import cf.bautroixa.maptest.presenter.impl.ProfilePresenterImpl;
-import cf.bautroixa.maptest.ui.MainActivity;
+import cf.bautroixa.maptest.ui.chat.ChatActivity;
 import cf.bautroixa.maptest.ui.theme.OneAppbarActivity;
 import cf.bautroixa.maptest.ui.theme.OneDialog;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class ProfileActivity extends OneAppbarActivity implements ProfilePresenter.View {
     public static final String ARG_USER_ID = "userId";
     public static final String ARG_USER_PUBLIC_DATA = "userPublicData";
     ProfilePresenterImpl profilePresenter;
-    UserPublicData user;
+    UserPublic user;
 
     LinearLayout linearAddFriend, linearChat;
     TextView tvAddFriend;
@@ -45,23 +48,41 @@ public class ProfileActivity extends OneAppbarActivity implements ProfilePresent
 
         linearChat = findViewById(R.id.ln_chat);
 
+        Uri data = getIntent().getData();
+        if (data != null && data.getScheme() != null) {
+            String scheme = data.getScheme(); // "http" or "tripgether"
+            List<String> params = data.getPathSegments();
+            if (scheme.equals("http") && params.size() >= 3 && params.get(1).equals("users")) {
+                String userId = params.get(2);
+                profilePresenter.init(userId);
+                return;
+            } else if (scheme.equals("tripgether") && params.size() > 0) {
+                String userId = params.get(0);
+                profilePresenter.init(userId);
+                return;
+            } else {
+                Toast.makeText(this, "Lỗi: invalid web intent", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+
         Bundle args = getIntent().getExtras();
         if (args != null) {
-            UserPublicData userPublicData = (UserPublicData) args.getSerializable(ARG_USER_PUBLIC_DATA);
+            UserPublic userPublic = (UserPublic) args.getSerializable(ARG_USER_PUBLIC_DATA);
             String userId = args.getString(ARG_USER_ID, User.NO_USER);
-            if (userPublicData != null) {
-                profilePresenter.init(userPublicData);
+            if (userPublic != null) {
+                profilePresenter.init(userPublic);
             } else if (!userId.equals(User.NO_USER)) {
                 profilePresenter.init(userId);
             } else {
-                Toast.makeText(this, "Lỗi: null intent", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Lỗi: invalid intent, uid or data must be specified", Toast.LENGTH_SHORT).show();
                 finish();
             }
         }
     }
 
     @Override
-    public void setUpView(UserPublicData user, int status) {
+    public void setUpView(final UserPublic user, int status) {
         this.user = user;
         loadingDialog.dismiss();
         setTitle(user.getName());
@@ -69,16 +90,15 @@ public class ProfileActivity extends OneAppbarActivity implements ProfilePresent
         linearChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: intent to MessagingActivity
-                Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP & Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Intent intent = new Intent(ProfileActivity.this, ChatActivity.class);
+                intent.putExtra(ChatActivity.ARG_TO_USER_ID, user.getId());
                 startActivity(intent);
             }
         });
         setupAddFriendButton(user, status);
     }
 
-    public void setupAddFriendButton(final UserPublicData user, final int status) {
+    public void setupAddFriendButton(final UserPublic user, final int status) {
         switch (status) {
             case User.FriendStatus.NONE:
                 tvAddFriend.setText("Kết bạn");
@@ -97,13 +117,13 @@ public class ProfileActivity extends OneAppbarActivity implements ProfilePresent
             public void onClick(View v) {
                 switch (status) {
                     case User.FriendStatus.NONE:
-                        profilePresenter.OnRequestAddFriend(user);
+                        profilePresenter.requestAddFriend(user);
                         break;
                     case User.FriendStatus.BE_FRIEND:
-                        profilePresenter.OnRemoveFriend(user);
+                        profilePresenter.removeFriend(user);
                         break;
                     case User.FriendStatus.SENT:
-                        profilePresenter.OnCancelAddFriendRequest(user);
+                        profilePresenter.cancelAddFriendRequest(user);
                         break;
                     case User.FriendStatus.RECEIVED:
                         new OneDialog.Builder().posBtnText(R.string.btn_accept).negBtnText(R.string.btn_reject)
@@ -113,9 +133,9 @@ public class ProfileActivity extends OneAppbarActivity implements ProfilePresent
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {
-                                            profilePresenter.OnAcceptAddFriend(user);
+                                            profilePresenter.acceptAddFriend(user);
                                         } else {
-                                            profilePresenter.OnRejectAddFriend(user);
+                                            profilePresenter.rejectAddFriend(user);
                                         }
                                         dialog.dismiss();
                                     }
@@ -127,17 +147,22 @@ public class ProfileActivity extends OneAppbarActivity implements ProfilePresent
     }
 
     @Override
-    public void onAddFriendSending() {
+    public void onLoading() {
         linearAddFriend.setEnabled(false);
         loadingDialog = ProgressDialog.show(ProfileActivity.this, "", "Vui lòng đợi", true, false);
         loadingDialog.setCustomTitle(new View(ProfileActivity.this));
     }
 
-    @Override
-    public void onAddFriendFailed(String reason) {
-        linearAddFriend.setEnabled(true);
+    public void onSuccess() {
         loadingDialog.dismiss();
+    }
+
+    @Override
+    public void onFailed(String reason, boolean finished) {
+        linearAddFriend.setEnabled(true);
+        if (loadingDialog != null) loadingDialog.dismiss();
         Toast.makeText(ProfileActivity.this, reason, Toast.LENGTH_LONG).show();
+        if (finished) finish();
     }
 
     @Override

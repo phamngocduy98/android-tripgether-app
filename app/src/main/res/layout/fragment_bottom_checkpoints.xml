@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context=".ui.map.bottomspace.BottomCheckpointsFragment">
+    tools:context=".ui.bottomspace.BottomCheckpointsFragment">
 
     <TextView
         android:id="@+id/tv_count_frag_trip_overview"

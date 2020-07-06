@@ -173,8 +173,9 @@
 
     <style name="OneUI.TabLayout.BottomNavigation" parent="Widget.Design.TabLayout">
         <item name="android:layout_height">50dp</item>
-        <item name="tabPaddingStart">15dp</item>
-        <item name="tabPaddingEnd">15dp</item>
+        <item name="tabPaddingStart">8dp</item>
+        <item name="tabPaddingEnd">8dp</item>
+        <item name="minWidth">32dp</item>
         <item name="tabIndicator">@drawable/indicator_bottom_navigation</item>
         <item name="tabIndicatorColor">@color/colorTextButton</item>
         <item name="tabIndicatorFullWidth">false</item>
@@ -183,6 +184,7 @@
         <item name="tabBackground">@android:color/transparent</item>
         <item name="tabTextAppearance">@style/OneUI.TabTextAppearance</item>
         <item name="tabSelectedTextColor">@color/colorTextButton</item>
+        <item name="tabUnboundedRipple">false</item>
     </style>
 
     <style name="OneUI.TabTextAppearance" parent="TextAppearance.Design.Tab">

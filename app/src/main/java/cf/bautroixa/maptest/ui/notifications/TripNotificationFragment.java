@@ -17,19 +17,21 @@ import androidx.recyclerview.widget.SortedListAdapterCallback;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterface;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterfaceOwner;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.TripNotification;
+import cf.bautroixa.maptest.model.firestore.objects.TripNotification;
 import cf.bautroixa.maptest.ui.adapter.TripNotificationAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TripNotificationFragment extends Fragment implements NotificationActivity.ActivityNavigationInterfaceOwner {
+public class TripNotificationFragment extends Fragment implements ActivityNavigationInterfaceOwner {
     private ModelManager manager;
     private RecyclerView rvNotifications;
     private TripNotificationAdapter adapter;
     private SortedList<TripNotification> tripNotificationSortedList;
-    private NotificationActivity.ActivityNavigationInterface activityNavigationInterface;
+    private ActivityNavigationInterface activityNavigationInterface;
 
     public TripNotificationFragment() {
     }
@@ -37,7 +39,7 @@ public class TripNotificationFragment extends Fragment implements NotificationAc
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        manager = ModelManager.getInstance();
+        manager = ModelManager.getInstance(context);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class TripNotificationFragment extends Fragment implements NotificationAc
 
     // Called On Attach
     @Override
-    public void setActivityNavigationInterface(NotificationActivity.ActivityNavigationInterface activityNavigationInterface) {
+    public void setActivityNavigationInterface(ActivityNavigationInterface activityNavigationInterface) {
         this.activityNavigationInterface = activityNavigationInterface;
         adapter = new TripNotificationAdapter(requireContext(), activityNavigationInterface);
         tripNotificationSortedList = new SortedList<>(TripNotification.class, new SortedListAdapterCallback<TripNotification>(adapter) {
@@ -78,6 +80,8 @@ public class TripNotificationFragment extends Fragment implements NotificationAc
             }
         });
         adapter.setTripNotifications(tripNotificationSortedList);
-        manager.getCurrentTrip().getTripNotificationsManager().attachSortedList(this, tripNotificationSortedList);
+        if (manager.getCurrentTrip().isSubManagerAvailable()) {
+            manager.getCurrentTrip().getTripNotificationsManager().attachSortedList(this, tripNotificationSortedList);
+        }
     }
 }

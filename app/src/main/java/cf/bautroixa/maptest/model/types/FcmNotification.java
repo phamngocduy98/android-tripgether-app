@@ -3,7 +3,11 @@ package cf.bautroixa.maptest.model.types;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Arrays;
 import java.util.Map;
+
+import cf.bautroixa.maptest.model.firestore.objects.Notification;
+import cf.bautroixa.maptest.utils.calculation.TimeConverterHelper;
 
 public class FcmNotification {
     @JsonIgnore
@@ -85,6 +89,18 @@ public class FcmNotification {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public Notification toNotification() {
+        int indexOfType = Notification.TripType.tripTypes.indexOf(type);
+        if (indexOfType != -1) {
+            return new Notification(type, avatar, Arrays.asList(messageParams.split(",")), TimeConverterHelper.toFirestoreTimestamp(time));
+        }
+        indexOfType = Notification.UserType.userTypes.indexOf(type);
+        if (indexOfType != -1) {
+            return new Notification(type, avatar, Arrays.asList(messageParams.split(",")), TimeConverterHelper.toFirestoreTimestamp(time));
+        }
+        return null;
     }
 
     public interface Priority {

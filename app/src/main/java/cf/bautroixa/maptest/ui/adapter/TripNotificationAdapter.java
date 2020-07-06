@@ -12,30 +12,29 @@ import androidx.recyclerview.widget.SortedList;
 
 import com.google.firebase.firestore.FieldValue;
 
-import java.util.Objects;
-
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
+import cf.bautroixa.maptest.interfaces.ActivityNavigationInterface;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Notification;
-import cf.bautroixa.maptest.model.firestore.TripNotification;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.firestore.UserNotification;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Notification;
+import cf.bautroixa.maptest.model.firestore.objects.TripNotification;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.firestore.objects.UserNotification;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
-import cf.bautroixa.maptest.ui.notifications.NotificationActivity;
 import cf.bautroixa.maptest.ui.theme.OneRecyclerView;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
-import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class TripNotificationAdapter extends OneRecyclerView.Adapter<TripNotificationAdapter.NotificationVH> {
     ModelManager manager;
     Context context;
-    NotificationActivity.ActivityNavigationInterface navigationInterface;
+    ActivityNavigationInterface navigationInterface;
     private SortedList<TripNotification> tripNotifications;
 
-    public TripNotificationAdapter(Context context, NotificationActivity.ActivityNavigationInterface navigationInterface) {
-        this.manager = ModelManager.getInstance();
+    public TripNotificationAdapter(Context context, ActivityNavigationInterface navigationInterface) {
+        this.manager = ModelManager.getInstance(context);
         this.context = context;
         this.navigationInterface = navigationInterface;
     }
@@ -84,8 +83,8 @@ public class TripNotificationAdapter extends OneRecyclerView.Adapter<TripNotific
 
         public void bind(final TripNotification tripNotification) {
             if (tripNotification == null) return;
-//            boolean isSeen = tripNotification.getSeenList().contains(manager.getCurrentUserRef());
-            boolean isSeen = tripNotification.isSeen();
+            boolean isSeen = tripNotification.getSeenList().contains(manager.getCurrentUserRef());
+//            boolean isSeen = tripNotification.isSeen();
             tvContent.setText(Html.fromHtml(tripNotification.getRenderedMessage(context, !isSeen)));
             tvTime.setText(DateFormatter.format(tripNotification.getTime()));
             ImageHelper.loadCircleImage(tripNotification.getAvatar(), imgAvatar);
@@ -103,16 +102,14 @@ public class TripNotificationAdapter extends OneRecyclerView.Adapter<TripNotific
                         case UserNotification.TripType.USER_ADDED:
                         case UserNotification.TripType.USER_REMOVED:
                             if (!tripNotification.getType().equals(UserNotification.TripType.USER_REMOVED)) {
-                                User user = manager.getCurrentTrip().getMembersManager().get(Objects.requireNonNull(tripNotification.getUserRef()).getId());
-                                navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
+                                navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, User.class.getSimpleName(), tripNotification.getUserRef().getId());
                             }
                             break;
                         case UserNotification.TripType.CHECKPOINT_GATHER_REQUEST:
                         case UserNotification.TripType.CHECKPOINT_ADDED:
                         case UserNotification.TripType.CHECKPOINT_REMOVED:
                             if (!tripNotification.getType().equals(UserNotification.TripType.CHECKPOINT_REMOVED)) {
-                                Checkpoint checkpoint = manager.getCurrentTrip().getCheckpointsManager().get(Objects.requireNonNull(tripNotification.getCheckpointRef()).getId());
-                                navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, checkpoint);
+                                navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, Checkpoint.class.getSimpleName(), tripNotification.getCheckpointRef().getId());
                             }
                             break;
                         case UserNotification.TripType.TRIP_JOIN_REQUEST:

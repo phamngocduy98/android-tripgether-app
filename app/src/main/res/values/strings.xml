@@ -9,17 +9,18 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="btn_cancel">Cancel</string>
+    <string name="btn_cancel">Hủy</string>
     <string name="dialog_title">Thông báo</string>
     <string name="dialog_messsage">Dialog message</string>
-    <string name="dialog_title_sos">Send SOS</string>
+    <string name="dialog_title_sos">Gửi yêu cầu hỗ trợ</string>
 
     <string name="shared_preference_name">tripgether</string>
     <string name="socket_token">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhbmRyb2lkIiwiaWF0IjoxNTg0Mjg4NTA1LCJleHAiOjE2MTU4NDYxMDV9.cezgSOYqispv6Qq_aUZBlp--O72YeGYMKhH3oriez68</string>
     <string name="tv_step_activity_create_trip">Tạo chuyến đi (Bước %d của %d)</string>
-    <string name="btn_leave_trip">Leave trip</string>
+    <string name="btn_leave_trip">Rời chuyến đi</string>
     <string name="dialog_message_leave_trip">Bạn có chắc chắn muốn rời chuyến đi này không?</string>
-    <string name="server_host">us-central1-tripgether-b135a.cloudfunctions.net</string>
+    <string name="server_host">asia-east2-tripgether-b135a.cloudfunctions.net</string>
+    <string name="intent_server_host">bautroixa.cf</string>
 
     <string name="detail_personal_information"><u>Thông tin cá nhân chi tiết</u></string>
     <string name="avatar"><u>Ảnh đại diện</u></string>
@@ -31,7 +32,6 @@
     <string name="dialog_title_select_checkpoint">Chọn một điểm đến</string>
     <string name="dialog_title_enter_checkpoint_name">Nhập tên địa điểm</string>
     <string name="dialog_title_leave_trip">Rời chuyến đi</string>
-    <string name="default_notification_channel_id">9999</string>
     <string name="dialog_title_join_trip">Tham gia chuyến đi</string>
     <string name="btn_qr_scan">Quét mã QR</string>
     <string name="btn_enter_trip_code">Nhập mã chuyến đi</string>
@@ -106,5 +106,22 @@
     <string name="dialog_message_permission_read_contact">Ứng dụng cần quyền truy cập danh bạ</string>
     <string name="dialog_title_permission_camera">Truy cập máy ảnh</string>
     <string name="dialog_message_permission_camera">Ứng dụng cần quyền truy cập máy ảnh để có thể quét mã QR</string>
+    <string name="user_notification_checkpoint_remind">%s tới địa điểm tiếp theo: %s</string>
+    <string name="default_notification_channel_id">99999</string>
+    <string name="dialog_title_choose_image">Chọn ảnh</string>
+    <string name="title_got_lost_setting">Cài đặt tránh lạc</string>
+    <string name="switch_toggle_reminder_on">Bật nhắc nhở</string>
+    <string name="switch_toggle_reminder_off">Tắt nhắc nhở</string>
+    <string name="title_checkpoint_reminder_setting">Nhắc nhở lịch trình</string>
+    <string name="title_map_style_setting">Loại bản đồ</string>
+    <string name="setting_street_map">Bản đồ mặc định</string>
+    <string name="setting_satellite_map">Bản đồ vệ tinh</string>
+    <string name="title_unit_setting">Đơn vị đo</string>
+    <string name="setting_censius_meter">Hệ đo lường chuẩn (°C, mét)</string>
+    <string name="setting_fahrenheit_inch">Hệ đo lường anh (°F, inch)</string>
+    <string name="dialog_title_permission_required">Yêu cầu quyền</string>
+    <string name="dialog_message_auto_start_permission">Ứng dụng cần quyền tự khởi động để có thể hiển thị thông báo.</string>
+    <string name="btn_allow">Cho phép</string>
+    <string name="btn_never_show_again">Không hỏi lại</string>
 
 </resources>

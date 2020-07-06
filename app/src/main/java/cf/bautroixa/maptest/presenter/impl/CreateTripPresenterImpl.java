@@ -10,8 +10,8 @@ import com.google.firebase.firestore.DocumentReference;
 
 import java.util.ArrayList;
 
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
 import cf.bautroixa.maptest.presenter.CreateTripPresenter;
 import cf.bautroixa.maptest.ui.adapter.CreateTripCheckpointsAdapter;
 
@@ -23,7 +23,7 @@ public class CreateTripPresenterImpl implements CreateTripPresenter {
     CreateTripCheckpointsAdapter checkpointsAdapter;
 
     public CreateTripPresenterImpl(Context context, View view) {
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
         this.context = context;
         this.view = view;
         this.checkpoints = new ArrayList<>();

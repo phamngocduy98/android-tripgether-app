@@ -26,6 +26,5 @@
     <color name="colorItemOutcomingMessage">#0099ff</color>
     <color name="colorItemIncomingMessage">#f1f0f0</color>
     <color name="colorBorder">#393939</color>
-    <color name="colorTextDarkBg">#fff</color>
     <color name="colorDarkerBackground">#1A1A1A</color>
 </resources>

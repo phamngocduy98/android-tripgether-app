@@ -15,10 +15,11 @@ import java.util.Date;
 import java.util.List;
 
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Notification;
-import cf.bautroixa.maptest.model.firestore.TripNotification;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.model.firestore.UserNotification;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Notification;
+import cf.bautroixa.maptest.model.firestore.objects.TripNotification;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.firestore.objects.UserNotification;
 import cf.bautroixa.maptest.model.types.FcmNotification;
 import cf.bautroixa.maptest.presenter.AlertActivityPresenter;
 
@@ -28,7 +29,7 @@ public class AlertActivityPresenterImpl implements AlertActivityPresenter {
     private ModelManager manager;
 
     public AlertActivityPresenterImpl(Context context, View view) {
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
         this.context = context;
         this.view = view;
     }
@@ -45,7 +46,17 @@ public class AlertActivityPresenterImpl implements AlertActivityPresenter {
                         public void onComplete(@NonNull Task<TripNotification> task) {
                             if (task.isSuccessful()) {
                                 TripNotification tripNotification = task.getResult();
-                                view.setUpView(tripNotification);
+                                if (tripNotification.getCheckpointRef() != null) {
+                                    String checkpointId = tripNotification.getCheckpointRef().getId();
+                                    Checkpoint checkpoint = manager.getCurrentTrip().getCheckpointsManager().get(checkpointId);
+                                    view.setUpView(tripNotification);
+                                    view.staticMap(manager.getCurrentUser().getCurrentCoord(), checkpoint.getCoordinate());
+                                } else if (tripNotification.getUserRef() != null) {
+                                    String userId = tripNotification.getUserRef().getId();
+                                    User user = manager.getCurrentTrip().getMembersManager().get(userId);
+                                    view.setUpView(tripNotification);
+                                    view.staticMap(manager.getCurrentUser().getCurrentCoord(), user.getCurrentCoord());
+                                }
                             }
                         }
                     });

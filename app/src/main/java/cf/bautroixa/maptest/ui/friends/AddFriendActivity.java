@@ -2,6 +2,7 @@ package cf.bautroixa.maptest.ui.friends;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -13,7 +14,7 @@ import com.google.android.gms.tasks.Task;
 
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.model.http.UserHttpService;
-import cf.bautroixa.maptest.model.types.UserPublicData;
+import cf.bautroixa.maptest.model.repo.objects.UserPublic;
 import cf.bautroixa.maptest.ui.theme.OneAppbarActivity;
 import cf.bautroixa.maptest.ui.theme.OnePromptDialog;
 
@@ -42,21 +43,21 @@ public class AddFriendActivity extends OneAppbarActivity {
             @Override
             public void onClick(View v) {
                 OnePromptDialog onePromptDialog = new OnePromptDialog.Builder()
-                        .iconTitle(R.drawable.ic_phone_app)
+                        .iconBody(R.drawable.ic_phone_app)
                         .title(R.string.dialog_title_enter_phone_num)
                         .editHintText(R.string.dialog_title_enter_phone_num)
                         .onResult(new OnePromptDialog.OnDialogResult() {
                             @Override
                             public void onDialogResult(final OnePromptDialog dialog, boolean isCanceled, final String value) {
                                 if (!isCanceled) {
-                                    UserHttpService.findUser(null, value).addOnCompleteListener(new OnCompleteListener<UserPublicData>() {
+                                    UserHttpService.findUser(null, value).addOnCompleteListener(new OnCompleteListener<UserPublic>() {
                                         @Override
-                                        public void onComplete(@NonNull Task<UserPublicData> task) {
+                                        public void onComplete(@NonNull Task<UserPublic> task) {
                                             if (task.isSuccessful()) {
                                                 dialog.toggleProgressBar(false);
-                                                UserPublicData userPublicData = task.getResult();
+                                                UserPublic userPublic = task.getResult();
                                                 Intent intent = new Intent(AddFriendActivity.this, ProfileActivity.class);
-                                                intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, userPublicData);
+                                                intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, (Parcelable) userPublic);
                                                 startActivity(intent);
                                             } else {
                                                 Toast.makeText(AddFriendActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
@@ -74,21 +75,21 @@ public class AddFriendActivity extends OneAppbarActivity {
             @Override
             public void onClick(View v) {
                 OnePromptDialog onePromptDialog = new OnePromptDialog.Builder()
-                        .iconTitle(R.drawable.ic_mail_app)
+                        .iconBody(R.drawable.ic_mail_app)
                         .title(R.string.dialog_title_enter_user_name)
                         .editHintText(R.string.dialog_title_enter_user_name)
                         .onResult(new OnePromptDialog.OnDialogResult() {
                             @Override
                             public void onDialogResult(final OnePromptDialog dialog, boolean isCanceled, final String value) {
                                 if (!isCanceled) {
-                                    UserHttpService.findUser(value, null).addOnCompleteListener(new OnCompleteListener<UserPublicData>() {
+                                    UserHttpService.findUser(value, null).addOnCompleteListener(new OnCompleteListener<UserPublic>() {
                                         @Override
-                                        public void onComplete(@NonNull Task<UserPublicData> task) {
+                                        public void onComplete(@NonNull Task<UserPublic> task) {
                                             if (task.isSuccessful()) {
                                                 dialog.toggleProgressBar(false);
-                                                UserPublicData userPublicData = task.getResult();
+                                                UserPublic userPublic = task.getResult();
                                                 Intent intent = new Intent(AddFriendActivity.this, ProfileActivity.class);
-                                                intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, userPublicData);
+                                                intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, (Parcelable) userPublic);
                                                 startActivity(intent);
                                             } else {
                                                 Toast.makeText(AddFriendActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();

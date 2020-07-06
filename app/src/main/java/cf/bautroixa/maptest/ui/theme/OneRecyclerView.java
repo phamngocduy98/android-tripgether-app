@@ -33,7 +33,7 @@ public abstract class OneRecyclerView extends RecyclerView {
                     itemView.setBackgroundResource(R.drawable.bg_radius_bot_white);
                     break;
                 default:
-                    itemView.setBackgroundResource(R.drawable.bg_radius_full_white_with_border);
+                    itemView.setBackgroundResource(R.drawable.bg_radius_full_white);
             }
         }
     }

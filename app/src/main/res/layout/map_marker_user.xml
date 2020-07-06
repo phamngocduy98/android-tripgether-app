@@ -40,7 +40,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:color/transparent" />
+        android:src="@color/fui_transparent" />
 
     <cf.bautroixa.maptest.ui.theme.RoundedImageView
         android:id="@+id/img_sos_map_marker_user"

@@ -24,13 +24,12 @@ import com.google.android.gms.tasks.Task;
 
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.ui.auth.LoginActivity;
+import cf.bautroixa.maptest.model.sharedpref.SharedPrefKeys;
 import cf.bautroixa.maptest.ui.friends.FriendListActivity;
 import cf.bautroixa.maptest.ui.settings.SettingActivity;
 import cf.bautroixa.maptest.ui.theme.OneAppbarActivity;
 import cf.bautroixa.maptest.ui.theme.OneDialog;
-import cf.bautroixa.maptest.utils.AlarmHelper;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class MyProfileActivity extends OneAppbarActivity implements Toolbar.OnMenuItemClickListener {
     GoogleSignInClient mGoogleSignInClient;
@@ -43,7 +42,6 @@ public class MyProfileActivity extends OneAppbarActivity implements Toolbar.OnMe
     private Switch switchService;
 
     public MyProfileActivity() {
-        manager = ModelManager.getInstance();
     }
 
     @Override
@@ -52,6 +50,9 @@ public class MyProfileActivity extends OneAppbarActivity implements Toolbar.OnMe
         setContentView(R.layout.fragment_tab_profile);
         setToolbarMenu(R.menu.fragment_profile);
         getToolbar().setOnMenuItemClickListener(this);
+
+        manager = ModelManager.getInstance(this);
+
         imgAvatar = findViewById(R.id.appbar_img_avatar);
         switchService = findViewById(R.id.switch_toggle_service);
         LinearLayout mPersonalInformationLinear = findViewById(R.id.ln_personal_information);
@@ -110,10 +111,12 @@ public class MyProfileActivity extends OneAppbarActivity implements Toolbar.OnMe
             @Override
             public void onClick(View v) {
                 if (switchService.isChecked()) {
-                    AlarmHelper.turnOn(MyProfileActivity.this, sharedPref);
+//                    AlarmHelper.turnOn(MyProfileActivity.this, sharedPref);
+                    sharedPref.edit().putBoolean(SharedPrefKeys.SETTING_SERVICE_ON, true).commit();
                     switchService.setText(R.string.switch_toggle_service_on);
                 } else {
-                    AlarmHelper.turnOff(MyProfileActivity.this, sharedPref);
+//                    AlarmHelper.turnOff(MyProfileActivity.this, sharedPref);
+                    sharedPref.edit().putBoolean(SharedPrefKeys.SETTING_SERVICE_ON, false).commit();
                     switchService.setText(R.string.switch_toggle_service_off);
                 }
             }
@@ -140,13 +143,11 @@ public class MyProfileActivity extends OneAppbarActivity implements Toolbar.OnMe
     }
 
     private void logout() {
-        manager.logout();
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(MyProfileActivity.this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        Intent intent = new Intent(MyProfileActivity.this, LoginActivity.class);
-                        startActivity(intent);
+                        manager.logout();
                     }
                 });
 

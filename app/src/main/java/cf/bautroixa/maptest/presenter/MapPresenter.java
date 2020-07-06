@@ -10,9 +10,9 @@ import com.google.android.gms.maps.model.Marker;
 
 import java.util.List;
 
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.Document;
-import cf.bautroixa.maptest.model.firestore.User;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.User;
 import cf.bautroixa.maptest.ui.map.MapBackgroundFragment;
 
 public interface MapPresenter {
@@ -49,6 +49,9 @@ public interface MapPresenter {
 
         void onCompassRotate(float azimuth);
 
+        void lockFocusMyLocation(boolean lock);
+
+        @Nullable
         MapBackgroundFragment.MarkerViewHolder getMarkerView(Document document);
 
         @Nullable

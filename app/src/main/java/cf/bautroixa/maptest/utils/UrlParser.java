@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Trip;
+import cf.bautroixa.maptest.model.firestore.objects.Trip;
 
 public class UrlParser {
     private static final String TAG = "UrlParser";
@@ -21,10 +21,10 @@ public class UrlParser {
             for (String path : paths) {
                 Log.d(TAG, "path=" + path);
             }
-            if (paths.size() >= 2 && "trips".equals(paths.get(0))) {
-                if (paths.size() == 2) return new String[]{paths.get(1), ""};
-                if (paths.size() >= 4 && "join".equals(paths.get(2))) {
-                    return new String[]{paths.get(1), paths.get(3)};
+            if (paths.size() >= 3 && "trip".equals(paths.get(1))) {
+                if (paths.size() == 3) return new String[]{paths.get(2), ""};
+                if (paths.size() >= 5 && "join".equals(paths.get(3))) {
+                    return new String[]{paths.get(2), paths.get(4)};
                 }
             }
         }

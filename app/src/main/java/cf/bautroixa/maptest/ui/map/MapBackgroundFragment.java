@@ -1,9 +1,13 @@
 package cf.bautroixa.maptest.ui.map;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,37 +34,42 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.Collections;
-import cf.bautroixa.maptest.model.firestore.Document;
-import cf.bautroixa.maptest.model.firestore.User;
+import cf.bautroixa.maptest.model.constant.Collections;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.sharedpref.SPMapStyle;
+import cf.bautroixa.maptest.model.sharedpref.SharedPrefHelper;
 import cf.bautroixa.maptest.presenter.MapPresenter;
 import cf.bautroixa.maptest.presenter.impl.MapPresenterImpl;
-import cf.bautroixa.maptest.utils.CreateMarker;
-import cf.bautroixa.maptest.utils.ImageHelper;
-import cf.bautroixa.maptest.utils.PixelDPConverter;
+import cf.bautroixa.maptest.utils.LocationHelper;
+import cf.bautroixa.maptest.utils.calculation.PixelDPConverter;
+import cf.bautroixa.maptest.utils.ui_utils.CreateMarker;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class MapBackgroundFragment extends Fragment implements MapPresenter.View, NavigationInterfaceOwner, OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
     private static final String TAG = "MapBackgroundFragment";
     private static final String SAVED_STATE_MAP_FRAGMENT = "state_map_fragment";
 
-    MapPresenterImpl mapPresenter;
-    private NavigationInterfaces navigationInterfaces;
+    private MapPresenterImpl mapPresenter;
+    private SharedPreferences sharedPreferences;
+    private LocationHelper locationHelper;
+    private NavigationInterface navigationInterface;
 
     private boolean isMapLoaded = false, focusMyLocation = true;
     private int screenWidth, screenHeight, markerZIndex = 1;
     // Views
-    private HashMap<String, MarkerViewHolder> markerViews;
+    private HashMap<String, MarkerViewHolder> markerViewHolders;
     private HashMap<String, Marker> markers;
 
     private SupportMapFragment ggMapFragment;
@@ -69,7 +79,7 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
 
 
     public MapBackgroundFragment() {
-        this.markerViews = new HashMap<>();
+        this.markerViewHolders = new HashMap<>();
         this.markers = new HashMap<>();
     }
 
@@ -89,6 +99,8 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        locationHelper = LocationHelper.getInstance(requireContext());
+        sharedPreferences = SharedPrefHelper.getSharedPreferences(requireContext());
 //        if (savedInstanceState != null) {
 //            ggMapFragment.setInitialSavedState((SavedState) savedInstanceState.getParcelable(SAVED_STATE_MAP_FRAGMENT));
 //        }
@@ -97,10 +109,25 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mapPresenter = new MapPresenterImpl(this, requireContext(), this, navigationInterfaces);
+        mapPresenter = new MapPresenterImpl(this, requireContext(), this, navigationInterface);
         initScreenSize();
         ggMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.frag_map);
         Objects.requireNonNull(ggMapFragment).getMapAsync(this);
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        locationHelper.setInBackground(false);
+        if (mMap != null) setMapType();
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        locationHelper.setInBackground(true);
     }
 
     @Override
@@ -110,12 +137,22 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
         uiSetting.setMapToolbarEnabled(false);
         int nightModeFlags = requireContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) setMapNightMode(googleMap);
+        setMapType();
         mMap.setOnMapLoadedCallback(this);
         mMap.setOnMapLongClickListener(mapPresenter);
         mMap.setOnMarkerClickListener(mapPresenter);
 //        mMap.setOnCameraMoveCanceledListener(mapPresenter);
 //        mMap.setOnCameraIdleListener(mapPresenter);
         mMap.setOnMapClickListener(mapPresenter);
+    }
+
+    public void setMapType() {
+        if (mMap == null) return;
+        if (SPMapStyle.getMapStyle(sharedPreferences) == SPMapStyle.MapStyle.SATELLITE && mMap.getMapType() != GoogleMap.MAP_TYPE_SATELLITE) {
+            mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        } else if (mMap.getMapType() != GoogleMap.MAP_TYPE_NORMAL) {
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        }
     }
 
     @Override
@@ -147,7 +184,7 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
         if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
         final View markerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.map_marker_user, null);
         MarkerViewHolder markerViewHolder = new MarkerViewHolder(markerView);
-        markerViews.put(getMarkerId(user), markerViewHolder);
+        markerViewHolders.put(getMarkerId(user), markerViewHolder);
 
         markerViewHolder.bind(user);
         final Marker marker = mMap.addMarker(new MarkerOptions().position(user.getLatLng())
@@ -155,12 +192,21 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
                 .snippet(Collections.USERS)
                 .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(context, markerView, 52))));
         if (user.getAvatar() != null && !user.getAvatar().equals(User.DEFAULT_AVATAR)) {
-            ImageHelper.loadCircleImageAsync(user.getAvatar(), markerViewHolder.markerImage).addOnCompleteListener(new OnCompleteListener<Void>() {
+            ImageHelper.loadCircleImage(user.getAvatar(), new Target() {
                 @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(context, markerView, 52)));
-                    }
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    markerViewHolder.imgSos.setImageBitmap(bitmap);
+                    Log.d(TAG, "loaded marker image completed");
+                    updateMarker(marker, markerViewHolder);
+                }
+
+                @Override
+                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                    Log.d(TAG, "loaded marker image failed");
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
                 }
             });
         }
@@ -170,7 +216,13 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
 
     @Override
     public void updateMarker(Marker marker, MarkerViewHolder markerViewHolder) {
-        marker.setIcon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), markerViewHolder.markerView, 52)));
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), "loaded", Toast.LENGTH_SHORT).show();
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), markerViewHolder.markerView, 52)));
+            }
+        }, 2000);
     }
 
     @Nullable
@@ -215,7 +267,6 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
      */
     @Override
     public void targetCamera(LatLngBounds bounds, int bottomSpaceHeight) {
-        focusMyLocation = false;
         if (isMapLoaded) {
 //            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100), cancelableCallback); // padding 100
             final int toolbarStatusbarHeight = (int) PixelDPConverter.convertDpToPixel(61 + 25, requireContext());
@@ -262,7 +313,6 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
             });
 
         }
-        focusMyLocation = true;
     }
 
     @Override
@@ -305,7 +355,7 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
         }
 
         if (focusMyLocation) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            targetPoint(latLng, 0);
         }
     }
 
@@ -325,8 +375,13 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
     }
 
     @Override
-    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
-        this.navigationInterfaces = navigationInterfaces;
+    public void setNavigationInterface(NavigationInterface navigationInterface) {
+        this.navigationInterface = navigationInterface;
+    }
+
+    @Override
+    public void lockFocusMyLocation(boolean lock) {
+        focusMyLocation = lock;
     }
 
     public MapPresenterImpl getMapPresenter() {
@@ -335,7 +390,7 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
 
     @Override
     public MarkerViewHolder getMarkerView(Document document) {
-        return markerViews.get(getMarkerId(document));
+        return markerViewHolders.get(getMarkerId(document));
     }
 
     @Override

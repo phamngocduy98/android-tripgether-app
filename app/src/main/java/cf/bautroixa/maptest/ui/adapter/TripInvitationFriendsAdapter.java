@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.presenter.impl.TripInvitationFriendsPresenter;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.presenter.TripInvitationFriendsPresenter;
 import cf.bautroixa.maptest.presenter.impl.TripInvitationFriendsPresenterImpl;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
 import cf.bautroixa.maptest.ui.theme.ViewAnim;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class TripInvitationFriendsAdapter extends RecyclerView.Adapter<TripInvitationFriendsAdapter.FriendVH> {
     ArrayList<User> friends;
@@ -58,10 +58,10 @@ public class TripInvitationFriendsAdapter extends RecyclerView.Adapter<TripInvit
             super(itemView);
             tripInvitationFriendsPresenter = new TripInvitationFriendsPresenterImpl(context, this);
 //            progressBattery = itemView.findViewById(R.id.progress_battery_item_friend);
-            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend);
-            imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend);
+            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_avatar);
+            imgAvatar = itemView.findViewById(R.id.img_avatar_item_avatar);
 //            imgIsLeader = itemView.findViewById(R.id.img_is_leader_item_friend);
-            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_friend);
+            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_avatar);
 
             tvName = itemView.findViewById(R.id.tv_name_status_item_friend);
             tvInfo = itemView.findViewById(R.id.tv_info_item_friend);

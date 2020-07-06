@@ -16,13 +16,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
 import cf.bautroixa.maptest.presenter.CreateTripPresenter;
 import cf.bautroixa.maptest.presenter.impl.CreateTripPresenterImpl;
 import cf.bautroixa.maptest.ui.adapter.CreateTripCheckpointsAdapter;
 import cf.bautroixa.maptest.ui.dialogs.CheckpointEditDialogFragment;
 import cf.bautroixa.maptest.ui.theme.OneAppbarActivity;
 import cf.bautroixa.maptest.ui.theme.ViewAnim;
+import cf.bautroixa.maptest.ui.trip_invite.TripInvitationActivity;
 import cf.bautroixa.maptest.utils.KeyboardHelper;
 
 public class CreateTripActivity extends OneAppbarActivity implements CreateTripPresenter.View {

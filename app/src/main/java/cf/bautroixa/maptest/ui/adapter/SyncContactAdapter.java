@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,13 +21,13 @@ import java.util.ArrayList;
 
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.model.http.UserHttpService;
-import cf.bautroixa.maptest.model.types.UserPublicData;
+import cf.bautroixa.maptest.model.repo.objects.UserPublic;
 import cf.bautroixa.maptest.ui.dialogs.LoadingDialogHelper;
 import cf.bautroixa.maptest.ui.friends.ProfileActivity;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
 import cf.bautroixa.maptest.utils.ContactHelper;
-import cf.bautroixa.maptest.utils.ImageHelper;
 import cf.bautroixa.maptest.utils.IntentHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.ContactVH> {
     ArrayList<ContactHelper.Contact> contacts;
@@ -64,9 +65,9 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
 
         public ContactVH(@NonNull View itemView) {
             super(itemView);
-            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend);
-            imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend);
-            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_friend);
+            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_avatar);
+            imgAvatar = itemView.findViewById(R.id.img_avatar_item_avatar);
+            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_avatar);
 
             tvName = itemView.findViewById(R.id.tv_name_status_item_friend);
             tvInfo = itemView.findViewById(R.id.tv_info_item_friend);
@@ -86,14 +87,14 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
                 @Override
                 public void onClick(View v) {
                     final ProgressDialog loadingDialog = LoadingDialogHelper.create(context, "Vui lòng đợi");
-                    UserHttpService.findUser(null, contact.getPhoneNumber()).addOnCompleteListener(activity, new OnCompleteListener<UserPublicData>() {
+                    UserHttpService.findUser(null, contact.getPhoneNumber()).addOnCompleteListener(activity, new OnCompleteListener<UserPublic>() {
                         @Override
-                        public void onComplete(@NonNull Task<UserPublicData> task) {
+                        public void onComplete(@NonNull Task<UserPublic> task) {
                             loadingDialog.dismiss();
                             if (task.isSuccessful()) {
-                                UserPublicData userPublicData = task.getResult();
+                                UserPublic userPublic = task.getResult();
                                 Intent intent = new Intent(activity, ProfileActivity.class);
-                                intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, userPublicData);
+                                intent.putExtra(ProfileActivity.ARG_USER_PUBLIC_DATA, (Parcelable) userPublic);
                                 activity.startActivity(intent);
                             } else {
                                 IntentHelper.sendSms(context, contact.getPhoneNumber(), "Tải ngay Tripgether tại " + context.getString(R.string.server_host));

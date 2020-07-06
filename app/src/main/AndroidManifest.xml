@@ -22,21 +22,54 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.friends.SyncContactActivity"></activity>
-        <activity android:name=".ui.friends.AddFriendActivity" />
-        <activity android:name=".ui.friends.ProfileActivity" />
-        <activity android:name=".ui.friends.FriendListActivity" />
+        <activity android:name=".ui.settings.GotLostSettingActivity"></activity>
+        <activity android:name=".ui.posts.PostCreatorActivity" />
+        <activity android:name=".ui.auth.PhoneVerificationActivity" />
+        <activity android:name=".ui.trip.WaitingRoomActivity" />
         <activity
-            android:name=".ui.settings.SettingActivity"
-            android:theme="@style/NoActionBar" />
+            android:name=".ui.trip_view.TripActivity"
+            android:exported="true"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="trips"
+                    android:scheme="tripgether" />
+            </intent-filter>
+        </activity>
         <activity
-            android:name=".ui.settings.BooleanSettingActivity"
-            android:theme="@style/NoActionBar" />
-        <activity
-            android:name=".ui.settings.DarkModeSettingActivity"
-            android:theme="@style/NoActionBar" />
+            android:name=".ui.friends.ProfileActivity"
+            android:exported="true"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="@string/intent_server_host"
+                    android:pathPrefix="/tripgether/users"
+                    android:scheme="http" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="users"
+                    android:scheme="tripgether" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.SplashScreenActivity"
+            android:exported="true"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -50,15 +83,23 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="@string/server_host"
-                    android:pathPrefix="/"
+                    android:host="@string/intent_server_host"
+                    android:pathPrefix="/tripgether/openapp"
                     android:scheme="http" />
-                <data
-                    android:host="tripgether"
-                    android:pathPrefix="/"
-                    android:scheme="tripgether" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.friends.SyncContactActivity" />
+        <activity android:name=".ui.friends.AddFriendActivity" />
+        <activity android:name=".ui.friends.FriendListActivity" />
+        <activity
+            android:name=".ui.settings.SettingActivity"
+            android:theme="@style/NoActionBar" />
+        <activity
+            android:name=".ui.settings.BooleanSettingActivity"
+            android:theme="@style/NoActionBar" />
+        <activity
+            android:name=".ui.settings.DarkModeSettingActivity"
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".ui.AlertActivity"
             android:showOnLockScreen="true"
@@ -79,23 +120,22 @@
             android:windowSoftInputMode="adjustResize" />
 
         <service
-            android:name=".services.MyFirebaseMessagingService"
+            android:name=".services.FCMService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".services.UpdateLocationService"
-            android:enabled="true"
-            android:exported="true" />
+        <service android:name=".services.AlwaysOnService" />
+        <service android:name=".services.alarm.AlarmService" />
 
         <activity
             android:name=".ui.auth.LoginActivity"
             android:theme="@style/NoActionBar" />
         <activity
-            android:name=".ui.trip.TripInvitationActivity"
-            android:theme="@style/NoActionBar" />
+            android:name=".ui.trip_invite.TripInvitationActivity"
+            android:theme="@style/NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".ui.trip.CreateTripActivity"
             android:theme="@style/NoActionBar" />
@@ -105,7 +145,7 @@
             android:value="@string/config_gg_map_api_key" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_marker" />
+            android:resource="@drawable/ic_tripgether2_noti_icon" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
@@ -123,6 +163,8 @@
         <activity
             android:name=".ui.notifications.NotificationActivity"
             android:theme="@style/NoActionBar" />
+
+        <receiver android:name=".receiver.LocationUpdateWakefulReceiver" />
     </application>
 
 </manifest>

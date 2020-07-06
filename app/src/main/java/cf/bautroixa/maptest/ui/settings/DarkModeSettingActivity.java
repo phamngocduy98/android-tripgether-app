@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.constant.SharedPrefs;
+import cf.bautroixa.maptest.model.sharedpref.SPDarkMode;
+import cf.bautroixa.maptest.model.sharedpref.SharedPrefKeys;
 import cf.bautroixa.maptest.ui.theme.OneAppbarActivity;
-import cf.bautroixa.maptest.utils.DarkModeHelper;
 
 public class DarkModeSettingActivity extends OneAppbarActivity {
     public static final List<Integer> radioModeIds = Arrays.asList(R.id.radio_system_dark_mode, R.id.radio_light_mode, R.id.radio_dark_mode, R.id.radio_auto_dark_mode);
@@ -50,7 +50,7 @@ public class DarkModeSettingActivity extends OneAppbarActivity {
     @Override
     public void onResume() {
         super.onResume();
-        int mode = sharedPref.getInt(SharedPrefs.DARK_MODE, DarkModeHelper.SYSTEM_MODE);
+        int mode = sharedPref.getInt(SharedPrefKeys.SETTING_DARK_MODE_TYPE, SPDarkMode.SYSTEM_MODE);
         if (mode >= 0 && mode < radioModeButtons.size()) {
             radioModeButtons.get(mode).toggle();
         }
@@ -59,8 +59,8 @@ public class DarkModeSettingActivity extends OneAppbarActivity {
             public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
                 int mode = radioModeIds.indexOf(checkedId);
                 if (mode != -1){
-                    sharedPref.edit().putInt(SharedPrefs.DARK_MODE, mode).commit();
-                    AppCompatDelegate.setDefaultNightMode(DarkModeHelper.androidNightModes.get(mode));
+                    sharedPref.edit().putInt(SharedPrefKeys.SETTING_DARK_MODE_TYPE, mode).commit();
+                    AppCompatDelegate.setDefaultNightMode(SPDarkMode.androidNightModes.get(mode));
                     finish();
                 }
             }

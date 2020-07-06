@@ -6,20 +6,19 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.GeoPoint;
 
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.http.AppRequest;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.http.MapboxHttpService;
 import cf.bautroixa.maptest.model.types.GeocodingResult;
 import cf.bautroixa.maptest.model.types.SearchResult;
 import cf.bautroixa.maptest.presenter.BottomSearchPlacePresenter;
 
-import static cf.bautroixa.maptest.ui.map.bottomspace.BottomSearchPlaceFragment.ARG_LATITUDE;
-import static cf.bautroixa.maptest.ui.map.bottomspace.BottomSearchPlaceFragment.ARG_LONGITUDE;
+import static cf.bautroixa.maptest.ui.bottomspace.BottomSearchPlaceFragment.ARG_LATITUDE;
+import static cf.bautroixa.maptest.ui.bottomspace.BottomSearchPlaceFragment.ARG_LONGITUDE;
 
 public class BottomSearchPlacePresenterImpl implements BottomSearchPlacePresenter {
     private final ModelManager manager;
@@ -27,7 +26,7 @@ public class BottomSearchPlacePresenterImpl implements BottomSearchPlacePresente
     View view;
 
     public BottomSearchPlacePresenterImpl(Context context, View view) {
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
         this.context = context;
         this.view = view;
     }
@@ -40,7 +39,7 @@ public class BottomSearchPlacePresenterImpl implements BottomSearchPlacePresente
             String placeAddress = arg.getString(SearchResult.PLACE_ADDRESS, null);
             if (placeName == null || placeAddress == null) {
                 view.onLoading();
-                AppRequest.getGeocodingAddress(context, new LatLng(coord.getLatitude(), coord.getLongitude())).addOnCompleteListener(new OnCompleteListener<GeocodingResult>() {
+                MapboxHttpService.getGeocodingAddress(context, coord.getLatitude(), coord.getLongitude()).addOnCompleteListener(new OnCompleteListener<GeocodingResult>() {
                     @Override
                     public void onComplete(@NonNull final Task<GeocodingResult> task) {
                         if (task.isSuccessful()) {

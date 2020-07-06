@@ -41,7 +41,10 @@ public class OneAppbarFragment extends Fragment {
     }
 
     public void setSubtitle(CharSequence title) {
-        if (this.tvSubtitle != null) this.tvSubtitle.setText(title);
+        if (this.tvSubtitle != null) {
+            this.tvSubtitle.setVisibility(View.VISIBLE);
+            this.tvSubtitle.setText(title);
+        }
     }
 
     public void setTitle(CharSequence title) {

@@ -10,10 +10,17 @@ import com.google.android.gms.maps.model.LatLng;
 import cf.bautroixa.maptest.R;
 
 public class IntentHelper {
+    public static void sendPost(Context context, String postId) {
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        String url = String.format("https://%s/share/post/%s/", context.getString(R.string.server_host), postId);
+        share.putExtra(Intent.EXTRA_TEXT, url);
+        context.startActivity(Intent.createChooser(share, "Chia sẻ bài viết"));
+    }
     public static void sendTripCodeIntent(Context context, String tripCode) {
         Intent share = new Intent(Intent.ACTION_SEND);
         share.setType("text/plain");
-        String url = String.format("https://%s/trips/%s/", context.getString(R.string.server_host), tripCode);
+        String url = String.format("https://%s/share/trip/%s/", context.getString(R.string.server_host), tripCode);
         share.putExtra(Intent.EXTRA_TEXT, "Mã tham gia nhóm Tripgether của tôi là: " + tripCode + "\n Tham gia ngay tại " + url);
         context.startActivity(Intent.createChooser(share, "Chia sẻ mã tham gia"));
     }
@@ -34,5 +41,16 @@ public class IntentHelper {
         } else {
             Toast.makeText(context, "Bạn chưa cài đặt Google Maps", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public static void openNotificationSetting(Context context) {
+        Intent intent = new Intent();
+        intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+        //for Android 5-7
+        intent.putExtra("app_package", context.getPackageName());
+        intent.putExtra("app_uid", context.getApplicationInfo().uid);
+        // for Android 8 and above
+        intent.putExtra("android.provider.extra.APP_PACKAGE", context.getPackageName());
+        context.startActivity(intent);
     }
 }

@@ -5,6 +5,8 @@
     <color name="colorAccent">#3e91ff</color>
 
     <!-- STYLE -->
+    <color name="colorWarning">#D50000</color>
+
     <color name="colorText">#4C4C4C</color>
     <color name="colorTextSecondary">#979797</color>
     <color name="colorButtonBg">#0381fe</color>
@@ -26,6 +28,6 @@
     <color name="colorItemOutcomingMessage">#0099ff</color>
     <color name="colorItemIncomingMessage">#f1f0f0</color>
     <color name="colorBorder">#D0D1D1</color>
-    <color name="colorTextDarkBg">#fff</color>
+    <color name="colorTextDarkBg">#F4F4F4</color>
     <color name="colorDarkerBackground">#E5E5E5</color>
 </resources>

@@ -10,8 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -21,59 +20,61 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.Document;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
+import cf.bautroixa.maptest.model.constant.RequestCodes;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Trip;
-import cf.bautroixa.maptest.model.firestore.User;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.model.firestore.managers.NotificationsManager;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Trip;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.model.sharedpref.SPDarkMode;
 import cf.bautroixa.maptest.model.ui_item.StateToolItem;
 import cf.bautroixa.maptest.model.ui_item.ToolItem;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.dialogs.SosRequestEditDialogFragment;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
 import cf.bautroixa.maptest.ui.notifications.NotificationActivity;
 import cf.bautroixa.maptest.ui.settings.SettingActivity;
-import cf.bautroixa.maptest.utils.AlarmHelper;
-import cf.bautroixa.maptest.utils.DarkModeHelper;
 
 public class BottomToolsAdapter extends RecyclerView.Adapter<BottomToolsAdapter.ToolVH> {
     ArrayList<ToolItem> tools;
     Context context;
     ModelManager manager;
 
-    public BottomToolsAdapter(final Context context, final FragmentManager fragmentManager, final LifecycleOwner lifecycleOwner, final NavigationInterfaces navigationInterfaces) {
+    public BottomToolsAdapter(final Context context, final Fragment fragment, final NavigationInterface navigationInterface) {
         this.setHasStableIds(true);
-        this.manager = ModelManager.getInstance();
+        this.manager = ModelManager.getInstance(context);
         this.context = context;
         tools = new ArrayList<>();
         final SharedPreferences sharedPref = context.getSharedPreferences(context.getString(R.string.shared_preference_name), Context.MODE_PRIVATE);
         // 0
-        tools.add(new ToolItem(0, lifecycleOwner, R.drawable.ic_people_white_24dp, "Thành viên", new ToolItem.OnToolItemClicked() {
+        tools.add(new ToolItem(0, fragment, R.drawable.ic_people_white_24dp, "Thành viên", new ToolItem.OnToolItemClicked() {
             @Override
             public void onClick(View v, boolean isActivated) {
-                navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
+                navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_FRIEND_LIST_EXPANDED);
             }
         }));
         // 1
-        tools.add(new ToolItem(1, lifecycleOwner, R.drawable.ic_place_black_24dp, "Địa điểm", new ToolItem.OnToolItemClicked() {
+        tools.add(new ToolItem(1, fragment, R.drawable.ic_place_black_24dp, "Địa điểm", new ToolItem.OnToolItemClicked() {
             @Override
             public void onClick(View v, boolean isActivated) {
                 if (isActivated) {
                     manager.getCurrentTrip().getActiveCheckpoint().addOnCompleteListener(new OnCompleteListener<Checkpoint>() {
                         @Override
                         public void onComplete(@NonNull Task<Checkpoint> task) {
-                            navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, task.getResult());
+                            navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_CHECKPOINT, task.getResult());
                         }
                     });
                 } else {
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_CHECKPOINT_LIST_EXPANDED);
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_CHECKPOINT_LIST_EXPANDED);
                 }
 
             }
         }) {
             @Override
-            protected void onCreate() {
-                manager.getCurrentTrip().attachListener(lifecycleOwner, new Document.OnValueChangedListener<Trip>() {
+            protected void onCreate(ToolItem toolItem) {
+                manager.getCurrentTrip().attachListener(fragment, new Document.OnValueChangedListener<Trip>() {
                     @Override
                     public void onValueChanged(@NonNull Trip currentTrip) {
                         boolean hasActiveCheckpoint = currentTrip.isAvailable() && currentTrip.getActiveCheckpointRef() != null;
@@ -87,15 +88,15 @@ public class BottomToolsAdapter extends RecyclerView.Adapter<BottomToolsAdapter.
             }
         });
         // 2
-        tools.add(new ToolItem(2, lifecycleOwner, R.drawable.ic_help, "Gửi hỗ trợ", new ToolItem.OnToolItemClicked() {
+        tools.add(new ToolItem(2, fragment, R.drawable.ic_help, "Gửi hỗ trợ", new ToolItem.OnToolItemClicked() {
             @Override
             public void onClick(View v, boolean isActivated) {
-                new SosRequestEditDialogFragment().show(fragmentManager, "add edit sos");
+                new SosRequestEditDialogFragment().show(fragment.getChildFragmentManager(), "add edit sos");
             }
         }) {
             @Override
-            protected void onCreate() {
-                manager.getCurrentUser().attachListener(lifecycleOwner, new Document.OnValueChangedListener<User>() {
+            protected void onCreate(ToolItem toolItem) {
+                manager.getCurrentUser().attachListener(fragment, new Document.OnValueChangedListener<User>() {
                     @Override
                     public void onValueChanged(@NonNull User currentUser) {
                         boolean hasSosRequest = currentUser.isAvailable() && currentUser.getSosRequest() != null && !currentUser.getSosRequest().isResolved();
@@ -106,45 +107,76 @@ public class BottomToolsAdapter extends RecyclerView.Adapter<BottomToolsAdapter.
                 });
             }
         });
-        final boolean isLocationServiceOn = AlarmHelper.isOn(context, sharedPref);
-        tools.add(new ToolItem(3, lifecycleOwner, R.drawable.ic_notifications_black_24dp, "Thông báo", new ToolItem.OnToolItemClicked() {
+        tools.add(new ToolItem(3, fragment, R.drawable.ic_notifications_black_24dp, "Thông báo", new ToolItem.OnToolItemClicked() {
             @Override
             public void onClick(View v, boolean isActivated) {
-                context.startActivity(new Intent(context, NotificationActivity.class));
+                fragment.startActivityForResult(new Intent(context, NotificationActivity.class), RequestCodes.TOOL_NOTIFICATION);
             }
-        }));
-        tools.add(new ToolItem(4, lifecycleOwner, R.drawable.ic_weather_sun, "Thời tiết", new ToolItem.OnToolItemClicked() {
+        }) {
+            @Override
+            protected void onCreate(final ToolItem toolItem) {
+                final int[] userNotSeen = {0};
+                final int[] tripNotSeen = {0};
+                manager.getCurrentUser().getUserNotificationsManager().attachOnNotificationCountChangedListener(fragment, new NotificationsManager.OnNotificationCountChanged() {
+                    @Override
+                    public void onChanged(int notSeenCount) {
+                        userNotSeen[0] = notSeenCount;
+                        toolItem.setBadgeNumber(userNotSeen[0] + tripNotSeen[0]);
+                        notifyItemChanged(3);
+                    }
+                });
+                if (manager.getCurrentTrip().isAvailable()) {
+                    manager.getCurrentTrip().getTripNotificationsManager().attachOnNotificationCountChangedListener(fragment, new NotificationsManager.OnNotificationCountChanged() {
+                        @Override
+                        public void onChanged(int notSeenCount) {
+                            tripNotSeen[0] = notSeenCount;
+                            toolItem.setBadgeNumber(userNotSeen[0] + tripNotSeen[0]);
+                            notifyItemChanged(3);
+                        }
+                    });
+                }
+            }
+        });
+        tools.add(new ToolItem(4, fragment, R.drawable.ic_explore_black_24dp, "Khám phá", new ToolItem.OnToolItemClicked() {
             @Override
             public void onClick(View v, boolean isActivated) {
-                navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_WEATHER);
+                navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_EXPLORE);
             }
         }));
-        tools.add(new ToolItem(5, lifecycleOwner, isLocationServiceOn, R.drawable.ic_my_location_black_24dp, "Bật chia sẻ", new ToolItem.OnToolItemClicked() {
+
+        tools.add(new ToolItem(4, fragment, R.drawable.ic_weather_sun, "Thời tiết", new ToolItem.OnToolItemClicked() {
             @Override
             public void onClick(View v, boolean isActivated) {
-                if (!isActivated) AlarmHelper.turnOff(context, sharedPref);
-                else AlarmHelper.turnOn(context, sharedPref);
+                navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_WEATHER);
             }
         }));
+//        final boolean isLocationServiceOn = AlarmHelper.isOn(sharedPref);
+//        tools.add(new ToolItem(5, fragment, isLocationServiceOn, R.drawable.ic_my_location_black_24dp, "Bật chia sẻ", new ToolItem.OnToolItemClicked() {
+//            @Override
+//            public void onClick(View v, boolean isActivated) {
+//                if (!isActivated) AlarmHelper.turnOff(context, sharedPref);
+//                else AlarmHelper.turnOn(context, sharedPref);
+//            }
+//        }));
         tools.add(new StateToolItem(6,
-                lifecycleOwner,
+                fragment,
                 Arrays.asList(context.getResources().getStringArray(R.array.setting_dark_mode)),
                 context.getResources().obtainTypedArray(R.array.dark_mode_drawables),
                 new StateToolItem.OnStateToolItemClickedListener() {
                     @Override
                     public void onClick(View v, int mode) {
-                        DarkModeHelper.applyMode(context, sharedPref, mode);
+                        SPDarkMode.applyMode(sharedPref, mode);
                     }
                 },
-                DarkModeHelper.getCurrentMode(context),
+                SPDarkMode.getCurrentMode(sharedPref),
                 new StateToolItem.OnChangeStateListener() {
                     @Override
                     public int newState(int oldState) {
-                        return (oldState + 1) % DarkModeHelper.nightModes.size();
+                        return (oldState + 1) % SPDarkMode.nightModes.size();
                     }
                 }
         ));
-        tools.add(new ToolItem(7, lifecycleOwner, R.drawable.ic_settings_black_24dp, "Cài đặt", new ToolItem.OnToolItemClicked() {
+        tools.add(new ToolItem(7, fragment, R.drawable.ic_settings_black_24dp, "Cài đặt", new ToolItem.OnToolItemClicked() {
             @Override
             public void onClick(View v, boolean isActivated) {
                 context.startActivity(new Intent(context, SettingActivity.class));
@@ -184,7 +216,7 @@ public class BottomToolsAdapter extends RecyclerView.Adapter<BottomToolsAdapter.
 
     class ToolVH extends RecyclerView.ViewHolder {
         ImageView icon;
-        TextView tvTitle;
+        TextView tvTitle, badge;
         Context context;
 
         public ToolVH(Context context, @NonNull View itemView) {
@@ -192,6 +224,7 @@ public class BottomToolsAdapter extends RecyclerView.Adapter<BottomToolsAdapter.
             this.context = context;
             icon = itemView.findViewById(R.id.ic_item_tool);
             tvTitle = itemView.findViewById(R.id.tv_title_item_tool);
+            badge = itemView.findViewById(R.id.badge_item_tool);
         }
 
         void bind(ToolItem toolItem) {
@@ -199,6 +232,12 @@ public class BottomToolsAdapter extends RecyclerView.Adapter<BottomToolsAdapter.
             icon.setActivated(isActivated);
             icon.setImageResource(toolItem.getIcon());
             tvTitle.setText(toolItem.getText());
+            if (toolItem.getBadgeNumber() != null) {
+                badge.setVisibility(View.VISIBLE);
+                badge.setText(String.valueOf(toolItem.getBadgeNumber()));
+            } else {
+                badge.setVisibility(View.INVISIBLE);
+            }
         }
     }
 }

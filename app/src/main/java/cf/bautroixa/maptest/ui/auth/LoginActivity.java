@@ -3,13 +3,11 @@ package cf.bautroixa.maptest.ui.auth;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,29 +16,22 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.ui.MainActivity;
+import cf.bautroixa.maptest.model.constant.RequestCodes;
+import cf.bautroixa.maptest.presenter.LoginPresenter;
+import cf.bautroixa.maptest.presenter.impl.LoginPresenterImpl;
+import cf.bautroixa.maptest.ui.dialogs.LoadingDialogHelper;
 import cf.bautroixa.maptest.ui.theme.LoadingDialogFragment;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginPresenter.View {
     private static final String TAG = "LoginActivity";
-    private static final int RC_SIGN_IN = 9001;
-
-    private FirebaseAuth mAuth;
+    private static final String googleClientId = "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com";
+    LoginPresenterImpl loginPresenter;
     private GoogleSignInClient mGoogleSignInClient;
-
     private EditText mUsernameField;
     private EditText mPasswordField;
-
     private LoadingDialogFragment loadingDialogFragment;
 
     @Override
@@ -48,14 +39,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mAuth = FirebaseAuth.getInstance();
-        String googleClientId = "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com";
+        loginPresenter = new LoginPresenterImpl(this, this);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(googleClientId)
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        loadingDialogFragment = new LoadingDialogFragment();
 
         mUsernameField = findViewById(R.id.et_username);
         mPasswordField = findViewById(R.id.et_password);
@@ -67,21 +56,14 @@ public class LoginActivity extends AppCompatActivity {
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mUsernameField.getText().length() == 0) {
-                    mUsernameField.setHintTextColor(Color.RED);
-                    return;
-                }
-                if (mPasswordField.getText().length() == 0) {
-                    mPasswordField.setHintTextColor(Color.RED);
-                    return;
-                }
-                signIn(mUsernameField.getText().toString(), mPasswordField.getText().toString());
+                validateInput();
             }
         });
         mGoogleSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signInWithGoogle();
+                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(signInIntent, RequestCodes.GOOGLE_SIGN_IN);
             }
         });
         mSignUpButton.setOnClickListener(new View.OnClickListener() {
@@ -103,9 +85,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mAuth.getCurrentUser() != null) {
-            onLoginSuccess();
-        }
+        loginPresenter.onResume();
     }
 
     @Override
@@ -115,67 +95,44 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == RequestCodes.GOOGLE_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                if (account != null) firebaseAuthWithGoogle(account);
+                if (account != null) loginPresenter.loginWithGoogle(account);
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-                Log.e(TAG, "Google sign in failed", e);
-                loadingDialogFragment.dismiss();
+                onLoginFailed("Google sign in failed" + e.getMessage());
             }
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getIdToken());
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        loadingDialogFragment.dismiss();
-                        if (task.isSuccessful()) {
-                            onLoginSuccess();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.e(TAG, "signInWithCredential:failure", task.getException());
-//                            Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+    void validateInput() {
+        if (mUsernameField.getText().length() == 0) {
+            mUsernameField.setHintTextColor(Color.RED);
+            return;
+        }
+        if (mPasswordField.getText().length() == 0) {
+            mPasswordField.setHintTextColor(Color.RED);
+            return;
+        }
+        loginPresenter.login(mUsernameField.getText().toString(), mPasswordField.getText().toString());
     }
 
-    private void signIn(String username, String password) {
-        loadingDialogFragment.show(getSupportFragmentManager(), "loading");
-        mAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                loadingDialogFragment.dismiss();
-                if (task.isSuccessful()) {
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    onLoginSuccess();
-                } else {
-                    Toast.makeText(LoginActivity.this, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+    @Override
+    public void onLoading() {
+        loadingDialogFragment = LoadingDialogHelper.create(getSupportFragmentManager());
     }
 
-    private void signInWithGoogle() {
-        loadingDialogFragment.show(getSupportFragmentManager(), "loading");
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    public void onLoginSuccess() {
-        ModelManager.getInstance().login(mAuth);
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(intent);
+    @Override
+    public void onLoginSuccess(Intent intent) {
+        if (loadingDialogFragment != null) loadingDialogFragment.dismiss();
+        if (intent != null) startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onLoginFailed(String reason) {
+        if (loadingDialogFragment != null) loadingDialogFragment.dismiss();
+        Toast.makeText(this, reason, Toast.LENGTH_LONG).show();
     }
 }

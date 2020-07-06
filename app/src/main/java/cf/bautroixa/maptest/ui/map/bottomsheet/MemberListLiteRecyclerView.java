@@ -10,16 +10,16 @@ import java.util.Calendar;
 import java.util.List;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class MemberListLiteRecyclerView extends MemberListRecyclerView {
-    public MemberListLiteRecyclerView(ModelManager manager, NavigationInterfaces navigationInterfaces) {
-        super(manager, navigationInterfaces);
+    public MemberListLiteRecyclerView(ModelManager manager, NavigationInterface navigationInterface) {
+        super(manager, navigationInterface);
         this.adapter = new MembersLiteAdapter();
     }
 
@@ -50,10 +50,10 @@ public class MemberListLiteRecyclerView extends MemberListRecyclerView {
 
         @Override
         public void findView() {
-            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_friend);
-            imgAvatar = itemView.findViewById(R.id.img_avatar_item_friend);
+            tvNameInAvatar = itemView.findViewById(R.id.tv_name_item_avatar);
+            imgAvatar = itemView.findViewById(R.id.img_avatar_item_avatar);
             imgIsLeader = itemView.findViewById(R.id.img_is_leader_item_friend);
-            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_friend);
+            tvOnlineIndicator = itemView.findViewById(R.id.tv_online_indicator_item_avatar);
         }
 
         @Override
@@ -74,7 +74,7 @@ public class MemberListLiteRecyclerView extends MemberListRecyclerView {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, user);
                 }
             });
             ImageHelper.loadCircleImage(user.getAvatar(), imgAvatar);

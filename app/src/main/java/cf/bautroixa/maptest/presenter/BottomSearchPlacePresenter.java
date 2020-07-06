@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import com.google.android.gms.tasks.Task;
 
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
 import cf.bautroixa.maptest.model.types.GeocodingResult;
 
 public interface BottomSearchPlacePresenter {

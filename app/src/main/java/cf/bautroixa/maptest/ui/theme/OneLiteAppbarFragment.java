@@ -14,7 +14,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class OneLiteAppbarFragment extends Fragment {
     Toolbar toolbar;
@@ -52,6 +52,10 @@ public class OneLiteAppbarFragment extends Fragment {
     protected void setBackButtonOnClickListener(View.OnClickListener onClickListener) {
         this.btnBack.setVisibility(View.VISIBLE);
         this.btnBack.setOnClickListener(onClickListener);
+    }
+
+    public void setBackButtonIcon(@DrawableRes int resId) {
+        btnBack.setImageResource(resId);
     }
 
     public void setToolbarMenu(@MenuRes int menuResId) {

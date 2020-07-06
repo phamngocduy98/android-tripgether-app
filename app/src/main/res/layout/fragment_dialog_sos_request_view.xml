@@ -1,59 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_radius_top_white_with_border"
-    android:orientation="vertical"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="16dp">
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_radius_full_white_with_border"
+    android:orientation="vertical">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:text="Cảnh báo SOS"
-        android:textSize="24sp" />
+        android:layout_marginHorizontal="22dp"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/tv_user_name_dialog_sos_request_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="8dp"
-        android:drawableStart="@drawable/ic_person_black_24dp"
-        android:drawableTint="@color/colorText"
-        android:text="AdminBautroixa" />
+        <ImageView
+            android:id="@+id/img_avatar_dialog_sos_request_view"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/bg_radius_full_white"
+            app:srcCompat="@drawable/no_avatar_image" />
 
-    <TextView
-        android:id="@+id/tv_user_location_dialog_sos_request_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableStart="@drawable/ic_place_black_24dp"
-        android:drawableTint="@color/colorText"
-        android:text="Vị trí hiện tại" />
+        <TextView
+            android:id="@+id/tv_user_name_dialog_sos_request_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-light"
+            android:lines="1"
+            android:text="eYour name"
+            android:textColor="@color/colorText"
+            android:textSize="24sp" />
 
-    <TextView
-        android:id="@+id/tv_lever_dialog_sos_request_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableStart="@drawable/ic_notifications_black_24dp"
-        android:drawableTint="@color/colorText"
-        android:paddingVertical="8dp"
-        android:text="Mức độ nghiêm trọng: CAO" />
+        <ImageView
+            android:id="@+id/img_lever_sos_request_view"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_gravity="center"
+            android:src="@drawable/bg_circle"
+            android:tint="#D50000" />
+
+        <TextView
+            android:id="@+id/tv_lever_dialog_sos_request_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTint="@color/colorText"
+            android:paddingVertical="8dp"
+            android:paddingStart="8dp"
+            android:text="Khẩn cấp" />
+
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/tv_desc_dialog_sos_request_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableStart="@drawable/ic_comment_black_24dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="16dp"
+        android:background="@drawable/edit_bg_radius"
         android:drawableTint="@color/colorText"
+        android:paddingHorizontal="22dp"
         android:paddingVertical="8dp"
-        android:text="Điện thoại hết pin rồi" />
+        android:text="Điện thoại hết pin rồi"
+        android:textSize="16dp" />
+
+    <cf.bautroixa.maptest.ui.theme.RoundedImageView
+        android:id="@+id/img_images_dialog_sos_request_view"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginHorizontal="22dp"
+        android:scaleType="centerCrop"
+        app:borderRadius="22dp"
+        app:srcCompat="@drawable/ic_photo" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="32dp"
         android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_i_am_coming_dialog_sos_request_view"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tôi đang tới" />
 
         <Button
             android:id="@+id/btn_close_dialog_sos_request_view"

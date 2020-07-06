@@ -16,12 +16,12 @@ import java.util.Calendar;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
-import cf.bautroixa.maptest.model.firestore.Message;
-import cf.bautroixa.maptest.model.firestore.User;
+import cf.bautroixa.maptest.model.firestore.objects.Message;
+import cf.bautroixa.maptest.model.firestore.objects.User;
 import cf.bautroixa.maptest.presenter.impl.ChatPresenterImpl;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
-import cf.bautroixa.maptest.utils.DateFormatter;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.DateFormatter;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHolder> {
     ChatPresenterImpl chatPresenter;
@@ -45,11 +45,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
     @Override
     public void onBindViewHolder(@NonNull final MessagesViewHolder holder, int position) {
         final Message message = messageSortedList.get(position);
-        boolean isEnd = position + 1 == messageSortedList.size();
-        if (position > 0) {
-            holder.bind(messageSortedList.get(position - 1), message, isEnd);
+        if (position < getItemCount() - 1) {
+            holder.bind(messageSortedList.get(position + 1), message);
         } else {
-            holder.bind(null, message, isEnd);
+            holder.bind(null, message);
         }
     }
 
@@ -60,7 +59,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
 
     @Override
     public int getItemViewType(int position) {
-        if (position > 0 && Objects.equals(messageSortedList.get(position - 1).getFromUser().getId(), messageSortedList.get(position).getFromUser().getId())) {
+        if (position < getItemCount() - 1 && Objects.equals(messageSortedList.get(position + 1).getFromUser().getId(), messageSortedList.get(position).getFromUser().getId())) {
             return MessageViewType.CONTINUOUS;
         }
         return MessageViewType.NORMAL;
@@ -77,7 +76,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
     public class MessagesViewHolder extends RecyclerView.ViewHolder {
         TextView tvDate, tvMessageSender, tvMessageContent, tvMessageContent2, tvMessageTime, tvMessageTime2;
         LinearLayout linearContainerMessageItem, linearIncomingMessageItem, linearOutcomingMessageItem;
-        RoundedImageView imgMessageItemAvatar, imgSeen;
+        RoundedImageView imgMessageItemAvatar, imgSending;
         View view;
         String lastAvatar = "";
 
@@ -96,7 +95,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
             linearOutcomingMessageItem = itemView.findViewById(R.id.linear_outcoming_message_item);
             tvMessageContent2 = itemView.findViewById(R.id.tv_content2_item_message);
             tvMessageTime2 = itemView.findViewById(R.id.tv_time2_item_message);
-            imgSeen = itemView.findViewById(R.id.img_seen_item_message);
+            imgSending = itemView.findViewById(R.id.img_seen_item_message);
 
             if (viewType == MessageViewType.CONTINUOUS) {
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) linearContainerMessageItem.getLayoutParams();
@@ -108,7 +107,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
             }
         }
 
-        public void bind(@Nullable Message preMessage, Message message, boolean isEnd) {
+        public void bind(@Nullable Message preMessage, Message message) {
             Context context = itemView.getContext();
             User sender = chatPresenter.getUser((message.getFromUser().getId()));
 
@@ -127,7 +126,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
             }
 
             if (chatPresenter.isMe(message.getFromUser().getId())) {
-                bindOutcomingMessage(message, sender, timeText, isEnd);
+                bindOutcomingMessage(message, timeText);
                 linearIncomingMessageItem.setVisibility(View.GONE);
                 linearOutcomingMessageItem.setVisibility(View.VISIBLE);
             } else {
@@ -148,16 +147,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
             }
         }
 
-        public void bindOutcomingMessage(Message message, User sender, String timeText, boolean isEnd) {
+        public void bindOutcomingMessage(Message message, String timeText) {
             if (tvMessageSender.getVisibility() == View.VISIBLE) {
                 tvMessageSender.setVisibility(View.GONE);
             }
             tvMessageContent2.setText(message.getText());
             tvMessageTime2.setText(timeText);
-            if (isEnd && message.getTime() != null) {
-                imgSeen.setVisibility(View.VISIBLE);
+            if (message.getTime() == null) {
+                imgSending.setVisibility(View.VISIBLE);
             } else {
-                if (imgSeen.getVisibility() == View.VISIBLE) imgSeen.setVisibility(View.INVISIBLE);
+                imgSending.setVisibility(View.INVISIBLE);
             }
         }
     }

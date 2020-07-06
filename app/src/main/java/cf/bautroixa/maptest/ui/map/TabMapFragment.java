@@ -26,32 +26,32 @@ import java.util.Stack;
 
 import cf.bautroixa.maptest.R;
 import cf.bautroixa.maptest.interfaces.MapBackgroundControllable;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.Checkpoint;
-import cf.bautroixa.maptest.model.firestore.Document;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.Trip;
-import cf.bautroixa.maptest.model.firestore.User;
+import cf.bautroixa.maptest.model.firestore.core.Document;
+import cf.bautroixa.maptest.model.firestore.objects.Checkpoint;
+import cf.bautroixa.maptest.model.firestore.objects.Trip;
+import cf.bautroixa.maptest.model.firestore.objects.User;
 import cf.bautroixa.maptest.model.types.SearchResult;
 import cf.bautroixa.maptest.model.ui_item.ViewState;
 import cf.bautroixa.maptest.presenter.MapPresenter;
-import cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.ui.bottomspace.BottomCheckpointsFragment;
+import cf.bautroixa.maptest.ui.bottomspace.BottomCreateJoinTripFragment;
+import cf.bautroixa.maptest.ui.bottomspace.BottomExploreFragment;
+import cf.bautroixa.maptest.ui.bottomspace.BottomMembersFragment;
+import cf.bautroixa.maptest.ui.bottomspace.BottomRouteFragment;
+import cf.bautroixa.maptest.ui.bottomspace.BottomSearchPlaceFragment;
+import cf.bautroixa.maptest.ui.bottomspace.BottomToolsFragment;
+import cf.bautroixa.maptest.ui.bottomspace.BottomWeatherFragment;
 import cf.bautroixa.maptest.ui.dialogs.SearchDialogFragment;
 import cf.bautroixa.maptest.ui.map.bottomsheet.BottomSheetCheckpointListFragment;
 import cf.bautroixa.maptest.ui.map.bottomsheet.BottomSheetMemberListFragment;
-import cf.bautroixa.maptest.ui.map.bottomsheet.SpaceManager;
-import cf.bautroixa.maptest.ui.map.bottomspace.BottomCheckpointsFragment;
-import cf.bautroixa.maptest.ui.map.bottomspace.BottomCreateJoinTripFragment;
-import cf.bautroixa.maptest.ui.map.bottomspace.BottomMembersFragment;
-import cf.bautroixa.maptest.ui.map.bottomspace.BottomRouteFragment;
-import cf.bautroixa.maptest.ui.map.bottomspace.BottomSearchPlaceFragment;
-import cf.bautroixa.maptest.ui.map.bottomspace.BottomToolsFragment;
-import cf.bautroixa.maptest.ui.map.bottomspace.BottomWeatherFragment;
 import cf.bautroixa.maptest.ui.profile.MyProfileActivity;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
 import cf.bautroixa.maptest.ui.theme.ViewAnim;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 
 public class TabMapFragment extends Fragment implements NavigationInterfaceOwner, MapBackgroundControllable {
@@ -69,6 +69,7 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     public static final int STATE_SOS_REQUEST = 30;
     public static final int STATE_ROUTE = 40;
     public static final int STATE_WEATHER = 50;
+    public static final int STATE_EXPLORE = 60;
 
     private static final String TAG = "MapFragment";
     // CHILD FRAGMENT
@@ -79,6 +80,7 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     BottomCheckpointsFragment bottomCheckpointsFragment;
     BottomRouteFragment bottomRouteFragment;
     BottomWeatherFragment bottomWeatherFragment;
+    BottomExploreFragment bottomExploreFragment;
     // DATA AND STATE
     private ModelManager manager;
     private Stack<ViewState> stateStack;
@@ -88,7 +90,7 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     private SearchResult selectedSearchResult = null;
     // LISTENER
     private MapPresenter.CallableMask mMapBackgroundInterface;
-    private NavigationInterfaces mNavigationInterface;
+    private NavigationInterface mNavigationInterface;
     // VIEWS
     private SpaceManager spaceManager;
     private View statusBar;
@@ -108,27 +110,9 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        manager = ModelManager.getInstance(context);
         stateStack = new Stack<>();
-        stateStack.push(new ViewState(STATE_TOOLS, null));
-        manager = ModelManager.getInstance();
-        manager.getCurrentTrip().attachListener(this, new Document.OnValueChangedListener<Trip>() {
-            @Override
-            public void onValueChanged(@NonNull Trip trip) {
-                if (trip.isAvailable()) {
-                    if (stateStack.peek().state == STATE_NO_TRIP) {
-                        stateStack.clear();
-                        stateStack.add(new ViewState(STATE_TOOLS, null));
-                        mHandleState(STATE_TOOLS, null);
-                    }
-                } else {
-                    if (stateStack.peek().state != STATE_NO_TRIP) {
-                        stateStack.clear();
-                        stateStack.add(new ViewState(STATE_NO_TRIP, null));
-                        mHandleState(STATE_NO_TRIP, null);
-                    }
-                }
-            }
-        });
+        stateStack.push(new ViewState(STATE_NO_TRIP, null));
     }
 
     @Override
@@ -159,12 +143,13 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
         bottomMembersFragment = new BottomMembersFragment();
         bottomCheckpointsFragment = new BottomCheckpointsFragment();
         bottomWeatherFragment = new BottomWeatherFragment();
+        bottomExploreFragment = new BottomExploreFragment();
         bottomSheet();
         editSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SearchDialogFragment searchDialog = new SearchDialogFragment();
-                searchDialog.setNavigationInterfaces(mNavigationInterface);
+                searchDialog.setNavigationInterface(mNavigationInterface);
                 searchDialog.show(getChildFragmentManager(), "search dialog");
             }
         });
@@ -198,19 +183,40 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
                 mMapBackgroundInterface.targetMyLocation();
             }
         });
+    }
 
-        // TODO: fix here
-        mHandleState(STATE_TOOLS, null);
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mHandleState(stateStack.peek().state, null);
+        manager.getCurrentTrip().attachListener(this, new Document.OnValueChangedListener<Trip>() {
+            @Override
+            public void onValueChanged(@NonNull Trip trip) {
+                if (trip.isAvailable()) {
+                    if (stateStack.peek().state == STATE_NO_TRIP) {
+                        stateStack.clear();
+                        stateStack.add(new ViewState(STATE_TOOLS, null));
+                        mHandleState(STATE_TOOLS, null);
+                    }
+                } else {
+                    if (stateStack.peek().state != STATE_NO_TRIP) {
+                        stateStack.clear();
+                        stateStack.add(new ViewState(STATE_NO_TRIP, null));
+                        mHandleState(STATE_NO_TRIP, null);
+                    }
+                }
+            }
+        });
     }
 
     @Override
     public void onAttachFragment(@NotNull Fragment fragment) {
         super.onAttachFragment(fragment);
         if (fragment instanceof NavigationInterfaceOwner) {
-            ((NavigationInterfaceOwner) fragment).setNavigationInterfaces(mNavigationInterface);
+            ((NavigationInterfaceOwner) fragment).setNavigationInterface(mNavigationInterface);
         }
         if (fragment instanceof MapBackgroundControllable) {
-            ((MapBackgroundControllable) fragment).setMapBackgroundInterfaces(mMapBackgroundInterface);
+            ((MapBackgroundControllable) fragment).setMapBackgroundInterface(mMapBackgroundInterface);
         }
         if (fragment instanceof BottomCheckpointsFragment) {
             bottomCheckpointsFragment.getBottomCheckpointsPresenter().selectCheckpoint(stateId);
@@ -234,8 +240,8 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     @Override
     public void onDetach() {
         super.onDetach();
-//        mNavigationInterface = null;
-//        mMapBackgroundInterface = null;
+        mNavigationInterface = null;
+        mMapBackgroundInterface = null;
     }
 
 
@@ -285,7 +291,7 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     }
 
     private void mHandleState(int newState, @Nullable Object data) {
-        mMapBackgroundInterface.cleanUpTempMarkerAndRoute();
+        if (mMapBackgroundInterface != null) mMapBackgroundInterface.cleanUpTempMarkerAndRoute();
         toggleSearchToolBar(newState == STATE_TOOLS || newState == STATE_NO_TRIP);
         if (newState == STATE_TOOLS || newState == STATE_FRIEND_LIST || newState == STATE_CHECKPOINT_LIST) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -351,6 +357,9 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
             case STATE_WEATHER:
                 spaceManager.selectActiveViewSpace(SpaceManager.SPACE_BOTTOM, bottomWeatherFragment);
                 break;
+            case STATE_EXPLORE:
+                spaceManager.selectActiveViewSpace(SpaceManager.SPACE_BOTTOM, bottomExploreFragment);
+                break;
         }
         Log.d(TAG, "new state= " + newState);
     }
@@ -384,11 +393,11 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     }
 
     @Override
-    public void setNavigationInterfaces(NavigationInterfaces NavigationInterfaces) {
-        this.mNavigationInterface = NavigationInterfaces;
+    public void setNavigationInterface(NavigationInterface NavigationInterface) {
+        this.mNavigationInterface = NavigationInterface;
     }
 
-    public void setMapBackgroundInterfaces(MapPresenter.CallableMask mapBackgroundInterfaces) {
-        this.mMapBackgroundInterface = mapBackgroundInterfaces;
+    public void setMapBackgroundInterface(MapPresenter.CallableMask mapBackgroundInterface) {
+        this.mMapBackgroundInterface = mapBackgroundInterface;
     }
 }

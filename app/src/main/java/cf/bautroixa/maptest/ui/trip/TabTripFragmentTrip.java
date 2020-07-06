@@ -1,5 +1,6 @@
 package cf.bautroixa.maptest.ui.trip;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,25 +15,26 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
-import androidx.recyclerview.widget.SortedListAdapterCallback;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 import cf.bautroixa.maptest.R;
+import cf.bautroixa.maptest.interfaces.NavigationInterface;
 import cf.bautroixa.maptest.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.maptest.interfaces.NavigationInterfaces;
-import cf.bautroixa.maptest.model.firestore.DocumentsManager;
 import cf.bautroixa.maptest.model.firestore.ModelManager;
-import cf.bautroixa.maptest.model.firestore.SosRequest;
-import cf.bautroixa.maptest.model.firestore.User;
-import cf.bautroixa.maptest.ui.adapter.MainActivityPagerAdapter;
+import cf.bautroixa.maptest.model.firestore.core.DocumentsManager;
+import cf.bautroixa.maptest.model.firestore.objects.SosRequest;
+import cf.bautroixa.maptest.model.firestore.objects.User;
+import cf.bautroixa.maptest.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.maptest.ui.dialogs.SosRequestEditDialogFragment;
 import cf.bautroixa.maptest.ui.map.TabMapFragment;
+import cf.bautroixa.maptest.ui.sortedlist.UserSortedListAdapterCallback;
 import cf.bautroixa.maptest.ui.theme.OneRecyclerView;
 import cf.bautroixa.maptest.ui.theme.RoundedImageView;
-import cf.bautroixa.maptest.utils.ImageHelper;
+import cf.bautroixa.maptest.ui.trip_invite.TripInvitationActivity;
 import cf.bautroixa.maptest.utils.IntentHelper;
+import cf.bautroixa.maptest.utils.ui_utils.ImageHelper;
 
 public class TabTripFragmentTrip extends Fragment implements NavigationInterfaceOwner {
     SortedList<User> sosRequestMembers;
@@ -40,7 +42,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigationInterface
     ModelManager manager;
     RecyclerView rvSos;
     private String[] leverStrings = new String[3];
-    private NavigationInterfaces navigationInterfaces;
+    private NavigationInterface navigationInterface;
     private DocumentsManager.OnListChangedListener<User> onSosChangedListener;
     /**
      * VIEWS
@@ -57,33 +59,15 @@ public class TabTripFragmentTrip extends Fragment implements NavigationInterface
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        manager = ModelManager.getInstance(context);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        manager = ModelManager.getInstance();
-        sosRequestMembers = new SortedList<>(User.class, new SortedListAdapterCallback<User>(adapter) {
-            @Override
-            public int compare(User o1, User o2) {
-                SosRequest sos1 = o1.getSosRequest(), sos2 = o2.getSosRequest();
-                if (sos1.isResolved() ^ sos2.isResolved()) {
-                    return sos1.isResolved() ? -1 : 1;
-                }
-                if (sos1.getLever() != sos2.getLever()) {
-                    return sos1.getLever() < sos2.getLever() ? -1 : 1;
-                }
-                return sos1.getTime().compareTo(sos1.getTime());
-            }
-
-            @Override
-            public boolean areContentsTheSame(User oldItem, User newItem) {
-                return oldItem.getSosRequest().equals(newItem.getSosRequest());
-            }
-
-            @Override
-            public boolean areItemsTheSame(User item1, User item2) {
-                return item1.getId().equals(item2.getId());
-            }
-        });
-
+        sosRequestMembers = new SortedList<>(User.class, new UserSortedListAdapterCallback(adapter));
         leverStrings = getResources().getStringArray(R.array.sos_lever);
 
         adapter = new SosAdapter();
@@ -163,7 +147,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigationInterface
     public void onAttachFragment(@NonNull Fragment childFragment) {
         super.onAttachFragment(childFragment);
         if (childFragment instanceof NavigationInterfaceOwner) {
-            ((NavigationInterfaceOwner) childFragment).setNavigationInterfaces(navigationInterfaces);
+            ((NavigationInterfaceOwner) childFragment).setNavigationInterface(navigationInterface);
         }
     }
 
@@ -182,7 +166,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigationInterface
             btnAddEditSos.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add_white_24dp, 0, 0, 0);
         }
         if (manager.getCurrentTrip().isAvailable()) {
-            manager.getCurrentTrip().getMembersManager().addOnDatasChangedListener(onSosChangedListener);
+            manager.getCurrentTrip().getMembersManager().addOnListChangedListener(onSosChangedListener);
         }
     }
 
@@ -190,19 +174,19 @@ public class TabTripFragmentTrip extends Fragment implements NavigationInterface
     public void onPause() {
         super.onPause();
         if (manager.getCurrentTrip().isAvailable()) {
-            manager.getCurrentTrip().getMembersManager().removeOnDatasChangedListener(onSosChangedListener);
+            manager.getCurrentTrip().getMembersManager().removeOnListChangedListener(onSosChangedListener);
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        navigationInterfaces = null;
+        navigationInterface = null;
         onSosChangedListener = null;
     }
 
-    public void setNavigationInterfaces(NavigationInterfaces navigationInterfaces) {
-        this.navigationInterfaces = navigationInterfaces;
+    public void setNavigationInterface(NavigationInterface navigationInterface) {
+        this.navigationInterface = navigationInterface;
     }
 
     public class SosVH extends OneRecyclerView.ViewHolder {
@@ -247,7 +231,7 @@ public class TabTripFragmentTrip extends Fragment implements NavigationInterface
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigationInterfaces.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, sosRequestUser);
+                    navigationInterface.navigate(MainActivityPagerAdapter.Tabs.TAB_MAP, TabMapFragment.STATE_MEMBER_STATUS, sosRequestUser);
                 }
             });
         }

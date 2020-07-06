@@ -39,6 +39,7 @@ public class OneAppbarActivity extends AppCompatActivity {
     }
 
     public void setSubtitle(CharSequence title) {
+        this.tvSubtitle.setVisibility(View.VISIBLE);
         this.tvSubtitle.setText(title);
     }
 

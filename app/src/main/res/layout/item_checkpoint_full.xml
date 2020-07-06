@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_radius_full_white_fill_bot"
     android:orientation="vertical"
-    tools:context=".ui.map.bottomspace.BottomCheckpointsFragment">
+    tools:context=".ui.bottomspace.BottomCheckpointsFragment">
 
     <com.gauravbhola.ripplepulsebackground.RipplePulseLayout
         android:id="@+id/layout_ripplepulse"
