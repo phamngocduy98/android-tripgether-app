@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
     android:gravity="center_horizontal"
-    tools:context=".auth.RegisterActivity">
+    tools:context=".ui.user.RegisterActivity">
 
     <TextView
         android:id="@+id/textView5"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="48dp"
         android:layout_marginEnd="48dp"
-        android:hint="Tên đăng nhập"
+        android:hint="Địa chỉ email"
         android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

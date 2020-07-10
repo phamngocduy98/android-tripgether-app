@@ -7,9 +7,9 @@
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
     app:layoutDescription="@xml/appbar_scene"
-    tools:context=".TabTripFragment">
+    tools:context=".ui.trip.TabTripFragment">
 
-    <include layout="@layout/appbar" />
+    <include layout="@layout/theme_appbar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content"

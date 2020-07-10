@@ -2,44 +2,53 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/linear_container_message_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginVertical="16dp"
         android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_date_item_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"
+            android:text="10 NGÀY TRƯỚC" />
 
         <TextView
             android:id="@+id/tv_sender_item_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:paddingStart="64dp"
+            android:paddingStart="72dp"
             android:text="Sender"
-            android:textSize="14sp" />
+            android:textColor="@color/colorTextSecondary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <LinearLayout
-            android:id="@+id/linear_main_message_item"
+            android:id="@+id/linear_incoming_message_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:layout_marginEnd="16dp">
 
-            <cf.bautroixa.maptest.theme.RoundedImageView
+            <cf.bautroixa.tripgether.ui.theme.RoundedImageView
                 android:id="@+id/img_avatar_item_message"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
                 app:borderRadius="15dp"
-                app:srcCompat="@drawable/avatar_item_room" />
+                app:srcCompat="@drawable/ic_person_black_24dp" />
 
             <TextView
                 android:id="@+id/tv_content_item_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/bg_radius_full_white"
                 android:paddingHorizontal="16dp"
@@ -57,6 +66,46 @@
                 android:textColor="@color/colorTextSecondary"
                 android:textSize="12sp" />
 
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_outcoming_message_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:id="@+id/tv_time2_item_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:text="12:12"
+                android:textColor="@color/colorTextSecondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tv_content2_item_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/bg_radius_full_color"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="Hi, Iam back"
+                android:textColor="@color/colorTextDarkBg"
+                android:textSize="18sp" />
+
+            <cf.bautroixa.tripgether.ui.theme.RoundedImageView
+                android:id="@+id/img_seen_item_message"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_gravity="bottom"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                android:visibility="visible"
+                app:srcCompat="@drawable/bg_border_image" />
 
         </LinearLayout>
     </LinearLayout>

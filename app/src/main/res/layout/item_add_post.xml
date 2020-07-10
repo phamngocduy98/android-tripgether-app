@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <include
+        android:layout_height="40dp"
+        android:layout_width="40dp"
+        layout="@layout/item_user_avatar" />
+
+    <TextView
+        android:id="@+id/et_item_add_post"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/colorTextSecondary"
+        android:background="@drawable/edit_bg_radius"
+        android:gravity="center_vertical"
+        android:ems="10"
+        android:textSize="14sp"
+        android:text="Chia sẻ về hành trình của mình..." />
+</LinearLayout>

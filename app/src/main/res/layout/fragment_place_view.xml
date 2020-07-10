@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_radius_full_white_with_border"
+    tools:context=".ui.dialogs.PlaceViewDialogFragment">
+
+    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
+        android:id="@+id/img_images_dialog_place_view"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:scaleType="centerCrop"
+        app:borderRadius="22dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_photo" />
+
+    <TextView
+        android:id="@+id/tv_place_name_dialog_place_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="278dp"
+        android:background="@drawable/bg_radius_none_white"
+        android:layout_marginHorizontal="1dp"
+        android:paddingHorizontal="21dp"
+        android:paddingTop="16dp"
+        android:text="PlaceName"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_place_address_dialog_place_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="22dp"
+        android:paddingVertical="8dp"
+        android:text="PlaceAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_place_name_dialog_place_view" />
+
+    <Button
+        android:id="@+id/btn_close_dialog_place_view"
+        style="@style/Button.FlatButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="16dp"
+        android:text="Đóng"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_place_address_dialog_place_view" />
+</androidx.constraintlayout.widget.ConstraintLayout>

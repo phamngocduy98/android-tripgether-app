@@ -7,14 +7,14 @@
     android:gravity="center_horizontal"
     android:background="@color/colorBackground"
     android:orientation="vertical"
-    tools:context=".auth.DetailProfileActivity">
+    tools:context=".ui.profile.DetailProfileActivity">
 
 
     <ImageView
         android:id="@+id/iv_avatar"
         android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:foreground="@drawable/iv_round_image_white"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.394"
         android:scaleType="centerCrop"
         android:src="@drawable/no_avatar_image"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,8 +34,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:orientation="vertical"
+        android:paddingVertical="8dp"
         app:layout_constraintBottom_toTopOf="@+id/btn_update"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,15 +45,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:background="@drawable/bg_radius_top_white">
+            android:background="@drawable/bg_radius_top_white"
+            android:gravity="center_vertical"
+            android:paddingVertical="8dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginHorizontal="15dp"
-                android:drawableTint="@color/colorText"
-                android:drawableStart="@drawable/ic_person_black_24dp" />
+                android:src="@drawable/ic_people_app" />
 
             <EditText
                 android:id="@+id/et_name"
@@ -68,20 +69,22 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_radius_none_white">
+            android:background="@drawable/bg_radius_none_white"
+            android:paddingVertical="8dp"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginHorizontal="15dp"
-                android:drawableTint="@color/colorText"
-                android:drawableStart="@drawable/ic_local_phone_black_24dp" />
+                android:src="@drawable/ic_phone_app" />
 
             <EditText
                 android:id="@+id/et_phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginEnd="16dp"
+                android:enabled="false"
                 android:hint="Số điện thoại"
                 android:textSize="16dp" />
         </LinearLayout>
@@ -89,15 +92,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="8dp"
-            android:background="@drawable/bg_radius_bot_white">
+            android:background="@drawable/bg_radius_bot_white"
+            android:gravity="center_vertical"
+            android:paddingVertical="8dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginHorizontal="15dp"
-                android:drawableTint="@color/colorText"
-                android:drawableStart="@drawable/ic_email_black_24dp" />
+                android:src="@drawable/ic_mail_app" />
 
             <EditText
                 android:id="@+id/tv_email"
@@ -114,7 +117,7 @@
 
     <Button
         android:id="@+id/btn_update"
-        style="@style/Button.RaisedButton"
+        style="@style/Button.FlatButtonBorder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"

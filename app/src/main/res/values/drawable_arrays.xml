@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer-array name="dark_mode_drawables">
+
+
+        <item>@drawable/ic_moon
+        </item>                  <!--        <item>@string/setting_dark_system_mode</item>-->
+        <item>@drawable/ic_stars_black_24dp
+        </item>      <!--        <item>@string/setting_dark_light_mode</item>-->
+        <item>@drawable/ic_moon
+        </item>                  <!--        <item>@string/setting_dark_dark_mode</item>-->
+        <item>@drawable/ic_moon
+        </item>                  <!--        <item>@string/setting_dark_auto_mode</item>-->
+    </integer-array>
+</resources>

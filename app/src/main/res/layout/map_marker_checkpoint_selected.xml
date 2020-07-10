@@ -11,14 +11,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/yellow_marker" />
+        android:tint="@color/colorTextButton"
+        app:srcCompat="@drawable/marker_bg" />
 
     <TextView
         android:id="@+id/tv_name_map_marker_checkpoint_selected"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/bg_circle"
+        android:backgroundTint="@color/colorBackground"
+        android:gravity="center"
         android:text="100"
+        android:textColor="@color/colorTextButton"
+        android:textSize="22dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

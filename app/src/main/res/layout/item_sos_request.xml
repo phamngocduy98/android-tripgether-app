@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <cf.bautroixa.maptest.theme.RoundedImageView
+    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
         android:id="@+id/img_user_avatar_item_sos"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -51,6 +51,7 @@
         android:layout_marginEnd="24dp"
         android:text="Khẩn cấp"
         android:textColor="@color/colorText"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_user_name_item_sos"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tv_user_name_item_sos" />
 </androidx.constraintlayout.widget.ConstraintLayout>

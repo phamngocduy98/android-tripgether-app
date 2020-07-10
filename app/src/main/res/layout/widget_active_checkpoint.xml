@@ -6,29 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_radius_full_white"
-    tools:context=".widgets.ActiveCheckpointWidget">
-
-    <com.github.vipulasri.timelineview.TimelineView
-        android:id="@+id/timeline_widget_active_checkpoint"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        app:endLineColor="@color/colorBorder"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:lineWidth="1dp"
-        app:marker="@drawable/ic_ticker"
-        app:startLineColor="@color/colorBorder" />
+    tools:context=".ui.bottomspace.ActiveCheckpointWidget">
 
     <TextView
         android:id="@+id/tv_time_remain_widget_active_checkpoint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:text="30 phút nữa"
-        app:layout_constraintStart_toEndOf="@+id/timeline_widget_active_checkpoint"
+        app:layout_constraintStart_toEndOf="@+id/imageView2"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -40,35 +27,56 @@
         android:text="Điểm xuất phát"
         android:textSize="24sp"
         app:layout_constraintEnd_toStartOf="@+id/tv_visited_count_widget_active_checkpoint"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/tv_time_remain_widget_active_checkpoint"
         app:layout_constraintTop_toBottomOf="@+id/tv_time_remain_widget_active_checkpoint" />
-
-    <TextView
-        android:id="@+id/tv_location_widget_active_checkpoint"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:singleLine="true"
-        android:text="Gần đại học quốc gia Hà Nội"
-        android:textColor="@color/colorTextSecondary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/tv_name_widget_active_checkpoint"
-        app:layout_constraintStart_toStartOf="@+id/tv_name_widget_active_checkpoint"
-        app:layout_constraintTop_toBottomOf="@+id/tv_name_widget_active_checkpoint" />
 
     <TextView
         android:id="@+id/tv_visited_count_widget_active_checkpoint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="16dp"
         android:fontFamily="sans-serif-condensed"
         android:text="1/10"
         android:textSize="24sp"
         android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_name_widget_active_checkpoint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_time_remain_widget_active_checkpoint" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="40dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_place_black_24dp"
+        android:tint="@color/colorText"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_name_widget_active_checkpoint"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_time_remain_widget_active_checkpoint" />
+
+    <Button
+        android:id="@+id/btn_check_in_widget_active_checkpoint"
+        style="@style/Button.FlatButton"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:drawableTint="@color/colorTextButton"
+        android:text="Điểm danh"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@+id/btn_view_checkpoint_widget_active_checkpoint"
+        app:layout_constraintTop_toTopOf="@+id/btn_view_checkpoint_widget_active_checkpoint" />
+
+    <Button
+        android:id="@+id/btn_view_checkpoint_widget_active_checkpoint"
+        style="@style/Button.FlatButton"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="Khám phá"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_name_widget_active_checkpoint" />
 </androidx.constraintlayout.widget.ConstraintLayout>

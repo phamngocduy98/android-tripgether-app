@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ripple="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_radius_full_white_fill_bot"
+    android:orientation="vertical"
+    tools:context=".ui.bottomspace.BottomCheckpointsFragment">
+
+    <com.gauravbhola.ripplepulsebackground.RipplePulseLayout
+        android:id="@+id/layout_ripplepulse"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:clipChildren="false"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        ripple:duration="2000"
+        ripple:endRadius="50dp"
+        ripple:rippleColor="#8DDAFF"
+        ripple:rippleType="fill"
+        ripple:startRadius="1dp"
+        ripple:strokeWidth="2dp">
+
+    </com.gauravbhola.ripplepulsebackground.RipplePulseLayout>
+
+    <TextView
+        android:id="@+id/tv_no_item_checkpoint_frag_trip_overview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="1"
+        android:textColor="@color/colorText"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_ripplepulse"
+        app:layout_constraintEnd_toEndOf="@+id/layout_ripplepulse"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_time_item_checkpoint_frag_trip_overview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="12/10/2020" />
+
+            <TextView
+                android:id="@+id/tv_visit_count_frag_trip_overview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bạn và 5 người khác"
+                android:textColor="@color/colorTextSecondary" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_name_item_checkpoint_frag_trip_overview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="2"
+            android:singleLine="false"
+            android:text="New York"
+            android:textColor="@color/colorText"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/tv_location_item_checkpoint_frag_trip_overview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lines="2"
+            android:text="132 Ngõ 32 Trần Quốc Hoàn, Dịch vọng Hậu, Cầu giấy, Hà Nội, Việt Nam, Trái đất, gì gì nữa cũng không biết nữa"
+            android:textColor="@color/colorTextSecondary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:divider="@drawable/divider"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
+        <Button
+            android:id="@+id/btn_check_in_item_checkpoint_frag_trip_overview"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableTint="@android:color/white"
+            android:text="Tôi đã có mặt"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_gather_here_item_checkpoint_frag_trip_overview"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableTint="@android:color/white"
+            android:text="Tập hợp tại đây"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_draw_route_item_checkpoint_frag_trip_overview"
+            style="@style/Button.FlatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableTint="@android:color/white"
+            android:text="Chỉ đường"
+            android:visibility="visible" />
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

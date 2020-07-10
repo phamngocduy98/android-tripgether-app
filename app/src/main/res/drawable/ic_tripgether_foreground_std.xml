@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="108dp"
+        android:height="108dp"
+        android:bottom="24dp"
+        android:drawable="@drawable/ic_tripgether_foreground"
+        android:end="24dp"
+        android:left="24dp"
+        android:top="24dp" />
+</layer-list>

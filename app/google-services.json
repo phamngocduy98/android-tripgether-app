@@ -10,7 +10,52 @@
       "client_info": {
         "mobilesdk_app_id": "1:703604566706:android:11a64808ab3f7471aa77ab",
         "android_client_info": {
-          "package_name": "cf.bautroixa.maptest"
+          "package_name": "cf.bautroixa.tripgether"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "703604566706-egqg8qdjkbji7v9l89qo2ala7lvkbnoo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cf.bautroixa.tripgether",
+            "certificate_hash": "cf0414279214fd11de5353c7a3c29ea4cc87cb92"
+          }
+        },
+        {
+          "client_id": "703604566706-dk9b0vgfedhi2eg6real8vhohmjfmulh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cf.bautroixa.tripgether",
+            "certificate_hash": "4c0657ec1ee982e561a26c894fa947fe06e6d284"
+          }
+        },
+        {
+          "client_id": "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-MmhK9ciM3mfHl2AvFpj6oYlvYni-9KA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "703604566706-upp9g9rtcdh3adrflqcgddt4p712jh27.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:703604566706:android:aca48c2ad429d5a1aa77ab",
+        "android_client_info": {
+          "package_name": "cf.bautroixa.tripgether"
         }
       },
       "oauth_client": [

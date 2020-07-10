@@ -8,8 +8,9 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient_activity_alert"
     android:paddingHorizontal="40dp"
-    android:paddingVertical="40dp"
-    tools:context=".AlertActivity">
+    android:paddingTop="30dp"
+    android:paddingBottom="8dp"
+    tools:context=".ui.AlertActivity">
 
     <TextView
         android:id="@+id/tv_app_name_activity_notify"
@@ -29,30 +30,27 @@
         android:id="@+id/tv_type_activity_notify"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="60dp"
         android:text="Example 1 yêu cầu hỗ trợ"
         android:textColor="@android:color/white"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_content_activity_notify"
+        app:layout_constraintBottom_toTopOf="@+id/tv_name_activity_notify"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_app_name_activity_notify"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
-        android:id="@+id/tv_content_activity_notify"
+        android:id="@+id/tv_name_activity_notify"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:maxLines="3"
+        android:maxLines="1"
         android:text="My battery is low now"
         android:textColor="@android:color/white"
         android:textSize="40sp"
         app:layout_constraintBottom_toTopOf="@id/layout_ripplepulse"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_type_activity_notify"
         app:layout_constraintVertical_chainStyle="packed" />
@@ -82,4 +80,5 @@
             android:text="@string/btn_ok"
             android:textColor="@android:color/white" />
     </com.gauravbhola.ripplepulsebackground.RipplePulseLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

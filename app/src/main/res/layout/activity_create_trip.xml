@@ -8,14 +8,14 @@
     app:layoutDescription="@xml/appbar_scene"
     app:motionProgress="1.0">
 
-    <include layout="@layout/appbar" />
+    <include layout="@layout/theme_appbar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        tools:context=".CreateTripActivity">
+        tools:context=".ui.trip.CreateTripActivity">
 
         <include
             android:id="@+id/screen_1_activity_create_trip"
@@ -24,18 +24,10 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/main_content" />
+            app:layout_constraintTop_toTopOf="@id/main_content"
+            app:layout_constraintVertical_bias="1.0" />
 
-        <include
-            android:id="@+id/screen_2_activity_create_trip"
-            layout="@layout/activity_create_trip_screen_2_invitation"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/main_content" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.motion.widget.MotionLayout>

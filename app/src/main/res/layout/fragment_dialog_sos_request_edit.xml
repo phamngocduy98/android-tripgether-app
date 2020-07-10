@@ -4,20 +4,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    android:fitsSystemWindows="true"
-    android:paddingVertical="16dp">
+    android:fitsSystemWindows="true">
 
-    <ImageView
+    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
         android:id="@+id/img_sos_frag_send_sos"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/user"
-        app:layout_constraintBottom_toTopOf="@+id/tv_header_lever_dialog_sos_request_edit"
+        android:scaleType="centerCrop"
+        app:borderRadius="22dp"
+        app:layout_constraintBottom_toTopOf="@+id/tv_header_desc_dialog_sos_edit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_photo_camera_black_24dp" />
+        app:srcCompat="@drawable/ic_photo" />
+
+    <ImageView
+        android:id="@+id/img_select_image_dialog_sos_edit"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/img_sos_frag_send_sos"
+        app:layout_constraintEnd_toEndOf="@+id/img_sos_frag_send_sos"
+        app:srcCompat="@drawable/ic_camera_app" />
+
+    <TextView
+        android:id="@+id/tv_header_desc_dialog_sos_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:text="Mô tả về vấn đề của bạn"
+        android:textColor="@color/colorText"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/edit_desc_frag_send_sos"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/edit_desc_frag_send_sos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_radius_full_white"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:lines="5"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:textColor="@color/colorText"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/tv_header_lever_dialog_sos_request_edit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_header_lever_dialog_sos_request_edit"
@@ -36,12 +75,13 @@
         android:id="@+id/rg_lever"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/bg_radius_full_white"
         android:divider="@drawable/divider"
         android:orientation="horizontal"
         android:paddingVertical="16dp"
         android:showDividers="middle"
-        app:layout_constraintBottom_toTopOf="@+id/tv_header_desc_dialog_sos_request_edit"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -70,41 +110,13 @@
             android:text="CAO" />
     </RadioGroup>
 
-    <TextView
-        android:id="@+id/tv_header_desc_dialog_sos_request_edit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        android:text="Mô tả về vấn đề của bạn"
-        android:textColor="@color/colorText"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/edit_desc_frag_send_sos"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/edit_desc_frag_send_sos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_radius_full_white"
-        android:ems="10"
-        android:inputType="textMultiLine"
-        android:lines="5"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        android:textColor="@color/colorText"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <LinearLayout
         android:id="@+id/linearLayout3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
+        android:paddingVertical="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -125,5 +137,14 @@
             android:layout_weight="1"
             android:text="Gửi" />
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/btn_back_sos_edit"
+        style="@style/ImageButton.FlatIconButton"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_back" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

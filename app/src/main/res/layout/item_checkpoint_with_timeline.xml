@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="65dp"
+    android:background="@drawable/bg_radius_none_white"
     android:clickable="true"
     android:focusable="true">
 
@@ -10,84 +11,89 @@
         android:id="@+id/timeline"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginStart="90dp"
         app:endLineColor="@color/colorBorder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:marker="@drawable/btn_flat_with_border"
+        app:layout_constraintVertical_bias="0.0"
         app:lineWidth="1dp"
+        app:marker="@drawable/ic_marker"
         app:markerSize="20dp"
         app:startLineColor="@color/colorBorder" />
 
-    <View
-        android:id="@+id/bg_item_checkpoint_timeline"
+    <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_radius_full_white_with_border"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toEndOf="@+id/timeline"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_name_item_checkpoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Cầu Thê Húc"
+                android:textColor="@color/colorText"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tv_address_item_checkpoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                android:singleLine="true"
+                android:text="Cầu Thuê Húc, Hoàn Kiếm, Hà Nội,  Việt Nam"
+                android:textColor="@color/colorTextSecondary"
+                android:textSize="14dp" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btn_edit_item_checkpoint"
+            style="@style/ImageButton.FlatIconButton"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit_black_24dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_time_item_checkpoint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:lines="1"
         android:text="12:30"
-        android:textColor="@color/colorTextSecondary"
-        android:textSize="14dp"
-        app:layout_constraintStart_toEndOf="@+id/timeline"
-        app:layout_constraintTop_toTopOf="@+id/bg_item_checkpoint_timeline" />
+        android:fontFamily="sans-serif-light"
+        app:layout_constraintBottom_toTopOf="@+id/tv_date_item_checkpoint"
+        app:layout_constraintEnd_toEndOf="@+id/tv_date_item_checkpoint"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
-        android:id="@+id/tv_name_item_checkpoint"
-        android:layout_width="0dp"
+        android:id="@+id/tv_date_item_checkpoint"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Cầu Thê Húc"
-        android:textColor="@color/colorText"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/timeline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_time_item_checkpoint" />
-
-    <TextView
-        android:id="@+id/tv_location_item_checkpoint"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:textColor="@color/colorTextSecondary"
-        android:text="Hà Nội ads aá sad asd asd asd asd asd ad asdas adas ad asd a asd á asd "
-        app:layout_constraintBottom_toBottomOf="@+id/bg_item_checkpoint_timeline"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/tv_name_item_checkpoint"
-        app:layout_constraintTop_toBottomOf="@+id/tv_name_item_checkpoint"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <ImageButton
-        android:id="@+id/btn_edit_item_checkpoint"
-        style="@style/ImageButton.FlatIconButton"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_edit_black_24dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="12/10/1998"
+        android:fontFamily="sans-serif-light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/timeline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_time_item_checkpoint" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

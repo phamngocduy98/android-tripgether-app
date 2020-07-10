@@ -9,23 +9,18 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="btn_cancel">Cancel</string>
+    <string name="btn_cancel">Hủy</string>
     <string name="dialog_title">Thông báo</string>
     <string name="dialog_messsage">Dialog message</string>
-    <string name="dialog_title_sos">Send SOS</string>
+    <string name="dialog_title_sos">Gửi yêu cầu hỗ trợ</string>
 
     <string name="shared_preference_name">tripgether</string>
     <string name="socket_token">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhbmRyb2lkIiwiaWF0IjoxNTg0Mjg4NTA1LCJleHAiOjE2MTU4NDYxMDV9.cezgSOYqispv6Qq_aUZBlp--O72YeGYMKhH3oriez68</string>
-
-    <string-array name="alert_levers_array">
-        <item>High</item>
-        <item>Medium</item>
-        <item>Low</item>
-    </string-array>
     <string name="tv_step_activity_create_trip">Tạo chuyến đi (Bước %d của %d)</string>
-    <string name="btn_leave_trip">Leave trip</string>
+    <string name="btn_leave_trip">Rời chuyến đi</string>
     <string name="dialog_message_leave_trip">Bạn có chắc chắn muốn rời chuyến đi này không?</string>
-    <string name="server_host">www.example.com</string>
+    <string name="server_host">asia-east2-tripgether-b135a.cloudfunctions.net</string>
+    <string name="intent_server_host">bautroixa.cf</string>
 
     <string name="detail_personal_information"><u>Thông tin cá nhân chi tiết</u></string>
     <string name="avatar"><u>Ảnh đại diện</u></string>
@@ -37,7 +32,6 @@
     <string name="dialog_title_select_checkpoint">Chọn một điểm đến</string>
     <string name="dialog_title_enter_checkpoint_name">Nhập tên địa điểm</string>
     <string name="dialog_title_leave_trip">Rời chuyến đi</string>
-    <string name="default_notification_channel_id">9999</string>
     <string name="dialog_title_join_trip">Tham gia chuyến đi</string>
     <string name="btn_qr_scan">Quét mã QR</string>
     <string name="btn_enter_trip_code">Nhập mã chuyến đi</string>
@@ -86,5 +80,48 @@
     <string name="title_setting">Cài đặt</string>
     <string name="btn_on">Bật</string>
     <string name="btn_off">Tắt</string>
+    <string name="dialog_edit_hint">Nhập giá trị</string>
+    <string name="dialog_title_enter_user_name">Nhập email</string>
+    <string name="user_notification_add_friend">%s đã gửi lời mời kết bạn với bạn</string>
+    <string name="user_notification_friend_accepted">%s đã đồng ý kết bạn.</string>
+    <string name="user_notification_invite_to_trip">%s đã mời bạn tham gia chuyến đi %s</string>
+    <string name="user_notification_trip_join_request">%s đã yêu cầu tham gia chuyến đi %s của bạn</string>
+    <string name="user_notification_trip_join_accepted">Yêu cầu tham gia chuyến đi %s của bạn đã được chấp thuận</string>
+    <string name="user_notification_trip_join_rejected">Yêu cầu tham gia chuyến đi %s của bạn chưa được chấp thuận!</string>
+    <string name="trip_notification_user_added">%s đã tham gia nhóm</string>
+    <string name="trip_notification_user_removed">%s đã rời nhóm</string>
+    <string name="trip_notification_user_sos_added">%s đang cần trợ giúp %s: %s</string>
+    <string name="trip_notification_user_sos_resolved">Yêu cầu trợ giúp của %s đã được giải quyết</string>
+    <string name="trip_notification_checkpoint_added">Trưởng nhóm đã thêm địa điểm mới %s tại %s</string>
+    <string name="trip_notification_checkpoint_removed">Trưởng nhóm đã xóa địa điểm %s</string>
+    <string name="trip_notification_checkpoint_gather_request">Trưởng nhóm yêu cầu tập trung tại %s ở gần %s</string>
+    <string name="user_notification_you_get_lost">\"Bạn đang ở xa các thành viên khác\"</string>
+    <string name="btn_accept">Chấp nhận</string>
+    <string name="btn_reject">Từ chối</string>
+    <string name="dialog_title_confirm_add_friend">Kết bạn?</string>
+    <string name="dialog_message_confirm_add_friend">Bạn có đồng ý kết bạn với người này?</string>
+    <string name="user_notification_friend_rejected">%s đã từ chối kết bạn.</string>
+    <string name="dialog_title_enter_phone_num">Nhập số điện thoại</string>
+    <string name="dialog_title_permission_read_contact">Truy cập danh bạ</string>
+    <string name="dialog_message_permission_read_contact">Ứng dụng cần quyền truy cập danh bạ</string>
+    <string name="dialog_title_permission_camera">Truy cập máy ảnh</string>
+    <string name="dialog_message_permission_camera">Ứng dụng cần quyền truy cập máy ảnh để có thể quét mã QR</string>
+    <string name="user_notification_checkpoint_remind">%s tới địa điểm tiếp theo: %s</string>
+    <string name="default_notification_channel_id">99999</string>
+    <string name="dialog_title_choose_image">Chọn ảnh</string>
+    <string name="title_got_lost_setting">Cài đặt tránh lạc</string>
+    <string name="switch_toggle_reminder_on">Bật nhắc nhở</string>
+    <string name="switch_toggle_reminder_off">Tắt nhắc nhở</string>
+    <string name="title_checkpoint_reminder_setting">Nhắc nhở lịch trình</string>
+    <string name="title_map_style_setting">Loại bản đồ</string>
+    <string name="setting_street_map">Bản đồ mặc định</string>
+    <string name="setting_satellite_map">Bản đồ vệ tinh</string>
+    <string name="title_unit_setting">Đơn vị đo</string>
+    <string name="setting_censius_meter">Hệ đo lường chuẩn (°C, mét)</string>
+    <string name="setting_fahrenheit_inch">Hệ đo lường anh (°F, inch)</string>
+    <string name="dialog_title_permission_required">Yêu cầu quyền</string>
+    <string name="dialog_message_auto_start_permission">Ứng dụng cần quyền tự khởi động để có thể hiển thị thông báo.</string>
+    <string name="btn_allow">Cho phép</string>
+    <string name="btn_never_show_again">Không hỏi lại</string>
 
 </resources>
