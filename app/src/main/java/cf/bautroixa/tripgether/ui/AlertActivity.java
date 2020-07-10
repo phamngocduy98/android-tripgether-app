@@ -43,7 +43,7 @@ import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.firestore.objects.UserNotification;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefKeys;
 import cf.bautroixa.tripgether.presenter.AlertActivityPresenter;
-import cf.bautroixa.tripgether.presenter.impl.AlertActivityPresenterImpl;
+import cf.bautroixa.tripgether.presenter.AlertActivityPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
 import cf.bautroixa.tripgether.utils.NavigableHelper;
@@ -178,5 +178,11 @@ public class AlertActivity extends AppCompatActivity implements AlertActivityPre
 
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        vibrator.cancel();
     }
 }

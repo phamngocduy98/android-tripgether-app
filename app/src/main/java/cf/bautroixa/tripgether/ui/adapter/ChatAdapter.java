@@ -18,7 +18,8 @@ import java.util.Objects;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Message;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
-import cf.bautroixa.tripgether.presenter.impl.ChatPresenterImpl;
+import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
+import cf.bautroixa.tripgether.presenter.ChatPresenterImpl;
 import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
 import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
@@ -109,7 +110,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
 
         public void bind(@Nullable Message preMessage, Message message) {
             Context context = itemView.getContext();
-            User sender = chatPresenter.getUser((message.getFromUser().getId()));
+            UserPublic sender = chatPresenter.getUser((message.getFromUser().getId()));
 
             Calendar calendar = Calendar.getInstance();
             String timeText = "";
@@ -136,7 +137,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHo
             }
         }
 
-        public void bindIncomingMessage(Message message, User sender, String timeText) {
+        public void bindIncomingMessage(Message message, UserPublic sender, String timeText) {
             tvMessageContent.setText(message.getText());
             tvMessageTime.setText(timeText);
             tvMessageSender.setText(sender.getName());

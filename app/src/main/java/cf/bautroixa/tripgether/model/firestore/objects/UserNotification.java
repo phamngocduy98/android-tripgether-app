@@ -57,10 +57,11 @@ public class UserNotification extends Notification {
 
     @Override
     protected void update(Document document) {
-        UserNotification tripNotification = (UserNotification) document;
-        super.update(tripNotification);
-        this.userRef = tripNotification.userRef;
-        this.tripRef = tripNotification.tripRef;
+        UserNotification userNotification = (UserNotification) document;
+        super.update(userNotification);
+        this.userRef = userNotification.userRef;
+        this.tripRef = userNotification.tripRef;
+        this.seen = userNotification.seen;
     }
 
     public interface TripType {

@@ -17,9 +17,9 @@ import java.util.List;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.interfaces.MapBackgroundControllable;
-import cf.bautroixa.tripgether.presenter.BottomRoutePresenter;
-import cf.bautroixa.tripgether.presenter.MapPresenter;
-import cf.bautroixa.tripgether.presenter.impl.BottomRoutePresenterImpl;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomRoutePresenter;
+import cf.bautroixa.tripgether.presenter.bottomspace.MapPresenter;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomRoutePresenterImpl;
 import cf.bautroixa.tripgether.utils.IntentHelper;
 
 /**

@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import cf.bautroixa.tripgether.R;
-import cf.bautroixa.tripgether.ui.auth.LoginActivity;
+import cf.bautroixa.tripgether.ui.user.LoginActivity;
 
 public class ChangePasswordActivity extends AppCompatActivity {
     private EditText mOldPasswordField;

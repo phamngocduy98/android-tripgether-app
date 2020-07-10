@@ -39,7 +39,7 @@ import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.http.HttpService;
 import cf.bautroixa.tripgether.presenter.MainActivityPresenter;
-import cf.bautroixa.tripgether.presenter.impl.MainActivityPresenterImpl;
+import cf.bautroixa.tripgether.presenter.MainActivityPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.friends.FriendListActivity;
 import cf.bautroixa.tripgether.ui.map.MapBackgroundFragment;

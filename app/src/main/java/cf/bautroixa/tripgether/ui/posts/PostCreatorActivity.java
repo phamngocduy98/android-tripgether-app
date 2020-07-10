@@ -24,8 +24,8 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
 import cf.bautroixa.tripgether.model.firestore.objects.Place;
-import cf.bautroixa.tripgether.presenter.CreatePostPresenter;
-import cf.bautroixa.tripgether.presenter.impl.CreatePostPresenterImpl;
+import cf.bautroixa.tripgether.presenter.post.CreatePostPresenter;
+import cf.bautroixa.tripgether.presenter.post.CreatePostPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.PostPlaceAdapter;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.AvatarVH;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
@@ -99,7 +99,7 @@ public class PostCreatorActivity extends OneLiteAppbarActivity implements Create
                 CheckpointEditDialogFragment.newInstance(new CheckpointEditDialogFragment.OnCheckpointSetListener() {
                     @Override
                     public void onCheckpointSet(Checkpoint checkpoint) {
-                        createPostPresenter.addPlace(new Place(checkpoint));
+                        createPostPresenter.addPlace(new Place(manager.getBasePlaceManager().getRef(), checkpoint));
                         containerAddToPostExt.setVisibility(View.GONE);
                     }
                 }).show(getSupportFragmentManager(), "add place");

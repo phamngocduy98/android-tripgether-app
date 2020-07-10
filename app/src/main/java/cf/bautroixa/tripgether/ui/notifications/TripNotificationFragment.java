@@ -65,13 +65,14 @@ public class TripNotificationFragment extends Fragment implements ActivityNaviga
         tripNotificationSortedList = new SortedList<>(TripNotification.class, new SortedListAdapterCallback<TripNotification>(adapter) {
             @Override
             public int compare(TripNotification o1, TripNotification o2) {
+                if (Objects.equals(o1.getId(), o2.getId())) return 0;
                 return -o1.getTime().compareTo(o2.getTime());
             }
 
             @Override
             public boolean areContentsTheSame(TripNotification oldItem, TripNotification newItem) {
-                // UserNotifications are not changed once created;
-                return Objects.equals(oldItem.getId(), newItem.getId()) && Objects.equals(oldItem.isSeen(), newItem.isSeen());
+                // TripNotification are not changed once created;
+                return Objects.equals(oldItem.getId(), newItem.getId()) && Objects.equals(oldItem.getSeenList(), newItem.getSeenList());
             }
 
             @Override

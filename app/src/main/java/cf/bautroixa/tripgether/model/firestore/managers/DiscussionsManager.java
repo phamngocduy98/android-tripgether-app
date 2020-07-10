@@ -27,6 +27,10 @@ public class DiscussionsManager extends CollectionManager<Discussion> {
         this.userRef = userRef;
     }
 
+    public void setUserRef(DocumentReference userRef) {
+        this.userRef = userRef;
+    }
+
     @Override
     public void add(String id, Discussion discussion) {
         discussion.initSubManager(baseUsersManager);
@@ -67,15 +71,7 @@ public class DiscussionsManager extends CollectionManager<Discussion> {
                     return TaskHelper.getCompletedTask(task.getResult());
                 } else {
                     final DocumentReference discussionRef = getNewDocumentReference();
-                    return create(new Discussion(currentUserRef, toUserRef).withRef(discussionRef)).continueWith(new Continuation<Void, DocumentReference>() {
-                        @Override
-                        public DocumentReference then(@NonNull Task<Void> task) throws Exception {
-                            if (task.isSuccessful()) {
-                                return discussionRef;
-                            }
-                            return null;
-                        }
-                    });
+                    return create(new Discussion(currentUserRef, toUserRef).withRef(discussionRef));
                 }
             }
         });

@@ -36,7 +36,7 @@ import cf.bautroixa.tripgether.model.http.TripHttpService;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
 import cf.bautroixa.tripgether.ui.dialogs.SelectCheckpointDialogFragment;
 import cf.bautroixa.tripgether.ui.dialogs.SosRequestEditDialogFragment;
-import cf.bautroixa.tripgether.ui.map.bottomsheet.BottomSheetCheckpointListFragment;
+import cf.bautroixa.tripgether.ui.bottomsheet.BottomSheetCheckpointListFragment;
 import cf.bautroixa.tripgether.ui.theme.OneAppbarFragment;
 import cf.bautroixa.tripgether.ui.theme.OneDialog;
 import cf.bautroixa.tripgether.ui.theme.OnePromptDialog;

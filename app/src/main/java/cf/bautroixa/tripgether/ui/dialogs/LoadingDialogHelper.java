@@ -10,7 +10,7 @@ import cf.bautroixa.tripgether.ui.theme.LoadingDialogFragment;
 
 public class LoadingDialogHelper {
     public static ProgressDialog create(Context context, String loadingText) {
-        ProgressDialog loadingDialog = ProgressDialog.show(context, "", loadingText, true, false);
+        ProgressDialog loadingDialog = ProgressDialog.show(context, "", loadingText, true, true);
         loadingDialog.setCustomTitle(new View(context));
         return loadingDialog;
     }

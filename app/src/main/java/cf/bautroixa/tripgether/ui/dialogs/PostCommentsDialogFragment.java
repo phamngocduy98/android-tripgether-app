@@ -173,9 +173,9 @@ public class PostCommentsDialogFragment extends OneBottomSheetDialog {
         if (commentText.length() > 0) {
             post.getCommentsManager()
                     .create(new Comment(manager.getCurrentUserRef(), commentText, replyCommentRef))
-                    .addOnCompleteListener(requireActivity(), new OnCompleteListener<Void>() {
+                    .addOnCompleteListener(requireActivity(), new OnCompleteListener<DocumentReference>() {
                         @Override
-                        public void onComplete(@NonNull Task<Void> task) {
+                        public void onComplete(@NonNull Task<DocumentReference> task) {
                             etComment.setText("");
                             replyCommentRef = null;
                             linearReply.setVisibility(View.GONE);

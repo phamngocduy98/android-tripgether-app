@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:background="@color/colorBackground"
-    tools:context=".ui.auth.LoginActivity">
+    tools:context=".ui.user.LoginActivity">
 
     <!--    <TextView-->
     <!--        android:id="@+id/tv_status"-->

@@ -20,9 +20,9 @@ import cf.bautroixa.tripgether.interfaces.MapBackgroundControllable;
 import cf.bautroixa.tripgether.interfaces.NavigationInterface;
 import cf.bautroixa.tripgether.interfaces.NavigationInterfaceOwner;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
-import cf.bautroixa.tripgether.presenter.BottomMembersPresent;
-import cf.bautroixa.tripgether.presenter.MapPresenter;
-import cf.bautroixa.tripgether.presenter.impl.BottomMembersPresenterImpl;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomMembersPresent;
+import cf.bautroixa.tripgether.presenter.bottomspace.MapPresenter;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomMembersPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.BottomMembersAdapter;
 import cf.bautroixa.tripgether.utils.ui_utils.RecyclerViewOnScrollListener;
 

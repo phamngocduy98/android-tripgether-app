@@ -16,8 +16,8 @@ import java.util.ArrayList;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
-import cf.bautroixa.tripgether.presenter.WaitingRoomItemPresenter;
-import cf.bautroixa.tripgether.presenter.impl.WaitingRoomItemPresenterImpl;
+import cf.bautroixa.tripgether.presenter.trip.WaitingRoomItemPresenter;
+import cf.bautroixa.tripgether.presenter.trip.WaitingRoomItemPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.UserPublicVH;
 import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
 import cf.bautroixa.tripgether.ui.friends.ProfileActivity;

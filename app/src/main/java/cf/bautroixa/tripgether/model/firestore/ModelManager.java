@@ -2,7 +2,6 @@ package cf.bautroixa.tripgether.model.firestore;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,15 +36,13 @@ import cf.bautroixa.tripgether.model.firestore.objects.SosRequest;
 import cf.bautroixa.tripgether.model.firestore.objects.Trip;
 import cf.bautroixa.tripgether.model.firestore.objects.TripNotification;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
-import cf.bautroixa.tripgether.model.firestore.objects.Visit;
 import cf.bautroixa.tripgether.ui.SplashScreenActivity;
 import cf.bautroixa.tripgether.utils.calculation.LatLngDistance;
+import timber.log.Timber;
 
 public class ModelManager {
-    private static final String TAG = "MainAppManager";
-    private Context mContext;
     private static ModelManager mInstance = null;
-
+    private Context mContext;
     private FirebaseFirestore db;
     private DocumentReference currentUserRef, tripRef = null;
     private User currentUser;
@@ -90,46 +87,47 @@ public class ModelManager {
     }
 
     public void login(final FirebaseAuth mAuth) {
-        if (mAuth.getCurrentUser() != null && mAuth.getUid() != null && (currentUserRef == null || currentUser == null)) {
-            // is logged in
-            FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser mUser = mAuth.getCurrentUser();
+        if (mUser != null) { // is logged in
+            String uid = mUser.getUid();
+            if (currentUserRef != null && !Objects.equals(currentUserRef.getId(), uid) && !currentUser.isRemoved()) {
+                // remove old user object
+                currentUser.onRemove();
+            }
+            currentUserRef = db.collection(Collections.USERS).document(uid);
+            currentUser.withRef(currentUserRef);
             initTokens(mUser);
-            User recentUser = currentUser;
-            currentUserRef = db.collection(Collections.USERS).document(mAuth.getUid());
-            currentUser = new User().withRef(currentUserRef);
             currentUser.initSubManager(baseUsersManager);
+            if (this.discussionsManagers != null) this.discussionsManagers.clear();
             this.discussionsManagers = new DiscussionsManager(baseUsersManager, db.collection(Collections.MESSAGES), currentUserRef);
+            if (this.basePostsManager != null) this.basePostsManager.clear();
             this.basePostsManager = new PostManager<>(Post.class, db.collection(Collections.POSTS), currentUserRef);
 
-            if (recentUser != null) {
-                // restore assigned listener
-                currentUser.restoreListeners(recentUser.getListeners());
-            }
+            // TODO: TEST GC
+            System.gc();
 
-            currentUser.setListenerRegistration(1000, baseUsersManager, new Document.OnValueChangedListener<User>() {
+            currentUser.setListenerRegistration(1000, new Document.OnValueChangedListener<User>() {
                 @Override
                 public void onValueChanged(User user) {
-                    Log.d(TAG, user.getFcmToken() + "currentUser: " + user.getName());
                     if (user.getFcmToken() != null && savedFCM != null && !user.getFcmToken().equals(savedFCM)) {
                         logout();
                     }
-                    if (user.getActiveTripRef() == null) {
+                    DocumentReference activeTripRef = user.getActiveTripRef();
+                    if (activeTripRef == null) {
                         tripRef = null;
                         if (currentTrip != null) currentTrip.onRemove();
-                    } else if ((tripRef == null || !tripRef.getId().equals(user.getActiveTripRef().getId()))) {
-                        // TODO: baseTripsManager.updateRefList(currentUser.getActiveTrips());
-                        tripRef = currentUser.getActiveTripRef();
-                        Trip recentTrip = currentTrip;
-                        currentTrip = new Trip().withRef(tripRef);
-                        if (recentTrip != null)
-                            currentTrip.restoreListeners(recentTrip.getListeners());
-                        currentTrip.setListenerRegistration(1000, baseTripsManager, null);
+                    } else if (tripRef == null || !tripRef.getId().equals(activeTripRef.getId())) {
+                        if (tripRef != null && !currentTrip.isRemoved()) {
+                            // remove old user object
+                            currentTrip.onRemove();
+                        }
+                        tripRef = activeTripRef;
+                        currentTrip.withRef(tripRef);
+                        currentTrip.setListenerRegistration(1000, null);
                         currentTrip.initSubManager(baseUsersManager, currentUser);
-                        if (recentTrip != null) currentTrip.restoreSubManagerListeners(recentTrip);
                     }
                 }
             });
-        } else {
         }
     }
 
@@ -149,19 +147,19 @@ public class ModelManager {
             @Override
             public void onComplete(@NonNull Task<InstanceIdResult> task) {
                 if (!task.isSuccessful() || task.getResult() == null) {
-                    Log.e(TAG, "get FCM token failed failed", task.getException());
+                    Timber.e(task.getException(), "get FCM token failed failed");
                     return;
                 }
                 savedFCM = task.getResult().getToken();
                 currentUser.sendUpdate(null, User.FCM_TOKEN, savedFCM);
-                Log.d(TAG, "init FCM token = " + savedFCM);
+                Timber.d("init FCM token = %s", savedFCM);
             }
         });
         mUser.getIdToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
             public void onComplete(@NonNull Task<GetTokenResult> task) {
                 if (task.isSuccessful()) {
-                    Log.d(TAG, "init token = " + task.getResult().getToken());
+                    Timber.d("init token = %s", task.getResult().getToken());
                 }
             }
         });
@@ -214,22 +212,6 @@ public class ModelManager {
         String tripDiscussionId = currentTrip.getDiscussionRef().getId();
         discussionsManagers.get(tripDiscussionId).getMessagesManager().create(batch, new Message(currentUserRef, "đang yêu cầu trợ giúp: " + sosRequest.getDescription()));
         return batch.commit();
-    }
-
-    public Task<Void> sendCheckIn() {
-        return currentTrip.getActiveCheckpoint().continueWithTask(new Continuation<Checkpoint, Task<Void>>() {
-            @Override
-            public Task<Void> then(@NonNull Task<Checkpoint> task) throws Exception {
-                if (task.isSuccessful()) {
-                    Checkpoint activeCheckpoint = task.getResult();
-                    if (isReadyToCheckIn(activeCheckpoint)) {
-                        return activeCheckpoint.getVisitsManager().create(new Visit().withRef(currentUser.getRef()));
-                    }
-                    throw new Exception("User not ready to check in");
-                }
-                throw task.getException();
-            }
-        });
     }
 
     public User getCurrentUser() {

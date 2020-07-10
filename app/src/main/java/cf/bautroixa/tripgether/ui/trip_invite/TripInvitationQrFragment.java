@@ -24,8 +24,8 @@ import java.util.Objects;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
-import cf.bautroixa.tripgether.presenter.TripInvitationQrPresenter;
-import cf.bautroixa.tripgether.presenter.impl.TripInvitationQrPresenterImpl;
+import cf.bautroixa.tripgether.presenter.trip.TripInvitationQrPresenter;
+import cf.bautroixa.tripgether.presenter.trip.TripInvitationQrPresenterImpl;
 import cf.bautroixa.tripgether.utils.IntentHelper;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
 

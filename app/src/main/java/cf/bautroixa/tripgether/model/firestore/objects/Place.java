@@ -1,5 +1,6 @@
 package cf.bautroixa.tripgether.model.firestore.objects;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.GeoPoint;
 
 import cf.bautroixa.tripgether.model.firestore.core.Document;
@@ -12,18 +13,18 @@ public class Place extends Document {
     public Place() {
     }
 
-    public Place(Checkpoint checkpoint) {
+    public Place(CollectionReference collectionReference, Checkpoint checkpoint) {
         this.placeName = checkpoint.getPlaceName();
         this.placeAddress = checkpoint.getLocation();
         this.coordinate = checkpoint.getCoordinate();
-        this.withId(GeoHashUtils.getGeoPointId(this.coordinate));
+        this.withRef(collectionReference.document(GeoHashUtils.getGeoPointId(this.coordinate)));
     }
 
-    public Place(String placeName, String placeAddress, GeoPoint coordinate) {
+    public Place(CollectionReference collectionReference, String placeName, String placeAddress, GeoPoint coordinate) {
         this.placeName = placeName;
         this.placeAddress = placeAddress;
         this.coordinate = coordinate;
-        this.withId(GeoHashUtils.getGeoPointId(this.coordinate));
+        this.withRef(collectionReference.document(GeoHashUtils.getGeoPointId(this.coordinate)));
     }
 
     @Override

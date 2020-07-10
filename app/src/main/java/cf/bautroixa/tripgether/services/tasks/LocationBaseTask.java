@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 
@@ -23,7 +24,6 @@ import java.util.Objects;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
-import cf.bautroixa.tripgether.model.firestore.core.DocumentsManager;
 import cf.bautroixa.tripgether.model.firestore.core.RefsArrayManager;
 import cf.bautroixa.tripgether.model.firestore.objects.Notification;
 import cf.bautroixa.tripgether.model.firestore.objects.Trip;
@@ -84,8 +84,9 @@ public class LocationBaseTask {
         }
     }
 
-    private static void determinateGetLostStatus(final TaskCompletionSource<Void> taskCompletionSource, final Context context, final SharedPreferences sharedPreferences, ModelManager manager, final User currentUser, Trip activeTrip) {
-        activeTrip.getMembersManager().addOneTimeInitCompleteListener(new RefsArrayManager.OnInitCompleteListener<User>() {
+    private static Task<Void> determinateGetLostStatus(final Context context, final SharedPreferences sharedPreferences, ModelManager manager, final User currentUser, Trip activeTrip) {
+        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+        activeTrip.getMembersManager().waitUntilInitComplete(new RefsArrayManager.OnInitCompleteListener<User>() {
             @Override
             public void onComplete(ArrayList<User> members) {
                 int safeDistance = SPGetLost.getSafeDistance(sharedPreferences);
@@ -100,8 +101,7 @@ public class LocationBaseTask {
                 }
                 // if user get lost
                 long lastLostTimestamp = SPGetLost.getLastLostTime(sharedPreferences);
-                Calendar calendar = Calendar.getInstance();
-                long now = calendar.getTimeInMillis();
+                long now = System.currentTimeMillis();
                 if (lastLostTimestamp == SPGetLost.Defaults.LAST_LOST_TIME) {
                     SPGetLost.setLastLostTime(sharedPreferences, now);
                     lastLostTimestamp = now;
@@ -117,9 +117,9 @@ public class LocationBaseTask {
                 if ((now - lastLostTimestamp) / 1000 / 60 > 30) { // alert team after 30 min
                     String priority = (now - lastLostTimestamp) / 1000 / 60 > 60 ? Notification.Priority.HIGH : Notification.Priority.NORMAL;
                     activeTrip.initSubManager(manager.getBaseUsersManager(), currentUser);
-                    activeTrip.getTripNotificationsManager().create(new TripNotification(context, Notification.TripType.USER_GET_LOST, currentUser, null, priority)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    activeTrip.getTripNotificationsManager().create(new TripNotification(context, Notification.TripType.USER_GET_LOST, currentUser, null, priority)).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                         @Override
-                        public void onComplete(@NonNull Task<Void> task) {
+                        public void onComplete(@NonNull Task<DocumentReference> task) {
                             if (task.isSuccessful()) taskCompletionSource.setResult(null);
                             else taskCompletionSource.setException(task.getException());
                         }
@@ -128,34 +128,33 @@ public class LocationBaseTask {
                 taskCompletionSource.setResult(null);
             }
         });
+        return taskCompletionSource.getTask();
     }
 
     private static Task<Void> doGetLostTask(final Context context, final ModelManager manager, final SharedPreferences sharedPreferences) {
-        final TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
         if (!SPGetLost.isGetLostDetectorOn(sharedPreferences)) {
-            taskCompletionSource.setResult(null);
-            return taskCompletionSource.getTask();
+            TaskHelper.getCompletedTask(null);
         }
-        manager.getBaseUsersManager().oneTimeListenGet(manager.getCurrentUser().getId(), new DocumentsManager.OnDocumentGotListener<User>() {
+        return manager.getBaseUsersManager().requestGet(manager.getCurrentUser().getId()).continueWithTask(new Continuation<User, Task<Void>>() {
             @Override
-            public void onGot(final User currentUser) {
-                if (currentUser.getSpeed() > 5.5554f) { // TODO : drive faster than riding speed 20km/h => pause
-                    taskCompletionSource.setResult(null);
-                    return;
+            public Task<Void> then(@NonNull Task<User> task) throws Exception {
+                assert task.getResult() != null;
+                User currentUser = task.getResult();
+                if (currentUser.getSpeed() > 5.5554f) {
+                    throw new Exception("[GET LOST PAUSED] User is driving too fast > 20km/h");
                 }
-                if (currentUser.getActiveTripRef() != null) {
-                    manager.getBaseTripsManager().oneTimeListenGet(currentUser.getActiveTripRef().getId(), new DocumentsManager.OnDocumentGotListener<Trip>() {
-                        @Override
-                        public void onGot(Trip trip) {
-                            determinateGetLostStatus(taskCompletionSource, context, sharedPreferences, manager, currentUser, trip);
-                        }
-                    });
-                } else {
-                    taskCompletionSource.setResult(null);
+                if (currentUser.getActiveTripRef() == null) {
+                    throw new Exception("[GET LOST PAUSED] No active trip");
                 }
+                return manager.getBaseTripsManager().requestGet(currentUser.getActiveTripRef().getId()).continueWithTask(new Continuation<Trip, Task<Void>>() {
+                    @Override
+                    public Task<Void> then(@NonNull Task<Trip> task) throws Exception {
+                        assert task.getResult() != null;
+                        return determinateGetLostStatus(context, sharedPreferences, manager, currentUser, task.getResult());
+                    }
+                });
             }
         });
-        return taskCompletionSource.getTask();
     }
 
     public static Task<Void> onNewLocation(final Context context, final SharedPreferences sharedPreferences, final Location lastLocation) {

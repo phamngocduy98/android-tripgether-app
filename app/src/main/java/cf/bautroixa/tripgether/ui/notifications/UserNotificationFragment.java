@@ -65,6 +65,7 @@ public class UserNotificationFragment extends Fragment implements ActivityNaviga
         userNotifications = new SortedList<>(UserNotification.class, new SortedListAdapterCallback<UserNotification>(adapter) {
             @Override
             public int compare(UserNotification o1, UserNotification o2) {
+                if(o1.getId().equals(o2.getId())) return 0;
                 return -o1.getTime().compareTo(o2.getTime());
             }
 

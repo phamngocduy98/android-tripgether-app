@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
-import cf.bautroixa.tripgether.presenter.impl.CreateTripPresenterImpl;
+import cf.bautroixa.tripgether.presenter.trip.CreateTripPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.CheckpointVH;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
 

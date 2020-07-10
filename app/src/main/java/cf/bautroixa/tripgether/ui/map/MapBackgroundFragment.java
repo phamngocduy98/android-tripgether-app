@@ -15,11 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,17 +45,17 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.interfaces.NavigationInterface;
 import cf.bautroixa.tripgether.interfaces.NavigationInterfaceOwner;
 import cf.bautroixa.tripgether.model.constant.Collections;
-import cf.bautroixa.tripgether.model.firestore.core.Document;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.sharedpref.SPMapStyle;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefHelper;
-import cf.bautroixa.tripgether.presenter.MapPresenter;
-import cf.bautroixa.tripgether.presenter.impl.MapPresenterImpl;
+import cf.bautroixa.tripgether.presenter.bottomspace.MapPresenter;
+import cf.bautroixa.tripgether.presenter.bottomspace.MapPresenterImpl;
 import cf.bautroixa.tripgether.utils.LocationHelper;
 import cf.bautroixa.tripgether.utils.calculation.PixelDPConverter;
 import cf.bautroixa.tripgether.utils.ui_utils.CreateMarker;
 import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import timber.log.Timber;
 
 public class MapBackgroundFragment extends Fragment implements MapPresenter.View, NavigationInterfaceOwner, OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
     private static final String TAG = "MapBackgroundFragment";
@@ -69,8 +69,8 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
     private boolean isMapLoaded = false, focusMyLocation = true;
     private int screenWidth, screenHeight, markerZIndex = 1;
     // Views
-    private HashMap<String, MarkerViewHolder> markerViewHolders;
-    private HashMap<String, Marker> markers;
+    private HashMap<String, UserMarkerViewHolder> userMarkerViews;
+    private HashMap<String, CheckpointMarkerViewHolder> checkpointMarkerViews;
 
     private SupportMapFragment ggMapFragment;
     private GoogleMap mMap;
@@ -79,8 +79,8 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
 
 
     public MapBackgroundFragment() {
-        this.markerViewHolders = new HashMap<>();
-        this.markers = new HashMap<>();
+        this.userMarkerViews = new HashMap<>();
+        this.checkpointMarkerViews = new HashMap<>();
     }
 
     @Override
@@ -179,66 +179,36 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
      */
 
     @Nullable
-    public Marker createUserMarker(final User user) {
+    public UserMarkerViewHolder createUserMarker(final User user) {
         final Context context = requireContext();
         if (!isMapLoaded || user == null || user.getLatLng() == null) return null;
         final View markerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.map_marker_user, null);
-        MarkerViewHolder markerViewHolder = new MarkerViewHolder(markerView);
-        markerViewHolders.put(getMarkerId(user), markerViewHolder);
-
-        markerViewHolder.bind(user);
+        UserMarkerViewHolder userMarkerViewHolder = new UserMarkerViewHolder(markerView);
+        userMarkerViewHolder.bind(user);
         final Marker marker = mMap.addMarker(new MarkerOptions().position(user.getLatLng())
                 .title(user.getId())
                 .snippet(Collections.USERS)
                 .icon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(context, markerView, 52))));
-        if (user.getAvatar() != null && !user.getAvatar().equals(User.DEFAULT_AVATAR)) {
-            ImageHelper.loadCircleImage(user.getAvatar(), new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    markerViewHolder.imgSos.setImageBitmap(bitmap);
-                    Log.d(TAG, "loaded marker image completed");
-                    updateMarker(marker, markerViewHolder);
-                }
-
-                @Override
-                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                    Log.d(TAG, "loaded marker image failed");
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            });
-        }
-        markers.put(getMarkerId(user), marker);
-        return marker;
-    }
-
-    @Override
-    public void updateMarker(Marker marker, MarkerViewHolder markerViewHolder) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getContext(), "loaded", Toast.LENGTH_SHORT).show();
-                marker.setIcon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), markerViewHolder.markerView, 52)));
-            }
-        }, 2000);
+        userMarkerViewHolder.setMarker(marker);
+        userMarkerViewHolder.updateAvatar(user);
+        userMarkerViews.put(user.getId(), userMarkerViewHolder);
+        return userMarkerViewHolder;
     }
 
     @Nullable
     @Override
-    public Marker createCheckpointMarker(final Checkpoint checkpoint, final int checkpointIndex) {
+    public CheckpointMarkerViewHolder createCheckpointMarker(final Checkpoint checkpoint, final int checkpointIndex) {
         if (!isMapLoaded || checkpoint == null || checkpoint.getLatLng() == null) return null;
+        final Context context = requireContext();
+        final View markerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.map_marker_checkpoint_selected, null);
+        CheckpointMarkerViewHolder checkpointMarkerViewHolder = new CheckpointMarkerViewHolder(markerView);
+        checkpointMarkerViewHolder.bind(checkpointIndex);
         Marker marker = mMap.addMarker(new MarkerOptions().position(checkpoint.getLatLng())
-                .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS).icon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), R.layout.map_marker_checkpoint_selected, 30, new CreateMarker.ILayoutEditor() {
-                    @Override
-                    public void edit(View view) {
-                        TextView tvName = view.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
-                        tvName.setText(String.valueOf(checkpointIndex + 1));
-                    }
-                })))));
-        markers.put(getMarkerId(checkpoint), marker);
-        return marker;
+                .title(checkpoint.getId()).snippet(Collections.CHECKPOINTS)
+                .icon((BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(context, markerView, 52)))));
+        checkpointMarkerViewHolder.setMarker(marker);
+        checkpointMarkerViews.put(checkpoint.getId(), checkpointMarkerViewHolder);
+        return checkpointMarkerViewHolder;
     }
 
     public Marker createTempMarker(LatLng latLng, String title, String snippet) {
@@ -389,37 +359,141 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
     }
 
     @Override
-    public MarkerViewHolder getMarkerView(Document document) {
-        return markerViewHolders.get(getMarkerId(document));
+    public UserMarkerViewHolder getUserMarkerView(User user) {
+        return userMarkerViews.get(user.getId());
     }
 
     @Override
-    @Nullable
-    public Marker getMarker(Document document) {
-        return markers.get(getMarkerId(document));
+    public CheckpointMarkerViewHolder getCheckpointMarkerView(Checkpoint checkpoint) {
+        return checkpointMarkerViews.get(checkpoint.getId());
     }
 
-    public String getMarkerId(Document document) {
-        return document.getClass().getSimpleName() + document.getId();
+    @Override
+    public void clearAllUserMarker() {
+        UserMarkerViewHolder[] userMarkerViewValues = new UserMarkerViewHolder[userMarkerViews.size()];
+        userMarkerViews.values().toArray(userMarkerViewValues);
+        for (int i = 0; i < userMarkerViewValues.length; i++) {
+            try {
+                userMarkerViewValues[i].marker.remove();
+            } catch (Exception e) {
+                Timber.e(e);
+            }
+        }
     }
 
-    public class MarkerViewHolder {
-        public View markerView;
+    @Override
+    public void clearAllCheckpointMarker() {
+        CheckpointMarkerViewHolder[] checkpointMarkerViewHolders = new CheckpointMarkerViewHolder[checkpointMarkerViews.size()];
+        checkpointMarkerViews.values().toArray(checkpointMarkerViewHolders);
+        for (int i = 0; i < checkpointMarkerViewHolders.length; i++) {
+            try {
+                checkpointMarkerViewHolders[i].marker.remove();
+            } catch (Exception e) {
+                Timber.e(e);
+            }
+        }
+    }
+
+    public class UserMarkerViewHolder extends RecyclerView.ViewHolder{
         public ImageView markerBg, markerImage, imgSos;
         public TextView tvName;
+        @Nullable
+        public Marker marker;
+        private User savedUser;
 
-        public MarkerViewHolder(View markerView) {
-            this.markerView = markerView;
-            markerBg = markerView.findViewById(R.id.img_bg_map_marker_user);
-            markerImage = markerView.findViewById(R.id.img_avatar_map_marker_user);
-            imgSos = markerView.findViewById(R.id.img_sos_map_marker_user);
-            tvName = markerView.findViewById(R.id.tv_name_map_marker_user);
+        public UserMarkerViewHolder(View itemView) {
+            super(itemView);
+            markerBg = itemView.findViewById(R.id.img_bg_map_marker_user);
+            markerImage = itemView.findViewById(R.id.img_avatar_map_marker_user);
+            imgSos = itemView.findViewById(R.id.img_sos_map_marker_user);
+            tvName = itemView.findViewById(R.id.tv_name_map_marker_user);
         }
 
         public void bind(User user) {
             boolean hasSos = user.getSosRequest() != null && !user.getSosRequest().isResolved();
             imgSos.setVisibility(hasSos ? View.VISIBLE : View.INVISIBLE);
             tvName.setText(user.getShortName());
+            savedUser = user;
+        }
+
+        public void setMarker(@NonNull Marker marker) {
+            this.marker = marker;
+        }
+
+        public void updateAvatar(User user){
+            if (user.getAvatar() != null && !user.getAvatar().equals(User.DEFAULT_AVATAR)) {
+                if (savedUser != null && Objects.equals(savedUser.getAvatar(), user.getAvatar())) return;
+                ImageHelper.loadCircleImage(user.getAvatar(), new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        markerImage.setImageBitmap(bitmap);
+                        Log.d(TAG, "loaded marker image completed");
+                        updateMarker();
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                        Log.d(TAG, "loaded marker image failed");
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                    }
+                });
+            }
+        }
+
+        public void updateMarker() {
+            if (marker == null) {
+                Timber.e("try to update null marker");
+                return;
+            }
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), itemView, 52)));
+                    } catch (Exception e) {
+                        Timber.e(e, "marker#setIcon of removed marker (not null)");
+                    }
+                }
+            }, 2000);
+        }
+    }
+
+    public class CheckpointMarkerViewHolder extends RecyclerView.ViewHolder {
+        public View markerView;
+        public TextView tvName;
+        public Marker marker;
+
+        public CheckpointMarkerViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvName = itemView.findViewById(R.id.tv_name_map_marker_checkpoint_selected);
+        }
+
+        public void bind(int checkpointIndex) {
+            tvName.setText(String.valueOf(checkpointIndex + 1));
+        }
+
+        public void setMarker(Marker marker) {
+            this.marker = marker;
+        }
+
+        public void updateMarker() {
+            if (marker == null) {
+                Timber.e("try to update null marker");
+                return;
+            }
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(CreateMarker.createBitmapFromLayout(requireContext(), markerView, 52)));
+                    } catch (Exception e) {
+                        Timber.e(e, "marker#setIcon of removed marker (not null)");
+                    }
+                }
+            }, 2000);
         }
     }
 }

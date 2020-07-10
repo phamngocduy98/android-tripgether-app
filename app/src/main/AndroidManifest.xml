@@ -24,7 +24,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".ui.settings.GotLostSettingActivity"></activity>
         <activity android:name=".ui.posts.PostCreatorActivity" />
-        <activity android:name=".ui.auth.PhoneVerificationActivity" />
+        <activity android:name=".ui.user.PhoneVerificationActivity" />
         <activity android:name=".ui.trip.WaitingRoomActivity" />
         <activity
             android:name=".ui.trip_view.TripActivity"
@@ -106,7 +106,7 @@
             android:theme="@style/NoActionBar.NoStatusBar" />
         <activity android:name=".ui.profile.ChangePasswordActivity" />
         <activity
-            android:name=".ui.auth.ForgotPasswordActivity"
+            android:name=".ui.user.ForgotPasswordActivity"
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".ui.profile.MyProfileActivity"
@@ -115,7 +115,7 @@
             android:name=".ui.profile.DetailProfileActivity"
             android:theme="@style/NoActionBar" />
         <activity
-            android:name=".ui.auth.RegisterActivity"
+            android:name=".ui.user.RegisterActivity"
             android:theme="@style/NoActionBar"
             android:windowSoftInputMode="adjustResize" />
 
@@ -130,7 +130,7 @@
         <service android:name=".services.alarm.AlarmService" />
 
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name=".ui.user.LoginActivity"
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".ui.trip_invite.TripInvitationActivity"

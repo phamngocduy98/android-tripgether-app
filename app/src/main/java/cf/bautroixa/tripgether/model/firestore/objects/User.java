@@ -62,17 +62,105 @@ public class User extends Document implements LatLngOwner {
             this.userNotificationsManager = new NotificationsManager<>(UserNotification.class, ref.collection(Collections.NOTIFICATIONS), this);
             setSubManagerAvailable(true);
         }
-        if (this.friends != null) {
-            this.friendsManager.updateRefList(this.friends);
+
+        if (this.friends != null) friendsManager.updateRefList(this.friends);
+        if (this.friendRequests != null) friendRequestsManager.updateRefList(this.friendRequests);
+        if (!userNotificationsManager.isListening()){
+            userNotificationsManager.setParentDocument(this);
+            userNotificationsManager.startListening(ref.collection(Collections.NOTIFICATIONS));
         }
-        if (this.friendRequests != null) {
-            this.friendRequestsManager.updateRefList(this.friendRequests);
+    }
+
+    @Exclude
+    protected void update(Document document) {
+        User user = (User) document;
+        this.name = user.name;
+        this.avatar = user.avatar;
+        this.phoneNumber = user.phoneNumber;
+        this.email = user.email;
+
+        this.currentCoord = user.currentCoord;
+        this.latLng = new LatLng(currentCoord.getLatitude(), currentCoord.getLongitude());
+        this.currentLocation = user.currentLocation;
+
+        this.sosRequest = user.sosRequest;
+        this.speed = user.speed;
+        this.battery = user.battery;
+
+        this.activeTripRef = user.activeTripRef;
+
+        this.setFriends(user.friends);
+        this.setFriendRequests(user.friendRequests);
+        this.sentFriendRequests = user.sentFriendRequests;
+
+        this.fcmToken = user.fcmToken;
+    }
+
+    @Exclude
+    @Override
+    public void onRemove() {
+        super.onRemove();
+        if (friendsManager != null) friendsManager.clear();
+        if (userNotificationsManager != null) userNotificationsManager.clear();
+        setSubManagerAvailable(false);
+    }
+
+    @Nullable
+    @Exclude
+    public RefsArrayManager<User> getFriendsManager() {
+        return friendsManager;
+    }
+
+    @Exclude
+    @Nullable
+    public RefsArrayManager<User> getFriendRequestsManager() {
+        return friendRequestsManager;
+    }
+
+    @Exclude
+    @NonNull
+    public NotificationsManager<UserNotification> getUserNotificationsManager() {
+        if (userNotificationsManager == null)
+            userNotificationsManager = new NotificationsManager<>(UserNotification.class, ref.collection(Collections.NOTIFICATIONS), this);
+        return userNotificationsManager;
+    }
+
+    @Exclude
+    public String getShortName() {
+        String[] names = name.split(" ");
+        if (names.length >= 2) {
+            return "" + names[0].charAt(0) + names[names.length - 1].charAt(0);
+        } else {
+            if (name.length() <= 2) return name;
+            return name.substring(0, 2);
         }
+    }
+
+    @Exclude
+    public LatLng getLatLng() {
+        if (this.latLng == null) {
+            synchronized (this) {
+                if (this.latLng == null && this.currentCoord != null) {
+                    this.latLng = new LatLng(this.currentCoord.getLatitude(), this.currentCoord.getLongitude());
+                }
+            }
+        }
+        return this.latLng;
+    }
+
+    @Exclude
+    public boolean isOnline() {
+        if (lastUpdate != null) {
+            return System.currentTimeMillis() - lastUpdate.toDate().getTime() < 5 * 60 * 1000;
+        }
+        return false;
     }
 
     public String getName() {
         return name;
     }
+
+    // GETTER AND SETTER
 
     public void setName(String name) {
         this.name = name;
@@ -180,10 +268,12 @@ public class User extends Document implements LatLngOwner {
         return friends;
     }
 
+    // SPECIAL GETTER / SETTER
     public void setFriends(List<DocumentReference> friends) {
         this.friends = friends;
-        if (isSubManagerAvailable()) this.friendsManager.updateRefList(friends);
-
+        if (this.friendsManager != null && friends != null) {
+            this.friendsManager.updateRefList(friends);
+        }
     }
 
     public List<DocumentReference> getFriendRequests() {
@@ -192,7 +282,8 @@ public class User extends Document implements LatLngOwner {
 
     public void setFriendRequests(List<DocumentReference> friendRequests) {
         this.friendRequests = friendRequests;
-        if (isSubManagerAvailable()) this.friendRequestsManager.updateRefList(friendRequests);
+        if (this.friendRequestsManager != null && friendRequests != null)
+            this.friendRequestsManager.updateRefList(friendRequests);
     }
 
     public List<DocumentReference> getSentFriendRequests() {
@@ -210,95 +301,6 @@ public class User extends Document implements LatLngOwner {
 
     public void setSosRequest(SosRequest sosRequest) {
         this.sosRequest = sosRequest;
-    }
-
-    @Nullable
-    @Exclude
-    public RefsArrayManager<User> getFriendsManager() {
-        return friendsManager;
-    }
-
-    @Nullable
-    @Exclude
-    public RefsArrayManager<User> getFriendRequestsManager() {
-        return friendRequestsManager;
-    }
-
-
-    @Exclude
-    @NonNull
-    public NotificationsManager<UserNotification> getUserNotificationsManager() {
-        if (userNotificationsManager == null)
-            userNotificationsManager = new NotificationsManager<>(UserNotification.class, ref.collection(Collections.NOTIFICATIONS), this);
-        return userNotificationsManager;
-    }
-
-    @Exclude
-    public String getShortName() {
-        String[] names = getName().split(" ");
-        if (names.length >= 2) {
-            return "" + names[0].charAt(0) + names[names.length - 1].charAt(0);
-        } else {
-            return getName();
-        }
-    }
-
-    @Exclude
-    public LatLng getLatLng() {
-        if (this.latLng == null) {
-            synchronized (this) {
-                if (this.latLng == null && this.currentCoord != null) {
-                    this.latLng = new LatLng(this.currentCoord.getLatitude(), this.currentCoord.getLongitude());
-                }
-            }
-        }
-        return this.latLng;
-    }
-
-    @Exclude
-    protected void update(Document document) {
-        User user = (User) document;
-        this.name = user.name;
-        this.avatar = user.avatar;
-        this.phoneNumber = user.phoneNumber;
-        this.email = user.email;
-
-        this.currentCoord = user.currentCoord;
-        this.latLng = new LatLng(currentCoord.getLatitude(), currentCoord.getLongitude());
-        this.currentLocation = user.currentLocation;
-
-        this.sosRequest = user.sosRequest;
-        this.speed = user.speed;
-        this.battery = user.battery;
-
-        this.activeTripRef = user.activeTripRef;
-
-        this.friends = user.friends;
-        this.friendRequests = user.friendRequests;
-        this.sentFriendRequests = user.sentFriendRequests;
-        if (this.friends != null && this.friendsManager != null)
-            this.friendsManager.updateRefList(friends);
-        if (this.friendRequests != null && this.friendRequestsManager != null)
-            this.friendRequestsManager.updateRefList(friendRequests);
-
-        this.fcmToken = user.fcmToken;
-    }
-
-    @Exclude
-    @Override
-    public void onRemove() {
-        super.onRemove();
-        if (friendsManager != null) friendsManager.clear();
-        if (friendRequestsManager != null) friendRequestsManager.clear();
-        if (userNotificationsManager != null) userNotificationsManager.clear();
-    }
-
-    @Exclude
-    public boolean isOnline() {
-        if (lastUpdate != null) {
-            return System.currentTimeMillis() - lastUpdate.toDate().getTime() < 5 * 60 * 1000;
-        }
-        return false;
     }
 
     @Override

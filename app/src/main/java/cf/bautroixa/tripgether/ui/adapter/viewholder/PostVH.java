@@ -23,8 +23,8 @@ import cf.bautroixa.tripgether.model.firestore.objects.Post;
 import cf.bautroixa.tripgether.model.repo.RepositoryManager;
 import cf.bautroixa.tripgether.model.repo.UserRepository;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
-import cf.bautroixa.tripgether.presenter.PostPresenter;
-import cf.bautroixa.tripgether.presenter.impl.PostPresenterImpl;
+import cf.bautroixa.tripgether.presenter.post.PostPresenter;
+import cf.bautroixa.tripgether.presenter.post.PostPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.PostPlaceAdapter;
 import cf.bautroixa.tripgether.ui.dialogs.PlaceViewDialogFragment;
 import cf.bautroixa.tripgether.ui.dialogs.PostCommentsDialogFragment;
@@ -81,6 +81,8 @@ public class PostVH extends RecyclerView.ViewHolder implements PostPresenter.Vie
             tvName.setText(userPublic.getName());
         } else {
             // TODO: loading animation
+            tvName.setText("Removed User");
+            avatarVH.bind(null, "RU");
         }
 
         tvTime.setText(DateFormatter.format(post.getTime()));

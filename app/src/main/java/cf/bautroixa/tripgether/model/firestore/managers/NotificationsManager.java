@@ -1,5 +1,6 @@
 package cf.bautroixa.tripgether.model.firestore.managers;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -12,6 +13,7 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 
 import cf.bautroixa.tripgether.model.firestore.core.CollectionManager;
+import cf.bautroixa.tripgether.model.firestore.core.Document;
 import cf.bautroixa.tripgether.model.firestore.objects.Notification;
 import cf.bautroixa.tripgether.model.firestore.objects.TripNotification;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
@@ -19,26 +21,11 @@ import cf.bautroixa.tripgether.model.firestore.objects.UserNotification;
 
 public class NotificationsManager<T extends Notification> extends CollectionManager<T> {
     int notSeenCount = 0;
-    @Nullable
-    User notificationOwner;
     ArrayList<OnNotificationCountChanged> onNotificationCountChangeds;
 
 
-    public NotificationsManager(Class<T> itemClass, @Nullable User notificationOwner) {
-        super(itemClass);
-        this.notificationOwner = notificationOwner;
-        this.onNotificationCountChangeds = new ArrayList<>();
-    }
-
-    public NotificationsManager(Class<T> itemClass, CollectionReference collectionReference, @Nullable User notificationOwner) {
-        super(itemClass, collectionReference);
-        this.notificationOwner = notificationOwner;
-        this.onNotificationCountChangeds = new ArrayList<>();
-    }
-
-    public NotificationsManager(Class<T> itemClass, CollectionReference collectionReference, Query query, @Nullable User notificationOwner) {
-        super(itemClass, collectionReference, query);
-        this.notificationOwner = notificationOwner;
+    public NotificationsManager(Class<T> itemClass, CollectionReference collectionReference, User parentDocument) {
+        super(itemClass, collectionReference, parentDocument);
         this.onNotificationCountChangeds = new ArrayList<>();
     }
 
@@ -49,11 +36,12 @@ public class NotificationsManager<T extends Notification> extends CollectionMana
     @Override
     public void add(String id, T data) {
         super.add(id, data);
-        if (notificationOwner != null) {
+        if (parentDocument != null) {
             if (data instanceof TripNotification) {
                 TripNotification tripNotification = (TripNotification) data;
-                if (!tripNotification.getSeenList().contains(notificationOwner.getRef())) {
+                if (!tripNotification.getSeenList().contains(parentDocument.getRef())) {
                     notSeenCount++;
+                    tripNotification.setSeen(true);
                     notifyNotificationCountChanged();
                 }
 
@@ -71,10 +59,10 @@ public class NotificationsManager<T extends Notification> extends CollectionMana
     @Override
     public void update(int index, T data) {
         super.update(index, data);
-        if (notificationOwner != null) {
+        if (parentDocument != null) {
             if (data instanceof TripNotification) {
                 TripNotification tripNotification = (TripNotification) data;
-                if (tripNotification.getSeenList().contains(notificationOwner.getRef())) {
+                if (tripNotification.getSeenList().contains(parentDocument.getRef())) {
                     notSeenCount--;
                     tripNotification.setSeen(true);
                     notifyNotificationCountChanged();

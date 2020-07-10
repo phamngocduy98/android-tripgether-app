@@ -40,9 +40,9 @@ public class BasePlaceManager extends CollectionManager<Place> {
                     return TaskHelper.getCompletedTask(task.getResult());
                 } else {
                     final DocumentReference newPlaceRef = getDocumentReference(place.getId());
-                    return create(place.withRef(newPlaceRef)).continueWith(new Continuation<Void, DocumentReference>() {
+                    return create(place.withRef(newPlaceRef)).continueWith(new Continuation<DocumentReference, DocumentReference>() {
                         @Override
-                        public DocumentReference then(@NonNull Task<Void> task) throws Exception {
+                        public DocumentReference then(@NonNull Task<DocumentReference> task) throws Exception {
                             if (task.isSuccessful()) {
                                 geoFire.setLocation(newPlaceRef.getId(), place.getCoordinate().getLatitude(), place.getCoordinate().getLongitude());
                                 return newPlaceRef;

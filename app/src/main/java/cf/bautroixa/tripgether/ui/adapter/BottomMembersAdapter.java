@@ -30,7 +30,7 @@ import cf.bautroixa.tripgether.model.firestore.objects.SosRequest;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.firestore.objects.Visit;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
-import cf.bautroixa.tripgether.presenter.impl.BottomMembersPresenterImpl;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomMembersPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.chat.ChatActivity;
 import cf.bautroixa.tripgether.ui.dialogs.SosRequestViewDialogFragment;

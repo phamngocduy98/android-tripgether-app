@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import cf.bautroixa.tripgether.R;
-import cf.bautroixa.tripgether.presenter.TabExplorePresenter;
-import cf.bautroixa.tripgether.presenter.impl.TabExplorePresenterImpl;
+import cf.bautroixa.tripgether.presenter.post.TabExplorePresenter;
+import cf.bautroixa.tripgether.presenter.post.TabExplorePresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.PostAdapter;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.AvatarVH;
 import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;

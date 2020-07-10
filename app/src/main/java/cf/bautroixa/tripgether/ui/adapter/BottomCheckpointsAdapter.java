@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.SortedList;
 import com.gauravbhola.ripplepulsebackground.RipplePulseLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ import cf.bautroixa.tripgether.interfaces.NavigationInterface;
 import cf.bautroixa.tripgether.model.firestore.core.DocumentsManager;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
 import cf.bautroixa.tripgether.model.firestore.objects.Visit;
-import cf.bautroixa.tripgether.presenter.impl.BottomCheckpointsPresenterImpl;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomCheckpointsPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
 import cf.bautroixa.tripgether.ui.theme.ViewAnim;
@@ -200,9 +201,9 @@ public class BottomCheckpointsAdapter extends RecyclerView.Adapter<BottomCheckpo
                 @Override
                 public void onClick(View v) {
                     ViewAnim.toggleLoading(btnCheckIn.getContext(), btnCheckIn, true, "Đang gửi");
-                    bottomCheckpointsPresenter.sendCheckIn().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    bottomCheckpointsPresenter.sendCheckIn().addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                         @Override
-                        public void onComplete(@NonNull Task<Void> task) {
+                        public void onComplete(@NonNull Task<DocumentReference> task) {
                             if (task.isSuccessful()) {
                                 ViewAnim.toggleLoading(btnCheckIn.getContext(), btnCheckIn, false, "Bạn đã có mặt!");
                             }

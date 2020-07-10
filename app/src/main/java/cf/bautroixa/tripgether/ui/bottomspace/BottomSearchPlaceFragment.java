@@ -26,9 +26,9 @@ import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
 import cf.bautroixa.tripgether.model.types.GeocodingResult;
 import cf.bautroixa.tripgether.model.types.SearchResult;
-import cf.bautroixa.tripgether.presenter.BottomSearchPlacePresenter;
-import cf.bautroixa.tripgether.presenter.MapPresenter;
-import cf.bautroixa.tripgether.presenter.impl.BottomSearchPlacePresenterImpl;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomSearchPlacePresenter;
+import cf.bautroixa.tripgether.presenter.bottomspace.MapPresenter;
+import cf.bautroixa.tripgether.presenter.bottomspace.BottomSearchPlacePresenterImpl;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
 
 public class BottomSearchPlaceFragment extends Fragment implements BottomSearchPlacePresenter.View, MapBackgroundControllable {

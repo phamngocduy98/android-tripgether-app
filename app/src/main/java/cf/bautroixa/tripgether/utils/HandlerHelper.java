@@ -27,6 +27,19 @@ public class HandlerHelper {
         });
     }
 
+    public HandlerHelper(Runnable callback) {
+        this.mHandler = new Handler();
+        this.mCallback = callback;
+    }
+
+    public HandlerHelper() {
+        this.mHandler = new Handler();
+    }
+
+    public void setCallback(Runnable callback) {
+        this.mCallback = callback;
+    }
+
     public void postDelayed(long delayMillis) {
         mHandler.postDelayed(mCallback, delayMillis);
     }

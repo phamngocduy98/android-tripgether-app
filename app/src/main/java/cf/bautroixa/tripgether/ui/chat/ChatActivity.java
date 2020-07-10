@@ -20,7 +20,7 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Discussion;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.presenter.ChatPresenter;
-import cf.bautroixa.tripgether.presenter.impl.ChatPresenterImpl;
+import cf.bautroixa.tripgether.presenter.ChatPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.ChatAdapter;
 import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
 import cf.bautroixa.tripgether.ui.theme.LoadingDialogFragment;

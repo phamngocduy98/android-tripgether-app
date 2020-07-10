@@ -22,25 +22,11 @@ import cf.bautroixa.tripgether.utils.calculation.NumberGenerator;
 
 public class Trip extends Document {
     @Exclude
-    public static final String NO_TRIP = "noTrip";
+    public static final String NAME = "name", LEADER = "leader", MEMBERS = "members", ACTIVE_CHECKPOINT_REF = "activeCheckpointRef";
     @Exclude
-    public static final String NAME = "name";
+    public static final String WAITING_ROOM = "waitingRoom", INVITE_ROOM = "inviteRoom", JOIN_CODE = "joinCode";
     @Exclude
-    public static final String LEADER = "leader";
-    @Exclude
-    public static final String MEMBERS = "members";
-    @Exclude
-    public static final String WAITING_ROOM = "waitingRoom";
-    @Exclude
-    public static final String INVITE_ROOM = "inviteRoom";
-    @Exclude
-    public static final String JOIN_CODE = "joinCode";
-    @Exclude
-    public static final String JOIN_CODE_VALUE = "joinCode.value";
-    @Exclude
-    public static final String JOIN_CODE_CREATE_TIME = "joinCode.createdTime";
-    @Exclude
-    public static final String ACTIVE_CHECKPOINT_REF = "activeCheckpointRef";
+    public static final String JOIN_CODE_VALUE = "joinCode.value", JOIN_CODE_CREATE_TIME = "joinCode.createdTime";
 
     @Exclude
     @Nullable
@@ -57,9 +43,9 @@ public class Trip extends Document {
     private List<DocumentReference> members, waitingRoom, inviteRoom;
     private DocumentReference discussionRef;
     @Nullable
-    private JoinCode joinCode;
-    @Nullable
     private DocumentReference activeCheckpointRef;
+    @Nullable
+    private JoinCode joinCode;
 
     public Trip() {
         this.withClass(Trip.class);
@@ -84,20 +70,20 @@ public class Trip extends Document {
 
     @Exclude
     public void initSubManager(RefsArrayManager<User> baseUsersManager, User notificationOwner) {
+        // SubManager is independence of its parents
         if (!isSubManagerAvailable()) {
             membersManager = new RefsArrayManager<>(User.class, baseUsersManager);
             checkpointsManager = new CollectionManager<>(Checkpoint.class, ref.collection(Collections.CHECKPOINTS));
             tripNotificationsManager = new NotificationsManager<>(TripNotification.class, ref.collection(Collections.NOTIFICATIONS), notificationOwner);
             setSubManagerAvailable(true);
         }
-    }
-
-    @Exclude
-    public void restoreSubManagerListeners(Trip oldTrip) {
-        if (isSubManagerAvailable() && oldTrip.isSubManagerAvailable()) {
-            membersManager.restoreListeners(oldTrip.getMembersManager().getListeners());
-            checkpointsManager.restoreListeners(oldTrip.getCheckpointsManager().getListeners());
-            tripNotificationsManager.restoreListeners(oldTrip.getTripNotificationsManager().getListeners());
+        if (this.members != null) membersManager.updateRefList(this.members);
+        if (!checkpointsManager.isListening()){
+            checkpointsManager.startListening(ref.collection(Collections.CHECKPOINTS));
+        }
+        if (!tripNotificationsManager.isListening()){
+            tripNotificationsManager.setParentDocument(notificationOwner);
+            tripNotificationsManager.startListening(ref.collection(Collections.NOTIFICATIONS));
         }
     }
 
@@ -106,13 +92,58 @@ public class Trip extends Document {
         Trip trip = (Trip) document;
         this.name = trip.name;
         this.leader = trip.leader;
-        this.members = trip.members;
+        setMembers(trip.getMembers());
         this.waitingRoom = trip.waitingRoom;
         this.inviteRoom = trip.inviteRoom;
         this.discussionRef = trip.discussionRef;
         this.joinCode = trip.joinCode;
         this.activeCheckpointRef = trip.activeCheckpointRef;
-        membersManager.updateRefList(trip.members);
+    }
+
+    @Override
+    @Exclude
+    public void onRemove() {
+        super.onRemove();
+        if (isSubManagerAvailable()){
+            membersManager.clear();
+            checkpointsManager.clear();
+            tripNotificationsManager.clear();
+        }
+    }
+
+    @Exclude
+    public RefsArrayManager<User> getMembersManager() {
+        return membersManager;
+    }
+
+    @Exclude
+    public CollectionManager<Checkpoint> getCheckpointsManager() {
+        return checkpointsManager;
+    }
+
+    @Exclude
+    public NotificationsManager<TripNotification> getTripNotificationsManager() {
+        return tripNotificationsManager;
+    }
+
+    public void setMembers(List<DocumentReference> members) {
+        this.members = members;
+        if (membersManager != null && members != null){
+            membersManager.updateRefList(members);
+        }
+    }
+
+    @Exclude
+    public Task<Checkpoint> getActiveCheckpoint() {
+        if (activeCheckpointRef != null) {
+            return checkpointsManager.waitGet(activeCheckpointRef.getId());
+        }
+        return TaskHelper.getCompletedTask(null);
+    }
+
+    @Exclude
+    public boolean isActiveCheckpoint(Checkpoint checkpoint) {
+        return activeCheckpointRef != null && activeCheckpointRef.getId().equals(checkpoint.getId());
     }
 
     public String getName() {
@@ -133,10 +164,6 @@ public class Trip extends Document {
 
     public List<DocumentReference> getMembers() {
         return members;
-    }
-
-    public void setMembers(List<DocumentReference> members) {
-        this.members = members;
     }
 
     public List<DocumentReference> getWaitingRoom() {
@@ -179,48 +206,6 @@ public class Trip extends Document {
 
     public void setJoinCode(JoinCode joinCode) {
         this.joinCode = joinCode;
-    }
-
-    @Exclude
-    @Nullable
-    public RefsArrayManager<User> getMembersManager() {
-        return membersManager;
-    }
-
-    @Exclude
-    public CollectionManager<Checkpoint> getCheckpointsManager() {
-        if (checkpointsManager == null) {
-            checkpointsManager = new CollectionManager<>(Checkpoint.class, ref.collection(Collections.CHECKPOINTS));
-        }
-        return checkpointsManager;
-    }
-
-    @Exclude
-    @Nullable
-    public NotificationsManager<TripNotification> getTripNotificationsManager() {
-        return tripNotificationsManager;
-    }
-
-    @Exclude
-    public Task<Checkpoint> getActiveCheckpoint() {
-        if (activeCheckpointRef != null) {
-            return checkpointsManager.requestGet(activeCheckpointRef.getId());
-        }
-        return TaskHelper.getCompletedTask(null);
-    }
-
-    @Override
-    @Exclude
-    public void onRemove() {
-        super.onRemove();
-        if (membersManager != null) membersManager.clear();
-        if (checkpointsManager != null) checkpointsManager.clear();
-        if (tripNotificationsManager != null) tripNotificationsManager.clear();
-    }
-
-    @Exclude
-    public boolean isActiveCheckpoint(Checkpoint checkpoint) {
-        return activeCheckpointRef != null && activeCheckpointRef.getId().equals(checkpoint.getId());
     }
 
     public static class JoinCode {

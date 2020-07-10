@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
-import cf.bautroixa.tripgether.presenter.CreateTripPresenter;
-import cf.bautroixa.tripgether.presenter.impl.CreateTripPresenterImpl;
+import cf.bautroixa.tripgether.presenter.trip.CreateTripPresenter;
+import cf.bautroixa.tripgether.presenter.trip.CreateTripPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.CreateTripCheckpointsAdapter;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
 import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;

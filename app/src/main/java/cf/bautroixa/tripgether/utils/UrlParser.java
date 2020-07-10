@@ -28,6 +28,6 @@ public class UrlParser {
                 }
             }
         }
-        return new String[]{Trip.NO_TRIP, ""};
+        return new String[]{"", ""};
     }
 }

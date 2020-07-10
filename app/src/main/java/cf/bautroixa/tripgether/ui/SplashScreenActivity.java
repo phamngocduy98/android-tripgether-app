@@ -39,8 +39,8 @@ import cf.bautroixa.tripgether.model.sharedpref.SPDarkMode;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefHelper;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefKeys;
 import cf.bautroixa.tripgether.services.work.WorkManagerHelper;
-import cf.bautroixa.tripgether.ui.auth.LoginActivity;
-import cf.bautroixa.tripgether.ui.auth.PhoneVerificationActivity;
+import cf.bautroixa.tripgether.ui.user.LoginActivity;
+import cf.bautroixa.tripgether.ui.user.PhoneVerificationActivity;
 import cf.bautroixa.tripgether.ui.theme.OneDialog;
 
 public class SplashScreenActivity extends AppCompatActivity {

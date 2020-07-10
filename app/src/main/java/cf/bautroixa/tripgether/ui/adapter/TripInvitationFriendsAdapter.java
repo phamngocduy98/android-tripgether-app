@@ -15,8 +15,8 @@ import java.util.Calendar;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
-import cf.bautroixa.tripgether.presenter.TripInvitationFriendsPresenter;
-import cf.bautroixa.tripgether.presenter.impl.TripInvitationFriendsPresenterImpl;
+import cf.bautroixa.tripgether.presenter.trip.TripInvitationFriendsPresenter;
+import cf.bautroixa.tripgether.presenter.trip.TripInvitationFriendsPresenterImpl;
 import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.ui.theme.ViewAnim;
 import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
