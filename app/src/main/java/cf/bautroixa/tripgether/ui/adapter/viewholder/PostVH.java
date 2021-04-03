@@ -29,7 +29,7 @@ import cf.bautroixa.tripgether.ui.adapter.PostPlaceAdapter;
 import cf.bautroixa.tripgether.ui.dialogs.PlaceViewDialogFragment;
 import cf.bautroixa.tripgether.ui.dialogs.PostCommentsDialogFragment;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class PostVH extends RecyclerView.ViewHolder implements PostPresenter.View {
     TextView tvName, tvTime, tvBody;

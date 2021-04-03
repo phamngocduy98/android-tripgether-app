@@ -10,7 +10,7 @@
 
     <include
         android:id="@+id/include2"
-        layout="@layout/theme_appbar_lite" />
+        layout="@layout/one_appbar_lite" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content"

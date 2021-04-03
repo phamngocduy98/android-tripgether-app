@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -12,7 +13,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.TripInvitationPagerAdapter;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
+import cf.bautroixa.ui.OneAppbarActivity;
 
 public class TripInvitationActivity extends OneAppbarActivity {
     Button btnFinish;
@@ -50,4 +51,8 @@ public class TripInvitationActivity extends OneAppbarActivity {
         }).attach();
     }
 
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
+    }
 }

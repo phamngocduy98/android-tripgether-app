@@ -21,7 +21,7 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.interfaces.NavigationInterface;
 import cf.bautroixa.tripgether.interfaces.NavigationInterfaceOwner;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
+import cf.bautroixa.ui.ViewAnim;
 
 public class BottomSheetFragment extends Fragment implements NavigationInterfaceOwner {
     private static final String TAG = "FriendListStatusFrag";
@@ -33,7 +33,7 @@ public class BottomSheetFragment extends Fragment implements NavigationInterface
     private TextView dragMark;
     private TabLayout tabLayout;
     private ViewPager2 pager;
-    private String[] tabNames = {"Thành viên", "Địa điểm"};
+    private final String[] tabNames = {"Thành viên", "Địa điểm"};
 
     public BottomSheetFragment() {
     }

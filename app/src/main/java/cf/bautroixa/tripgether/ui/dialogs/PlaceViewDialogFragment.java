@@ -25,8 +25,8 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Place;
 import cf.bautroixa.tripgether.model.repo.objects.CheckpointPublic;
 import cf.bautroixa.tripgether.model.repo.objects.PlacePublic;
-import cf.bautroixa.tripgether.ui.theme.OneDialogBase;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.dialogs.OneDialogBase;
 
 /**
  * A simple {@link Fragment} subclass.

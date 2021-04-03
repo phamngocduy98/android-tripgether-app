@@ -80,7 +80,7 @@
     <string name="title_setting">Cài đặt</string>
     <string name="btn_on">Bật</string>
     <string name="btn_off">Tắt</string>
-    <string name="dialog_edit_hint">Nhập giá trị</string>
+    <string name="dialog_prompt_edit_hint">Nhập giá trị</string>
     <string name="dialog_title_enter_user_name">Nhập email</string>
     <string name="user_notification_add_friend">%s đã gửi lời mời kết bạn với bạn</string>
     <string name="user_notification_friend_accepted">%s đã đồng ý kết bạn.</string>

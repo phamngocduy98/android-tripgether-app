@@ -13,9 +13,9 @@ import androidx.annotation.Nullable;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
-import cf.bautroixa.tripgether.ui.theme.OnePromptDialog;
 import cf.bautroixa.tripgether.ui.trip_view.TripActivity;
+import cf.bautroixa.ui.OnePromptDialog;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 public class JoinTripDialog extends OneDialog {
     ModelManager manager;

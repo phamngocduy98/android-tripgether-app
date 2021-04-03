@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,9 +15,9 @@ import java.util.ArrayList;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.constant.RequestCodes;
 import cf.bautroixa.tripgether.ui.adapter.SyncContactAdapter;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
 import cf.bautroixa.tripgether.utils.ContactHelper;
+import cf.bautroixa.ui.OneAppbarActivity;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 public class SyncContactActivity extends OneAppbarActivity {
     RecyclerView rvContacts;
@@ -77,5 +78,10 @@ public class SyncContactActivity extends OneAppbarActivity {
                 setupAdapter();
             }
         }
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

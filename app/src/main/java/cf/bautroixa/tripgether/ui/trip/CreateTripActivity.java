@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,10 +22,10 @@ import cf.bautroixa.tripgether.presenter.trip.CreateTripPresenter;
 import cf.bautroixa.tripgether.presenter.trip.CreateTripPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.CreateTripCheckpointsAdapter;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
 import cf.bautroixa.tripgether.ui.trip_invite.TripInvitationActivity;
 import cf.bautroixa.tripgether.utils.KeyboardHelper;
+import cf.bautroixa.ui.OneAppbarActivity;
+import cf.bautroixa.ui.ViewAnim;
 
 public class CreateTripActivity extends OneAppbarActivity implements CreateTripPresenter.View {
 
@@ -123,5 +124,10 @@ public class CreateTripActivity extends OneAppbarActivity implements CreateTripP
         KeyboardHelper.hideSoftKeyboard(CreateTripActivity.this);
         startActivity(new Intent(CreateTripActivity.this, TripInvitationActivity.class));
         finish();
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

@@ -6,7 +6,7 @@
     app:layoutDescription="@xml/appbar_scene"
     app:motionProgress="1.0">
 
-    <include layout="@layout/theme_appbar" />
+    <include layout="@layout/one_appbar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content"

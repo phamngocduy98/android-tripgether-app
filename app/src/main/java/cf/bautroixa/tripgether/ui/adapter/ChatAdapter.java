@@ -17,12 +17,11 @@ import java.util.Objects;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Message;
-import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
 import cf.bautroixa.tripgether.presenter.ChatPresenterImpl;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessagesViewHolder> {
     ChatPresenterImpl chatPresenter;

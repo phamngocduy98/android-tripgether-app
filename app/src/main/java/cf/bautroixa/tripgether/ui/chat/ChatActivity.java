@@ -22,9 +22,9 @@ import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.presenter.ChatPresenter;
 import cf.bautroixa.tripgether.presenter.ChatPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.ChatAdapter;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
-import cf.bautroixa.tripgether.ui.theme.LoadingDialogFragment;
-import cf.bautroixa.tripgether.ui.theme.OneLiteAppbarActivity;
+import cf.bautroixa.ui.OneLiteAppbarActivity;
+import cf.bautroixa.ui.dialogs.LoadingDialogFragment;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
 
 public class ChatActivity extends OneLiteAppbarActivity implements ChatPresenter.View, Toolbar.OnMenuItemClickListener {
     public static final String ARG_DISCUSSION_ID = "discussionId";

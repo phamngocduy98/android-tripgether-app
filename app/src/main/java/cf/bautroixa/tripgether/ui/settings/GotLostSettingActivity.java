@@ -9,10 +9,12 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
+
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.sharedpref.SPGetLost;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
 import cf.bautroixa.tripgether.utils.ui_utils.Formater;
+import cf.bautroixa.ui.OneAppbarActivity;
 
 public class GotLostSettingActivity extends OneAppbarActivity {
     LinearLayout linearGotLostSwitch;
@@ -78,5 +80,10 @@ public class GotLostSettingActivity extends OneAppbarActivity {
                 SPGetLost.setSafeDistance(sharedPref, progress);
             }
         });
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

@@ -24,7 +24,7 @@ import cf.bautroixa.tripgether.model.firestore.objects.Discussion;
 import cf.bautroixa.tripgether.ui.adapter.ChatListAdapter;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.friends.FriendListActivity;
-import cf.bautroixa.tripgether.ui.theme.OneLiteAppbarFragment;
+import cf.bautroixa.ui.OneLiteAppbarFragment;
 
 public class TabChatListFragment extends OneLiteAppbarFragment implements Toolbar.OnMenuItemClickListener, NavigationInterfaceOwner {
     ModelManager manager;

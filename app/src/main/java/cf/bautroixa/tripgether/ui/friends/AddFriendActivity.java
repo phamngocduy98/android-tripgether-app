@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -15,8 +16,8 @@ import com.google.android.gms.tasks.Task;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.http.UserHttpService;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
-import cf.bautroixa.tripgether.ui.theme.OnePromptDialog;
+import cf.bautroixa.ui.OneAppbarActivity;
+import cf.bautroixa.ui.OnePromptDialog;
 
 public class AddFriendActivity extends OneAppbarActivity {
     LinearLayout linearPhone, linearMail, linearContact;
@@ -102,5 +103,10 @@ public class AddFriendActivity extends OneAppbarActivity {
                 onePromptDialog.show(getSupportFragmentManager(), "add friend");
             }
         });
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

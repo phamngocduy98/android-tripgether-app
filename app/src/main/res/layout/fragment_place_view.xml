@@ -7,7 +7,7 @@
     android:background="@drawable/bg_radius_full_white_with_border"
     tools:context=".ui.dialogs.PlaceViewDialogFragment">
 
-    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
+    <cf.bautroixa.ui.RoundedImageView
         android:id="@+id/img_images_dialog_place_view"
         android:layout_width="match_parent"
         android:layout_height="300dp"

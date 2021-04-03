@@ -33,8 +33,10 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.SosRequest;
 import cf.bautroixa.tripgether.presenter.SosPresenter;
 import cf.bautroixa.tripgether.presenter.SosPresenterImpl;
-import cf.bautroixa.tripgether.ui.theme.FullScreenDialogFragment;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.dialogs.FullScreenDialogFragment;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
+import cf.bautroixa.ui.dialogs.OneChooseImageDialog;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class SosRequestEditDialogFragment extends FullScreenDialogFragment implements SosPresenter.View {
     private static final String TAG = "SosRequestEditDialogFragment";

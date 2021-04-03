@@ -1,0 +1,138 @@
+package cf.bautroixa.ui.helpers;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Shader;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.widget.ImageView;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+import com.squareup.picasso.Transformation;
+
+import java.io.IOException;
+
+public class ImageHelper {
+    /**
+     * https://stackoverflow.com/a/26112408/9385297
+     */
+    public static class CircleImageTransform implements Transformation {
+        @Override
+        public Bitmap transform(Bitmap source) {
+            int size = Math.min(source.getWidth(), source.getHeight());
+
+            int x = (source.getWidth() - size) / 2;
+            int y = (source.getHeight() - size) / 2;
+
+            Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
+            if (squaredBitmap != source) {
+                source.recycle();
+            }
+
+            Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
+
+            Canvas canvas = new Canvas(bitmap);
+            Paint paint = new Paint();
+            BitmapShader shader = new BitmapShader(squaredBitmap,
+                    Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            paint.setShader(shader);
+            paint.setAntiAlias(true);
+
+            float r = size / 2f;
+            canvas.drawCircle(r, r, r, paint);
+
+            squaredBitmap.recycle();
+            return bitmap;
+        }
+
+        @Override
+        public String key() {
+            return "circle";
+        }
+    }
+
+    public static void loadCircleImage(String imageUrl, ImageView target) {
+        loadCircleImage(imageUrl, target, 50, 50, null);
+    }
+
+    public static Task<Void> loadCircleImageAsync(String imageUrl, ImageView target) {
+        final TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+        loadCircleImage(imageUrl, target, 50, 50, new Callback() {
+            @Override
+            public void onSuccess() {
+                taskCompletionSource.setResult(null);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                taskCompletionSource.setException(e);
+            }
+        });
+        return taskCompletionSource.getTask();
+    }
+
+    public static void loadCircleImage(String imageUrl, Target target) {
+        Picasso.get().load(imageUrl).resize(50, 50).centerCrop().transform(new CircleImageTransform()).into(target);
+    }
+
+    public static void loadCircleImage(String imageUrl, ImageView target, int width, int height) {
+        loadCircleImage(imageUrl, target, width, height, null);
+    }
+
+    public static void loadCircleImage(String imageUrl, ImageView target, int width, int height, @Nullable Callback callback) {
+        if (imageUrl == null || imageUrl.length() == 0) return;
+        Picasso.get().load(imageUrl).resize(width, height).centerCrop().transform(new CircleImageTransform()).into(target, callback);
+    }
+
+    public static void loadCircleImage(@DrawableRes int imgResId, ImageView target, int width, int height) {
+        Picasso.get().load(imgResId).resize(width, height).centerCrop().transform(new CircleImageTransform()).into(target);
+    }
+
+    public static void loadImage(String imageUrl, ImageView target, int width, int height) {
+        if (imageUrl == null || imageUrl.length() == 0) return;
+        Picasso.get().load(imageUrl).resize(width, height).centerCrop().into(target);
+    }
+
+    public static void loadImage(String imageUrl, ImageView target, int width, int height, @Nullable Callback callback) {
+        if (imageUrl == null || imageUrl.length() == 0) return;
+        Picasso.get().load(imageUrl).resize(width, height).centerCrop().into(target, callback);
+    }
+
+    @Nullable
+    public static Bitmap getLocalImageFromUri(Context context, @Nullable Uri imageUri) {
+        if (imageUri == null) return null;
+        try {
+            return MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Bitmap getLocalImageFromUri2(Context context, @NonNull Uri imageUri) {
+        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(imageUri, filePathColumn, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String picturePath = cursor.getString(columnIndex);
+            cursor.close();
+            return BitmapFactory.decodeFile(picturePath);
+        }
+        return null;
+    }
+}

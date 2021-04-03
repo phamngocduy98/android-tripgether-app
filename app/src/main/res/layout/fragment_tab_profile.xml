@@ -8,7 +8,7 @@
     android:background="@color/colorBackground"
     app:layoutDescription="@xml/appbar_scene">
 
-    <include layout="@layout/theme_appbar_with_avatar" />
+    <include layout="@layout/one_appbar_with_avatar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content"

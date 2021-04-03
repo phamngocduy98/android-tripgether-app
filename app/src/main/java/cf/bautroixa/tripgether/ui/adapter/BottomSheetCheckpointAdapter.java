@@ -21,7 +21,7 @@ import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter
 import cf.bautroixa.tripgether.ui.adapter.viewholder.CheckpointVH;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
+import cf.bautroixa.ui.OneRecyclerView;
 
 public class BottomSheetCheckpointAdapter extends OneRecyclerView.Adapter<BottomSheetCheckpointAdapter.BottomSheetCheckpointVH> {
     SortedList<Checkpoint> checkpointSortedList;
@@ -53,11 +53,7 @@ public class BottomSheetCheckpointAdapter extends OneRecyclerView.Adapter<Bottom
     @Override
     public void onBindViewHolder(@NonNull BottomSheetCheckpointVH holder, int position, @NonNull List<Object> payloads) {
         if (payloads.size() > 0) {
-            if (payloads.get(0).equals(Payload.UNSET_ACTIVE_CHECKPOINT)) {
-                holder.setActiveCheckpoint(false);
-            } else {
-                holder.setActiveCheckpoint(true);
-            }
+            holder.setActiveCheckpoint(!payloads.get(0).equals(Payload.UNSET_ACTIVE_CHECKPOINT));
         } else {
             super.onBindViewHolder(holder, position, payloads);
         }

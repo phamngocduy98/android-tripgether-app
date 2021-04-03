@@ -1,35 +1,5 @@
 package cf.bautroixa.tripgether.ui.bottomspace;
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-
-import cf.bautroixa.tripgether.R;
-import cf.bautroixa.tripgether.interfaces.NavigationInterface;
-import cf.bautroixa.tripgether.interfaces.NavigationInterfaceOwner;
-import cf.bautroixa.tripgether.model.firestore.ModelManager;
-import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
-import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
-import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
-import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-
-
 //public class ActiveCheckpointWidget extends Fragment implements NavigationInterfaceOwner {
 ////    private ModelManager manager;
 ////    private ArrayList<Checkpoint> checkpoints;

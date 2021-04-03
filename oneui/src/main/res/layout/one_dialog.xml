@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_radius_full_white_with_border"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingVertical="20dp">
+
+    <ImageView
+        android:id="@+id/ic_title_one_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_mail_app"
+        android:contentDescription="Dialog icon Title" />
+
+    <TextView
+        android:id="@+id/tv_title_one_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="Dialog"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/colorText"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:id="@+id/container_body_one_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/ic_body_one_dialog"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="16dp"
+            app:srcCompat="@drawable/ic_phone_app"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/container_message_and_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_message_one_dialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="What to do for love?"
+                android:textColor="@color/colorText"
+                android:textSize="16dp" />
+
+            <EditText
+                android:id="@+id/edit_prompt_one_dialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text=""
+                android:textColor="@color/colorText"
+                android:visibility="gone" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="22dp"
+        android:divider="@drawable/divider"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_negative_one_dialog"
+            style="@style/Button.FlatButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_cancel" />
+        <Button
+            android:id="@+id/btn_positive_one_dialog"
+            style="@style/Button.FlatButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/ok" />
+    </LinearLayout>
+
+</LinearLayout>

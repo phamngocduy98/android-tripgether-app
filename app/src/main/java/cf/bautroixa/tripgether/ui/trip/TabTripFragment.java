@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -33,14 +34,14 @@ import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
 import cf.bautroixa.tripgether.model.firestore.objects.Trip;
 import cf.bautroixa.tripgether.model.http.HttpService;
 import cf.bautroixa.tripgether.model.http.TripHttpService;
+import cf.bautroixa.tripgether.ui.bottomsheet.BottomSheetCheckpointListFragment;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
 import cf.bautroixa.tripgether.ui.dialogs.SelectCheckpointDialogFragment;
 import cf.bautroixa.tripgether.ui.dialogs.SosRequestEditDialogFragment;
-import cf.bautroixa.tripgether.ui.bottomsheet.BottomSheetCheckpointListFragment;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarFragment;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
-import cf.bautroixa.tripgether.ui.theme.OnePromptDialog;
 import cf.bautroixa.tripgether.ui.trip_invite.TripInvitationActivity;
+import cf.bautroixa.ui.OneAppbarFragment;
+import cf.bautroixa.ui.OnePromptDialog;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 
 public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenuItemClickListener, NavigationInterfaceOwner {
@@ -113,6 +114,11 @@ public class TabTripFragment extends OneAppbarFragment implements Toolbar.OnMenu
         tabLayout = view.findViewById(R.id.tab_layout_frag_trip);
 
         return view;
+    }
+
+    @Override
+    public MotionLayout findMotionLayout(View view) {
+        return view.findViewById(R.id.appbar_root);
     }
 
     @Override

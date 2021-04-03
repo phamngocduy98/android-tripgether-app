@@ -54,7 +54,7 @@ import cf.bautroixa.tripgether.presenter.bottomspace.MapPresenterImpl;
 import cf.bautroixa.tripgether.utils.LocationHelper;
 import cf.bautroixa.tripgether.utils.calculation.PixelDPConverter;
 import cf.bautroixa.tripgether.utils.ui_utils.CreateMarker;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.helpers.ImageHelper;
 import timber.log.Timber;
 
 public class MapBackgroundFragment extends Fragment implements MapPresenter.View, NavigationInterfaceOwner, OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
@@ -69,8 +69,8 @@ public class MapBackgroundFragment extends Fragment implements MapPresenter.View
     private boolean isMapLoaded = false, focusMyLocation = true;
     private int screenWidth, screenHeight, markerZIndex = 1;
     // Views
-    private HashMap<String, UserMarkerViewHolder> userMarkerViews;
-    private HashMap<String, CheckpointMarkerViewHolder> checkpointMarkerViews;
+    private final HashMap<String, UserMarkerViewHolder> userMarkerViews;
+    private final HashMap<String, CheckpointMarkerViewHolder> checkpointMarkerViews;
 
     private SupportMapFragment ggMapFragment;
     private GoogleMap mMap;

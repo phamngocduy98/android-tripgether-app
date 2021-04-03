@@ -29,8 +29,8 @@ import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.objects.Message;
 import cf.bautroixa.tripgether.model.firestore.objects.SosRequest;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
-import cf.bautroixa.tripgether.ui.theme.OneBottomSheetDialog;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.dialogs.OneBottomSheetDialog;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class SosRequestViewDialogFragment extends OneBottomSheetDialog {
     private static final String TAG = "SosRequestEditDialogFragment";

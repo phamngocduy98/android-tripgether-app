@@ -17,11 +17,11 @@ import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.objects.Notification;
 import cf.bautroixa.tripgether.model.firestore.objects.UserNotification;
 import cf.bautroixa.tripgether.ui.friends.ProfileActivity;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.ui.trip_view.TripActivity;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.OneRecyclerView;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class UserNotificationAdapter extends OneRecyclerView.Adapter<UserNotificationAdapter.NotificationVH> {
     ModelManager manager;

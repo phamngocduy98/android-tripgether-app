@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,8 +19,8 @@ import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.http.TripHttpService;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
 import cf.bautroixa.tripgether.ui.adapter.TripWaitingRoomAdapter;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
+import cf.bautroixa.ui.OneAppbarActivity;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
 
 public class WaitingRoomActivity extends OneAppbarActivity {
     RecyclerView rvTripMember;
@@ -59,5 +60,10 @@ public class WaitingRoomActivity extends OneAppbarActivity {
             }
         });
 
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

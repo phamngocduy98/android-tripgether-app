@@ -3,7 +3,7 @@ package cf.bautroixa.tripgether.ui.dialogs;
 import android.content.DialogInterface;
 
 import cf.bautroixa.tripgether.R;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 public class FailedDialogFragment extends OneDialog {
     public FailedDialogFragment() {

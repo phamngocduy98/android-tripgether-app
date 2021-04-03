@@ -8,6 +8,7 @@ import android.widget.RadioGroup;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.sharedpref.SPDarkMode;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefKeys;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
+import cf.bautroixa.ui.OneAppbarActivity;
 
 public class DarkModeSettingActivity extends OneAppbarActivity {
     public static final List<Integer> radioModeIds = Arrays.asList(R.id.radio_system_dark_mode, R.id.radio_light_mode, R.id.radio_dark_mode, R.id.radio_auto_dark_mode);
@@ -58,12 +59,17 @@ public class DarkModeSettingActivity extends OneAppbarActivity {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
                 int mode = radioModeIds.indexOf(checkedId);
-                if (mode != -1){
+                if (mode != -1) {
                     sharedPref.edit().putInt(SharedPrefKeys.SETTING_DARK_MODE_TYPE, mode).commit();
                     AppCompatDelegate.setDefaultNightMode(SPDarkMode.androidNightModes.get(mode));
                     finish();
                 }
             }
         });
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

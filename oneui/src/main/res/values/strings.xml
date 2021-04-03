@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">OneUI - by Pham Ngoc Duy</string>
+
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Hủy</string>
+    <string name="btn_update">Cập nhật</string>
+    <string name="btn_allow">Cho phép</string>
+    <string name="btn_accept">Chấp nhận</string>
+    <string name="btn_reject">Từ chối</string>
+    <string name="btn_never_show_again">Không hỏi lại</string>
+    <string name="btn_delete">Xóa</string>
+    <string name="btn_on">Bật</string>
+    <string name="btn_off">Tắt</string>
+    <string name="btn_take_a_picture">Chụp ảnh</string>
+    <string name="btn_pick_from_gallery">Chọn từ bộ sưu tập</string>
+
+    <string name="dialog_title">Thông báo</string>
+    <string name="dialog_messsage">Dialog message</string>
+    <string name="dialog_title_choose_image">Chọn ảnh</string>
+    <string name="dialog_prompt_edit_hint">Nhập giá trị</string>
+
+    <string name="date_today">Hôm nay</string>
+    <string name="date_yesterday">Hôm qua</string>
+
+</resources>

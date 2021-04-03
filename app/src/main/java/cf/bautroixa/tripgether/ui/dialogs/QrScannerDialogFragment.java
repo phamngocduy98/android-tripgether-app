@@ -20,10 +20,10 @@ import com.google.zxing.Result;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.constant.RequestCodes;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
-import cf.bautroixa.tripgether.ui.theme.FullScreenDialogFragment;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
 import cf.bautroixa.tripgether.ui.trip_view.TripActivity;
 import cf.bautroixa.tripgether.utils.UrlParser;
+import cf.bautroixa.ui.dialogs.FullScreenDialogFragment;
+import cf.bautroixa.ui.dialogs.OneDialog;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class QrScannerDialogFragment extends FullScreenDialogFragment implements ZXingScannerView.ResultHandler {

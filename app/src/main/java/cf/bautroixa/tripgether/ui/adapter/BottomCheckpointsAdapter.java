@@ -26,8 +26,8 @@ import cf.bautroixa.tripgether.model.firestore.objects.Visit;
 import cf.bautroixa.tripgether.presenter.bottomspace.BottomCheckpointsPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
+import cf.bautroixa.ui.ViewAnim;
 
 public class BottomCheckpointsAdapter extends RecyclerView.Adapter<BottomCheckpointsAdapter.ViewHolder> {
     private static final String TAG = "BottomCheckpointsAdapter";

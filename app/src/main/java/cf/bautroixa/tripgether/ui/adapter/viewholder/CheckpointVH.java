@@ -12,8 +12,8 @@ import com.github.vipulasri.timelineview.TimelineView;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
 import cf.bautroixa.tripgether.model.repo.objects.CheckpointPublic;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
+import cf.bautroixa.ui.OneRecyclerView;
 
 public class CheckpointVH extends OneRecyclerView.ViewHolder {
     public TimelineView mTimelineView;

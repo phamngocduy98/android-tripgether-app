@@ -15,7 +15,7 @@ import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class MemberListLiteRecyclerView extends MemberListRecyclerView {
     public MemberListLiteRecyclerView(ModelManager manager, NavigationInterface navigationInterface) {
@@ -89,12 +89,9 @@ public class MemberListLiteRecyclerView extends MemberListRecyclerView {
 
         @Override
         public void update(User user) {
-            if (user.getLastUpdate() != null && Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000) {
-                // online in less than 5 mins
-                tvOnlineIndicator.setSelected(true);// green background
-            } else {
-                tvOnlineIndicator.setSelected(false);// red background
-            }
+            // online in less than 5 mins
+            // red background
+            tvOnlineIndicator.setSelected(user.getLastUpdate() != null && Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000);// green background
         }
     }
 }

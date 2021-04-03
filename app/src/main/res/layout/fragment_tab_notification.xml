@@ -9,7 +9,7 @@
     app:layoutDescription="@xml/appbar_scene"
     tools:context=".ui.notifications.NotificationActivity">
 
-    <include layout="@layout/theme_appbar" />
+    <include layout="@layout/one_appbar" />
 
     <LinearLayout
         android:id="@+id/main_content"

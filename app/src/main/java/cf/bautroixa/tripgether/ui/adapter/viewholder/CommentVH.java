@@ -16,9 +16,9 @@ import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
 import cf.bautroixa.tripgether.presenter.post.PostPresenter;
 import cf.bautroixa.tripgether.presenter.post.PostPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.PostPlaceAdapter;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 /**
  * layout xml : R.layout.item_comment

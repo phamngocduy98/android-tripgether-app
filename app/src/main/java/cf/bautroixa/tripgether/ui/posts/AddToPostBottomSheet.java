@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import cf.bautroixa.tripgether.R;
-import cf.bautroixa.tripgether.ui.theme.OneBottomSheetDialog;
+import cf.bautroixa.ui.dialogs.OneBottomSheetDialog;
 
 public class AddToPostBottomSheet extends OneBottomSheetDialog {
     View addImage, addPlace, addTrip;

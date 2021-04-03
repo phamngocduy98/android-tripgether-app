@@ -22,10 +22,10 @@ import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.firestore.objects.UserNotification;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.OneRecyclerView;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class TripNotificationAdapter extends OneRecyclerView.Adapter<TripNotificationAdapter.NotificationVH> {
     ModelManager manager;

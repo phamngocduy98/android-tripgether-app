@@ -23,9 +23,9 @@ import cf.bautroixa.tripgether.model.firestore.objects.Discussion;
 import cf.bautroixa.tripgether.model.firestore.objects.Message;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.ui.chat.ChatActivity;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.tripgether.utils.ui_utils.ImageHelperExt;
+import cf.bautroixa.ui.RoundedImageView;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.DiscussionVH> {
     Context context;
@@ -128,7 +128,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.Discus
                 tvOnlineIndicator.setSelected(isOnline); // green background / red background
             }
             // avatar
-            ImageHelper.loadUserAvatar(imgAvatar, tvNameInAvatar, user);
+            ImageHelperExt.loadUserAvatar(imgAvatar, tvNameInAvatar, user);
         }
     }
 }

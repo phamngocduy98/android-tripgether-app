@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
+
 import java.util.List;
 
 import cf.bautroixa.tripgether.R;
@@ -19,9 +21,9 @@ import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
 import cf.bautroixa.tripgether.presenter.user.ProfilePresenter;
 import cf.bautroixa.tripgether.presenter.user.ProfilePresenterImpl;
 import cf.bautroixa.tripgether.ui.chat.ChatActivity;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.OneAppbarActivity;
+import cf.bautroixa.ui.dialogs.OneDialog;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class ProfileActivity extends OneAppbarActivity implements ProfilePresenter.View {
     public static final String ARG_USER_ID = "userId";
@@ -198,5 +200,10 @@ public class ProfileActivity extends OneAppbarActivity implements ProfilePresent
         linearAddFriend.setEnabled(true);
         loadingDialog.dismiss();
         setupAddFriendButton(this.user, User.FriendStatus.NONE);
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

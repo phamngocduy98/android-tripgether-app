@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <public name="OneUI.Dialog" type="style" />
+    <public name="OneUI.Dialog.BottomSheetStyle" type="style" />
+    <public name="OverflowMenu" type="style" />
+    <public name="TextView.Badge" type="style" />
+    <public name="OneUI.VerticalRadioButton" type="style" />
+    <public name="OneUI.HorizontalRadioButton" type="style" />
+    <public name="TextView.LongBadge" type="style" />
+    <public name="Button.FlatButton" type="style" />
+
+    <public name="Button.FlatButtonBorder" type="style" />
+    <public name="ImageButton.FlatIconButton" type="style" />
+    <public name="Button.RaisedButton" type="style" />
+    <public name="OneUI.TabLayout" type="style" />
+    <public name="OneUI.TabLayout.BottomNavigation" type="style" />
+
+    <public name="OneUI.TabTextAppearance" type="style" />
+    <public name="OneUI.ToolbarPopupTheme" type="style" />
+    <public name="OneUI.Switch" type="style" />
+    <public name="ListItem.Title" type="style" />
+
+    <public name="theme_appbar" type="layout" />
+    <public name="theme_appbar_lite" type="layout" />
+    <public name="theme_appbar_with_avatar" type="layout" />
+
+    <public name="bg_radius_bot_white" type="drawable" />
+    <public name="bg_radius_full_white" type="drawable" />
+    <public name="bg_radius_none_white" type="drawable" />
+
+    <public name="bg_radius_bot_white_with_border" type="drawable" />
+    <public name="bg_radius_full_white_with_border" type="drawable" />
+    <public name="bg_radius_none_white_with_border" type="drawable" />
+</resources>

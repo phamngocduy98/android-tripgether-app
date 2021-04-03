@@ -22,8 +22,8 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.constant.RequestCodes;
 import cf.bautroixa.tripgether.presenter.user.LoginPresenter;
 import cf.bautroixa.tripgether.presenter.user.LoginPresenterImpl;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
-import cf.bautroixa.tripgether.ui.theme.LoadingDialogFragment;
+import cf.bautroixa.ui.dialogs.LoadingDialogFragment;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
 
 public class LoginActivity extends AppCompatActivity implements LoginPresenter.View {
     private static final String TAG = "LoginActivity";

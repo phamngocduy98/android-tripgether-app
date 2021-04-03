@@ -30,11 +30,11 @@ import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter
 import cf.bautroixa.tripgether.ui.dialogs.SosRequestEditDialogFragment;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
 import cf.bautroixa.tripgether.ui.sortedlist.UserSortedListAdapterCallback;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.ui.trip_invite.TripInvitationActivity;
 import cf.bautroixa.tripgether.utils.IntentHelper;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.OneRecyclerView;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class TabTripFragmentTrip extends Fragment implements NavigationInterfaceOwner {
     SortedList<User> sosRequestMembers;

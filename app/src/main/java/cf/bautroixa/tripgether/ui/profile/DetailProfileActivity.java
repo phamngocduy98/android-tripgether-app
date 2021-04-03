@@ -29,9 +29,9 @@ import cf.bautroixa.tripgether.model.firestore.core.Document;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.ui.MainActivity;
 import cf.bautroixa.tripgether.ui.user.PhoneVerificationActivity;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
-import cf.bautroixa.tripgether.ui.dialogs.OneChooseImageDialog;
 import cf.bautroixa.tripgether.utils.FirebaseStorageHelper;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
+import cf.bautroixa.ui.dialogs.OneChooseImageDialog;
 
 
 public class DetailProfileActivity extends AppCompatActivity {

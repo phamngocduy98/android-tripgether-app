@@ -17,9 +17,9 @@ import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.presenter.trip.TripInvitationFriendsPresenter;
 import cf.bautroixa.tripgether.presenter.trip.TripInvitationFriendsPresenterImpl;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.ViewAnim;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class TripInvitationFriendsAdapter extends RecyclerView.Adapter<TripInvitationFriendsAdapter.FriendVH> {
     ArrayList<User> friends;
@@ -72,11 +72,9 @@ public class TripInvitationFriendsAdapter extends RecyclerView.Adapter<TripInvit
         void bind(final User user) {
             // online indicator and lastUpdateTime
             if (user.getLastUpdate() != null) {
-                if (Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000) { // online in less than 5 mins
-                    tvOnlineIndicator.setSelected(true);// green background
-                } else {
-                    tvOnlineIndicator.setSelected(false);// red background
-                }
+                // online in less than 5 mins
+                // red background
+                tvOnlineIndicator.setSelected(Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000);// green background
             }
             // avatar
             if (user.getAvatar() != null && !user.getAvatar().equals(User.DEFAULT_AVATAR)) {

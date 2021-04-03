@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.objects.Checkpoint;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 public class SelectCheckpointDialogFragment extends OneDialog {
     RecyclerView rv;

@@ -14,9 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.presenter.user.RegisterPresenter;
 import cf.bautroixa.tripgether.presenter.user.RegisterPresenterImpl;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
+import cf.bautroixa.ui.ViewAnim;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 public class RegisterActivity extends AppCompatActivity implements RegisterPresenter.View {
     private static final String TAG = "RegisterActivity";

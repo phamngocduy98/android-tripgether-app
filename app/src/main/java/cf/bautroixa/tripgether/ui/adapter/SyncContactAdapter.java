@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.http.UserHttpService;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
 import cf.bautroixa.tripgether.ui.friends.ProfileActivity;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ContactHelper;
 import cf.bautroixa.tripgether.utils.IntentHelper;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.tripgether.utils.ui_utils.ImageHelperExt;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
 
 public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.ContactVH> {
     ArrayList<ContactHelper.Contact> contacts;
@@ -78,7 +78,7 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         void bind(final ContactHelper.Contact contact) {
             // online indicator
             tvOnlineIndicator.setVisibility(View.GONE);
-            ImageHelper.loadUserAvatar(imgAvatar, tvNameInAvatar, contact);
+            ImageHelperExt.loadUserAvatar(imgAvatar, tvNameInAvatar, contact);
 
             tvName.setText(contact.getName());
             tvInfo.setText(contact.getPhoneNumber());

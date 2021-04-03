@@ -19,8 +19,8 @@ import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
 import cf.bautroixa.tripgether.ui.chat.ChatActivity;
 import cf.bautroixa.tripgether.ui.friends.ProfileActivity;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.tripgether.utils.ui_utils.ImageHelperExt;
+import cf.bautroixa.ui.RoundedImageView;
 
 public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendVH> {
     ArrayList<User> friends;
@@ -77,7 +77,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Fr
                 }
             });
             tvOnlineIndicator.setSelected(user.isOnline());// green background
-            ImageHelper.loadUserAvatar(imgAvatar, tvNameInAvatar, user);
+            ImageHelperExt.loadUserAvatar(imgAvatar, tvNameInAvatar, user);
 
             tvName.setText(user.getName());
             tvInfo.setText(user.getEmail());

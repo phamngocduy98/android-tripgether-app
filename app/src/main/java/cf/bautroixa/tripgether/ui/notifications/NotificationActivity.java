@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -17,8 +18,8 @@ import cf.bautroixa.tripgether.interfaces.ActivityNavigationInterfaceOwner;
 import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.core.Document;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.NotificationActivityPagerAdapter;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
 import cf.bautroixa.tripgether.utils.NavigableHelper;
+import cf.bautroixa.ui.OneAppbarActivity;
 
 public class NotificationActivity extends OneAppbarActivity {
     private static final String TAG = NotificationActivity.class.getSimpleName();
@@ -88,6 +89,11 @@ public class NotificationActivity extends OneAppbarActivity {
                 }
             });
         }
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }
 

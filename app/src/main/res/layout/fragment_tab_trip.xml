@@ -9,7 +9,7 @@
     app:layoutDescription="@xml/appbar_scene"
     tools:context=".ui.trip.TabTripFragment">
 
-    <include layout="@layout/theme_appbar" />
+    <include layout="@layout/one_appbar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content"

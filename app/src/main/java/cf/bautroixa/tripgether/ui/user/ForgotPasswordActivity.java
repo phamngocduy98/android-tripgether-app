@@ -17,8 +17,8 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.ui.dialogs.FailedDialogFragment;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
+import cf.bautroixa.ui.ViewAnim;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
     private EditText mEmailField;

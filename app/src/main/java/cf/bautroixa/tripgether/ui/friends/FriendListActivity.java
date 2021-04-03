@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,7 +19,7 @@ import cf.bautroixa.tripgether.model.firestore.core.DocumentsManager;
 import cf.bautroixa.tripgether.model.firestore.core.RefsArrayManager;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.ui.adapter.FriendListAdapter;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
+import cf.bautroixa.ui.OneAppbarActivity;
 
 public class FriendListActivity extends OneAppbarActivity implements Toolbar.OnMenuItemClickListener {
     ModelManager manager;
@@ -79,5 +80,10 @@ public class FriendListActivity extends OneAppbarActivity implements Toolbar.OnM
                 break;
         }
         return false;
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

@@ -33,7 +33,7 @@ import cf.bautroixa.tripgether.model.repo.UserRepository;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
 import cf.bautroixa.tripgether.ui.adapter.PostCommentAdapter;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.CommentVH;
-import cf.bautroixa.tripgether.ui.theme.OneBottomSheetDialog;
+import cf.bautroixa.ui.dialogs.OneBottomSheetDialog;
 
 public class PostCommentsDialogFragment extends OneBottomSheetDialog {
     private static final String POST_ID = "postId";

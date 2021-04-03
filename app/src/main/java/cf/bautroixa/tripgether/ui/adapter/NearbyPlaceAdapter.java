@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Place;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.PlaceVH;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
+import cf.bautroixa.ui.OneRecyclerView;
 
 public class NearbyPlaceAdapter extends OneRecyclerView.Adapter<PlaceVH> {
     ArrayList<Place> places;

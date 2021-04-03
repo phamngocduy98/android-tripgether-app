@@ -27,9 +27,9 @@ import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.firestore.objects.Visit;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class MemberListRecyclerView {
     protected NavigationInterface navigationInterface;
@@ -93,11 +93,9 @@ public class MemberListRecyclerView {
             // online indicator and lastUpdateTime
             if (user.getLastUpdate() != null) {
                 tvLastUpdate.setText(DateFormatter.format(user.getLastUpdate()));
-                if (Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000) { // online in less than 5 mins
-                    tvOnlineIndicator.setSelected(true);// green background
-                } else {
-                    tvOnlineIndicator.setSelected(false);// red background
-                }
+                // online in less than 5 mins
+                // red background
+                tvOnlineIndicator.setSelected(Calendar.getInstance().getTimeInMillis() - user.getLastUpdate().toDate().getTime() < 5 * 60 * 1000);// green background
             }
             // avatar, battery and location
             if (!user.getAvatar().equals(currentUser.getAvatar())) {

@@ -9,7 +9,7 @@
 
     <include
         android:id="@+id/toolbar_activity_chat"
-        layout="@layout/theme_appbar_lite"
+        layout="@layout/one_appbar_lite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

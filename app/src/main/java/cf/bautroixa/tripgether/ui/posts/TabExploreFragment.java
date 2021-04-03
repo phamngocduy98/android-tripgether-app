@@ -19,7 +19,7 @@ import cf.bautroixa.tripgether.presenter.post.TabExplorePresenter;
 import cf.bautroixa.tripgether.presenter.post.TabExplorePresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.PostAdapter;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.AvatarVH;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
 
 /**
  * A simple {@link Fragment} subclass.

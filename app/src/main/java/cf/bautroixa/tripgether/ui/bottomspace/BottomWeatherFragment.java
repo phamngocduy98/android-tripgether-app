@@ -20,7 +20,7 @@ import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.http.WeatherApi;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.helpers.ImageHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

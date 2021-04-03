@@ -6,7 +6,7 @@
     android:paddingHorizontal="16dp"
     android:paddingVertical="8dp">
 
-    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
+    <cf.bautroixa.ui.RoundedImageView
         android:id="@+id/img_avatar_item_noti"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -25,7 +25,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/img_avatar_item_noti"
         app:layout_constraintEnd_toEndOf="@+id/img_avatar_item_noti" />
 
-    <cf.bautroixa.tripgether.ui.theme.RoundedImageView
+    <cf.bautroixa.ui.RoundedImageView
         android:id="@+id/img_type_item_noti"
         android:layout_width="18dp"
         android:layout_height="18dp"

@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -25,9 +26,9 @@ import cf.bautroixa.tripgether.model.repo.objects.TripPublic;
 import cf.bautroixa.tripgether.presenter.trip.TripPresenter;
 import cf.bautroixa.tripgether.presenter.trip.TripPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.TripPagerAdapter;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
 import cf.bautroixa.tripgether.utils.NavigableHelper;
+import cf.bautroixa.ui.OneAppbarActivity;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
 
 public class TripActivity extends OneAppbarActivity implements TripPresenter.View {
     public static final String ARG_TRIP_ID = "tripId";
@@ -150,5 +151,10 @@ public class TripActivity extends OneAppbarActivity implements TripPresenter.Vie
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         setResult(Activity.RESULT_CANCELED);
         finish();
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

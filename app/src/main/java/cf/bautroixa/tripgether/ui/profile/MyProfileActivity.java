@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -27,9 +28,9 @@ import cf.bautroixa.tripgether.model.firestore.ModelManager;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefKeys;
 import cf.bautroixa.tripgether.ui.friends.FriendListActivity;
 import cf.bautroixa.tripgether.ui.settings.SettingActivity;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.OneAppbarActivity;
+import cf.bautroixa.ui.dialogs.OneDialog;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class MyProfileActivity extends OneAppbarActivity implements Toolbar.OnMenuItemClickListener {
     GoogleSignInClient mGoogleSignInClient;
@@ -161,5 +162,10 @@ public class MyProfileActivity extends OneAppbarActivity implements Toolbar.OnMe
                 break;
         }
         return false;
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

@@ -29,9 +29,9 @@ import cf.bautroixa.tripgether.presenter.post.CreatePostPresenterImpl;
 import cf.bautroixa.tripgether.ui.adapter.PostPlaceAdapter;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.AvatarVH;
 import cf.bautroixa.tripgether.ui.dialogs.CheckpointEditDialogFragment;
-import cf.bautroixa.tripgether.ui.dialogs.LoadingDialogHelper;
-import cf.bautroixa.tripgether.ui.dialogs.OneChooseImageDialog;
-import cf.bautroixa.tripgether.ui.theme.OneLiteAppbarActivity;
+import cf.bautroixa.ui.OneLiteAppbarActivity;
+import cf.bautroixa.ui.dialogs.LoadingDialogHelper;
+import cf.bautroixa.ui.dialogs.OneChooseImageDialog;
 
 public class PostCreatorActivity extends OneLiteAppbarActivity implements CreatePostPresenter.View, Toolbar.OnMenuItemClickListener {
     ModelManager manager;

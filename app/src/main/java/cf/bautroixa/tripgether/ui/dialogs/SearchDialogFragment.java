@@ -37,9 +37,9 @@ import cf.bautroixa.tripgether.model.types.SearchResult;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
 import cf.bautroixa.tripgether.ui.adapter.viewholder.PlaceVH;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.ui.theme.FullScreenDialogFragment;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
+import cf.bautroixa.ui.OneRecyclerView;
+import cf.bautroixa.ui.ViewAnim;
+import cf.bautroixa.ui.dialogs.FullScreenDialogFragment;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,7 +51,7 @@ public class SearchDialogFragment extends FullScreenDialogFragment implements Na
     private ModelManager manager;
     private NavigationInterface navigationInterface;
 
-    private String avatarUrl = "";
+    private final String avatarUrl = "";
     private boolean showToolbar = true;
 
     private ConstraintLayout root;

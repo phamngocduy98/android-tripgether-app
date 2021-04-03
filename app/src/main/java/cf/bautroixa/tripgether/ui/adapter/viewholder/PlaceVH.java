@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.Place;
 import cf.bautroixa.tripgether.model.types.SearchResult;
-import cf.bautroixa.tripgether.ui.theme.OneRecyclerView;
+import cf.bautroixa.ui.OneRecyclerView;
 
 public class PlaceVH extends OneRecyclerView.ViewHolder {
     TextView tvName, tvTime, tvLocation;

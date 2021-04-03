@@ -8,7 +8,7 @@
     app:motionProgress="1.0"
     tools:context=".ui.friends.FriendListActivity">
 
-    <include layout="@layout/theme_appbar" />
+    <include layout="@layout/one_appbar" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/main_content"

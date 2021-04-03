@@ -56,10 +56,10 @@ import cf.bautroixa.tripgether.model.http.HttpRequest;
 import cf.bautroixa.tripgether.model.http.MapboxHttpService;
 import cf.bautroixa.tripgether.model.types.APILocation;
 import cf.bautroixa.tripgether.model.types.GeocodingResult;
-import cf.bautroixa.tripgether.ui.theme.FullScreenDialogFragment;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
 import cf.bautroixa.tripgether.utils.ui_utils.NoFilterArrayAdapter;
+import cf.bautroixa.ui.dialogs.FullScreenDialogFragment;
+import cf.bautroixa.ui.dialogs.OneDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -75,9 +75,9 @@ public class CheckpointEditDialogFragment extends FullScreenDialogFragment imple
     boolean isMapLoaded = false;
     private Checkpoint checkpoint;
     private LatLng selectedLatLng = new LatLng(21.0245, 105.84117);
-    private Calendar selectedTime = Calendar.getInstance();
+    private final Calendar selectedTime = Calendar.getInstance();
     private OnCheckpointSetListener onCheckpointSetListener;
-    private OnDeleteCheckpointListener onDeleteCheckpointListener;
+    private final OnDeleteCheckpointListener onDeleteCheckpointListener;
 
     private GoogleMap mMap;
     private EditText editTime, editName;

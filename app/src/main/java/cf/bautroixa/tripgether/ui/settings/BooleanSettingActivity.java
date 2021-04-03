@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
+
 import cf.bautroixa.tripgether.R;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
+import cf.bautroixa.ui.OneAppbarActivity;
 
 public class BooleanSettingActivity extends OneAppbarActivity {
     public static final String ARG_SETTING_NAME = "ARG_SETTING_NAME";
@@ -98,5 +100,10 @@ public class BooleanSettingActivity extends OneAppbarActivity {
             // two option setting
             twoOptionSettingInit();
         }
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

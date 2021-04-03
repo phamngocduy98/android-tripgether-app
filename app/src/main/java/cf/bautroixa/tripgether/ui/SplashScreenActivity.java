@@ -41,13 +41,13 @@ import cf.bautroixa.tripgether.model.sharedpref.SharedPrefKeys;
 import cf.bautroixa.tripgether.services.work.WorkManagerHelper;
 import cf.bautroixa.tripgether.ui.user.LoginActivity;
 import cf.bautroixa.tripgether.ui.user.PhoneVerificationActivity;
-import cf.bautroixa.tripgether.ui.theme.OneDialog;
+import cf.bautroixa.ui.dialogs.OneDialog;
 
 public class SplashScreenActivity extends AppCompatActivity {
     private static final String TAG = "SplashScreenActivity";
     private SharedPreferences sharedPref;
-    private String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS};
-    private ArrayList<String> essentialPermissions = new ArrayList<>(Arrays.asList(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION));
+    private final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS};
+    private final ArrayList<String> essentialPermissions = new ArrayList<>(Arrays.asList(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION));
     private ArrayList<String> neededPermissions = new ArrayList<>();
 
     public SplashScreenActivity() {

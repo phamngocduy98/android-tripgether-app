@@ -36,9 +36,9 @@ import cf.bautroixa.tripgether.ui.chat.ChatActivity;
 import cf.bautroixa.tripgether.ui.dialogs.SosRequestViewDialogFragment;
 import cf.bautroixa.tripgether.ui.friends.ProfileActivity;
 import cf.bautroixa.tripgether.ui.map.TabMapFragment;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
 import cf.bautroixa.tripgether.utils.ui_utils.DateFormatter;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdapter.MemberViewHolder> {
     BottomMembersPresenterImpl bottomMembersPresenter;
@@ -107,8 +107,9 @@ public class BottomMembersAdapter extends RecyclerView.Adapter<BottomMembersAdap
         LinearLayout linearSos, linearLocation;
         String currentAvatar = "";
 
-        private Button btnDirection;
-        private ImageButton btnCall, btnMessage;
+        private final Button btnDirection;
+        private final ImageButton btnCall;
+        private final ImageButton btnMessage;
 
         public MemberViewHolder(@NonNull View itemView) {
             super(itemView);

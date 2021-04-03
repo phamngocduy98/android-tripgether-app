@@ -9,7 +9,7 @@
     app:layoutDescription="@xml/appbar_scene"
     tools:context=".ui.settings.DarkModeSettingActivity">
 
-    <include layout="@layout/theme_appbar" />
+    <include layout="@layout/one_appbar" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/main_content"

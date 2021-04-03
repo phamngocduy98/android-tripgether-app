@@ -37,6 +37,8 @@ import cf.bautroixa.tripgether.model.types.SearchResult;
 import cf.bautroixa.tripgether.model.ui_item.ViewState;
 import cf.bautroixa.tripgether.presenter.bottomspace.MapPresenter;
 import cf.bautroixa.tripgether.ui.adapter.pager_adapter.MainActivityPagerAdapter;
+import cf.bautroixa.tripgether.ui.bottomsheet.BottomSheetCheckpointListFragment;
+import cf.bautroixa.tripgether.ui.bottomsheet.BottomSheetMemberListFragment;
 import cf.bautroixa.tripgether.ui.bottomspace.BottomCheckpointsFragment;
 import cf.bautroixa.tripgether.ui.bottomspace.BottomCreateJoinTripFragment;
 import cf.bautroixa.tripgether.ui.bottomspace.BottomExploreFragment;
@@ -46,12 +48,10 @@ import cf.bautroixa.tripgether.ui.bottomspace.BottomSearchPlaceFragment;
 import cf.bautroixa.tripgether.ui.bottomspace.BottomToolsFragment;
 import cf.bautroixa.tripgether.ui.bottomspace.BottomWeatherFragment;
 import cf.bautroixa.tripgether.ui.dialogs.SearchDialogFragment;
-import cf.bautroixa.tripgether.ui.bottomsheet.BottomSheetCheckpointListFragment;
-import cf.bautroixa.tripgether.ui.bottomsheet.BottomSheetMemberListFragment;
 import cf.bautroixa.tripgether.ui.profile.MyProfileActivity;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
-import cf.bautroixa.tripgether.ui.theme.ViewAnim;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.ViewAnim;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 
 public class TabMapFragment extends Fragment implements NavigationInterfaceOwner, MapBackgroundControllable {
@@ -85,7 +85,7 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     private Stack<ViewState> stateStack;
     private String avatarUrl;
     private String stateId;
-    private User selectedUser = null;
+    private final User selectedUser = null;
     private SearchResult selectedSearchResult = null;
     // LISTENER
     private MapPresenter.CallableMask mMapBackgroundInterface;
@@ -98,7 +98,7 @@ public class TabMapFragment extends Fragment implements NavigationInterfaceOwner
     private ImageButton btnMyLocation;
     private ConstraintLayout rootSearchToolbar;
     private LinearLayout bottomSpace, bottomSheet;
-    private LinearLayout[] spaces = new LinearLayout[2];
+    private final LinearLayout[] spaces = new LinearLayout[2];
     private BottomSheetBehavior bottomSheetBehavior;
     private ImageButton fabMyLocation, btnBack, btnDrawer;
     private BottomCreateJoinTripFragment bottomCreateJoinTripFragment;

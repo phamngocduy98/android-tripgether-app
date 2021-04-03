@@ -7,15 +7,17 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
+
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.sharedpref.SPDarkMode;
 import cf.bautroixa.tripgether.model.sharedpref.SPGetLost;
 import cf.bautroixa.tripgether.model.sharedpref.SPMapStyle;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefHelper;
 import cf.bautroixa.tripgether.model.sharedpref.SharedPrefKeys;
-import cf.bautroixa.tripgether.ui.theme.OneAppbarActivity;
 import cf.bautroixa.tripgether.utils.IntentHelper;
 import cf.bautroixa.tripgether.utils.ui_utils.Formater;
+import cf.bautroixa.ui.OneAppbarActivity;
 
 public class SettingActivity extends OneAppbarActivity {
     SharedPreferences sharedPref;
@@ -141,5 +143,10 @@ public class SettingActivity extends OneAppbarActivity {
 
         boolean vibrate = sharedPref.getBoolean(SharedPrefKeys.SETTING_VIBRATE_ON, true);
         tvVibrate.setText(vibrate ? getString(R.string.btn_on) : getString(R.string.btn_off));
+    }
+
+    @Override
+    public MotionLayout findMotionLayout() {
+        return findViewById(R.id.appbar_root);
     }
 }

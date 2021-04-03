@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import cf.bautroixa.tripgether.R;
 import cf.bautroixa.tripgether.model.firestore.objects.User;
 import cf.bautroixa.tripgether.model.repo.objects.UserPublic;
-import cf.bautroixa.tripgether.ui.theme.RoundedImageView;
-import cf.bautroixa.tripgether.utils.ui_utils.ImageHelper;
+import cf.bautroixa.ui.RoundedImageView;
+import cf.bautroixa.ui.helpers.ImageHelper;
 
 public class AvatarVH extends RecyclerView.ViewHolder {
     public TextView tvNameInAvatar, tvOnlineIndicator;

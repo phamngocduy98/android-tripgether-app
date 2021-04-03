@@ -8,7 +8,7 @@
 
     <include
         android:id="@+id/include3"
-        layout="@layout/theme_appbar_lite" />
+        layout="@layout/one_appbar_lite" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"

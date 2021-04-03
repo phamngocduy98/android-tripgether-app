@@ -9,7 +9,7 @@
     android:background="@color/colorBackground"
     tools:context=".ui.settings.GotLostSettingActivity">
 
-    <include layout="@layout/theme_appbar" />
+    <include layout="@layout/one_appbar" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/main_content"

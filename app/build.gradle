@@ -95,4 +95,5 @@ dependencies {
 
     // i am using my library: so proud :3
     implementation "cf.bautroixa.firestoreodm:firestoreodm:0.0.1"
+    implementation project(':oneui')
 }
